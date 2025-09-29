@@ -6,13 +6,13 @@
 #    By: ariou <ariou@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/03/04 17:23:35 by arthur            #+#    #+#              #
-#    Updated: 2025/09/29 17:54:32 by ariou            ###   ########.fr        #
+#    Updated: 2025/09/29 18:00:10 by ariou            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 # Variables
 
-NAME = server
+NAME = ircserv
 
 LIBFT = libs/libft
 
