@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   Exception.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
+/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:10:41 by emaillet          #+#    #+#             */
-/*   Updated: 2025/09/30 11:18:38 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/09/30 14:45:53 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef EXCEPTION_HPP
 # define EXCEPTION_HPP
 
-# include <iostream>
+#include "Irc.hpp"
 
 /* ************************************************************************** */
 /* Main parsing exception */

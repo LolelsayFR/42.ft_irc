@@ -6,12 +6,12 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:35:21 by emaillet          #+#    #+#             */
-/*   Updated: 2025/09/30 13:53:08 by arthur           ###   ########.fr       */
+/*   Updated: 2025/09/30 14:49:23 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../includes/Errors/Lang.hpp"
-#include "../../includes/Errors/Exception.hpp"
+#include "Irc.hpp"
+
 
 /* ************************************************************************** */
 /* Main parsing exception */
