@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
+/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 09:52:28 by emaillet          #+#    #+#             */
-/*   Updated: 2025/09/30 13:53:47 by arthur           ###   ########.fr       */
+/*   Updated: 2025/09/30 14:35:27 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,17 @@
 #include <unistd.h>
 #include <cstdlib>
 
-#include "../includes/Errors/Lang.hpp"
-#include "../includes/Errors/Exception.hpp"
-#include "../includes/Server/Server.hpp"
+#include "Errors/Lang.hpp"
+#include "Errors/Exception.hpp"
+#include "Server/Server.hpp"
+
+bool	isOnlyDigit(std::string str) {
+    for (int i = 0; str[i] != '\0'; i++) {
+        if (!std::isdigit(str[i]))
+            return (false);
+    }
+    return (true);
+}
 
 int main(int argc, char const *argv[])
 {
@@ -28,7 +36,7 @@ int main(int argc, char const *argv[])
 			throw (ArgsNumberErrorException());
 		int port = std::atoi(argv[1]);
 		std::string password = argv[2];
-		if (port == 0)
+		if (port == 0 || !isOnlyDigit(argv[1]))
 			throw (PortErrorException());
 		if (password.empty())
 			throw(PasswordErrorException());
