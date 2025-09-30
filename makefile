@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: ariou <ariou@student.42.fr>                +#+  +:+       +#+         #
+#    By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/03/04 17:23:35 by arthur            #+#    #+#              #
-#    Updated: 2025/09/29 18:00:10 by ariou            ###   ########.fr        #
+#    Updated: 2025/09/30 11:03:11 by emaillet         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,7 +18,7 @@ LIBFT = libs/libft
 
 CC = c++
 
-CFLAGS = -Wall -Wextra -Werror -g -std=c++98
+CFLAGS = -Wall -Wextra -Werror -g -std=c++98 -Iincludes
 
 GREEN = \033[32m
 RED = \033[31m

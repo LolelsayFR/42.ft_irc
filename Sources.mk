@@ -3,13 +3,14 @@
 #                                                         :::      ::::::::    #
 #    Sources.mk                                         :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: ariou <ariou@student.42.fr>                +#+  +:+       +#+         #
+#    By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/03/10 15:57:52 by arthur            #+#    #+#              #
-#    Updated: 2025/09/29 17:52:29 by ariou            ###   ########.fr        #
+#    Updated: 2025/09/30 11:02:32 by emaillet         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-SRC_MAIN := ./src/server.cpp 
+SRC_MAIN := ./src/main.cpp\
+			./src/Exception.cpp\
 
 SRC_FILES := $(SRC_MAIN)
