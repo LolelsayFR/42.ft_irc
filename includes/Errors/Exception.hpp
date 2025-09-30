@@ -6,14 +6,14 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:10:41 by emaillet          #+#    #+#             */
-/*   Updated: 2025/09/30 11:18:38 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/09/30 15:14:25 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef EXCEPTION_HPP
 # define EXCEPTION_HPP
 
-# include <iostream>
+#include "Irc.hpp"
 
 /* ************************************************************************** */
 /* Main parsing exception */
