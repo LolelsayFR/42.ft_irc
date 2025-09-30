@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   Exception.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
+/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:35:21 by emaillet          #+#    #+#             */
 /*   Updated: 2025/09/30 14:49:23 by arthur           ###   ########.fr       */
