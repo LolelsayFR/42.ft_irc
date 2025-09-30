@@ -6,7 +6,7 @@
 /*   By: artgirar <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:11:12 by artgirar          #+#    #+#             */
-/*   Updated: 2025/09/30 11:30:15 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/09/30 11:44:20 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,17 +18,16 @@
 #include <sys/socket.h>
 #include <vector>
 
-void	startServ(int port)
+void	start(void)
 {
 	// specifying the serv address
 	sockaddr_in serverAddress;
 	serverAddress.sin_family = AF_INET;
-	serverAddress.sin_port = htons(port);
+	serverAddress.sin_port = htons(8080);
 	serverAddress.sin_addr.s_addr = INADDR_ANY;
 
 	// Configuration du socket...
 	int server_fd = socket(AF_INET, SOCK_STREAM, 0);
-
 	std::vector<struct pollfd> fds;
 
     // Ajouter le socket serveur
@@ -82,5 +81,5 @@ void	startServ(int port)
 
 int	main(void)
 {
-		startServ(8080);
+		start();
 }
