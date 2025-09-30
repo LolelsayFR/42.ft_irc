@@ -6,15 +6,20 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:52:45 by emaillet          #+#    #+#             */
-/*   Updated: 2025/09/30 11:50:21 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/09/30 14:09:12 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
+# include "../Errors/Exception.hpp"
 # include <iostream>
 # include <netinet/in.h>
+# include <poll.h>
+# include <unistd.h>
+# include <sys/socket.h>
+# include <vector>
 
 class Server {
 private:
