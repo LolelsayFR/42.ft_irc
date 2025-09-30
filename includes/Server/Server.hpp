@@ -3,33 +3,27 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
+/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:52:45 by emaillet          #+#    #+#             */
-/*   Updated: 2025/09/30 14:09:12 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/09/30 14:46:15 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
-# include "../Errors/Exception.hpp"
-# include <iostream>
-# include <netinet/in.h>
-# include <poll.h>
-# include <unistd.h>
-# include <sys/socket.h>
-# include <vector>
+#include "Irc.hpp"
 
 class Server {
 private:
 	const int			_port;
 	const std::string	_password;
+	std::vector<int>	_clientList;
 	Server(void);
 	Server(const Server& other);
 	Server& operator=(const Server& other);
     //sockaddr_in			_serverAddress;
-	//std::vector<Client&>
 	//std::vector<Channel&>
 public:
 	//All constructor and destructor

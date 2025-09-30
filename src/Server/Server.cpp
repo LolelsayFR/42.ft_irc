@@ -6,11 +6,11 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/09/30 14:05:18 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/09/30 14:46:34 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Server/Server.hpp"
+#include "Irc.hpp"
 
 /* ************************************************************************** */
 /* All constructors and the destructor */
@@ -88,7 +88,7 @@ void Server::start(void){
 					client_poll.events = POLLIN;
 					fds.push_back(client_poll);
 
-					std::cout << "user connexion" << std::endl;
+					std::cout << "user connexion with fd " << client << std::endl;
 				} else {
 						// Données d'un client existant
 					char buffer[1024];
