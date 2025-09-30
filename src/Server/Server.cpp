@@ -3,14 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
+/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/09/30 15:57:41 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/09/30 19:11:20 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Irc.hpp"
+#include "Client/Client.hpp"
 #include "Server/Server.hpp"
 #include "Errors/Exception.hpp"
 
@@ -49,7 +50,9 @@ Server& Server::operator=(const Server& other) {
 /* All members functions */
 /* ************************************************************************** */
 
+
 void Server::start(void){
+	char buffer[1024];
 	std::cout << "Port : " << this->_port << " Password : " << this->_password << std::endl;
 	// specifying the serv address
 	sockaddr_in serverAddress;
@@ -85,37 +88,36 @@ void Server::start(void){
 				if (fds[i].fd == server_fd) {
 					// Nouvelle connexion
 					int client = accept(server_fd, NULL, NULL);
-					FdOutBuf		buf(client);
-					std::ostream	clientStream(&buf);
-
-					clientStream << "Enter password to access server" << std::endl;
-					char buffer[1024];
-					int n = read(client, buffer, sizeof(buffer));
-					if (strncmp(buffer, (this->_password + "\n").c_str(), n)) {
-						std::cout << "Client try to connect but access was refused" << std::endl;
-						clientStream << "wrong password" << std::endl;
-						close(client);
-					}
-					else {
-						pollfd client_poll;
-						client_poll.fd = client;
-						client_poll.events = POLLIN;
-						fds.push_back(client_poll);
-
-						std::cout << "user connexion" << std::endl;
-						clientStream << "Access granted on server" << std::endl;
-					}
+					pollfd client_poll;
+					client_poll.fd = client;
+					client_poll.events = POLLIN;
+					fds.push_back(client_poll);
+					_clientList.push_back(new Client(client));
+					std::cout << "user connexion with fd " << client << std::endl;
 				} else {
 					// Données d'un client existant
-					char buffer[1024];
 					int n = read(fds[i].fd, buffer, sizeof(buffer));
-					if (n > 0)
-						std::cout.write(buffer, n);
-					// Traiter les données...
+					buffer[n] = '\0';
+					write(1, buffer, n);
+					if (n > 0 && _clientList[_clientList.size() - 1]->getNickname().empty())
+					{
+						_clientList[_clientList.size() - 1]->extractNickname(buffer);
+						std::cout << "Username set to: " << _clientList[_clientList.size() - 1]->getUsername() << std::endl;
+						std::cout << "Nickname set to: " << _clientList[_clientList.size() - 1]->getNickname() << std::endl;
+					}
+					else if (n > 0 && _clientList[_clientList.size() - 1]->getUsername().empty())
+					{
+						_clientList[_clientList.size() - 1]->extractUsername(buffer);
+						std::cout << "Username set to: " << _clientList[_clientList.size() - 1]->getUsername() << std::endl;
+						std::cout << "Nickname set to: " << _clientList[_clientList.size() - 1]->getNickname() << std::endl;
+					}
 					if (n == 0) {
 						std::cout << "user disconnected" << std::endl;
 						close(fds[i].fd);
+
 						fds.erase(fds.begin() + i);
+						delete _clientList[i - 1];
+						_clientList.erase(_clientList.begin() + i - 1);
 						i--;
 					}
 				}
