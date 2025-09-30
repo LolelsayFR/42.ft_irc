@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 09:52:28 by emaillet          #+#    #+#             */
-/*   Updated: 2025/09/30 11:06:53 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/09/30 11:44:02 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,16 +19,21 @@
 
 #include "Lang.hpp"
 #include "Exception.hpp"
+#include "Server.hpp"
 
 int main(int argc, char const *argv[])
 {
 	try {		
-		int port;
-		(void) argc;
-		port = std::atoi(argv[1]);
+		if(argc != 3)
+			throw (ArgsNumberErrorException());
+		int port = std::atoi(argv[1]);
+		std::string password = argv[2];
 		if (port == 0)
 			throw (PortErrorException());
-		throw(PasswordErrorException());
+		if (password.empty())
+			throw(PasswordErrorException());
+		Server server(port, password);
+		server.start();
 	}
 	catch (ParsingException& e){
 		std::cout << e.what() << std::endl;
