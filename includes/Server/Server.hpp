@@ -13,8 +13,13 @@
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
+# include "Exception.hpp"
 # include <iostream>
 # include <netinet/in.h>
+# include <poll.h>
+# include <unistd.h>
+# include <sys/socket.h>
+# include <vector>
 
 class Server {
 private:
