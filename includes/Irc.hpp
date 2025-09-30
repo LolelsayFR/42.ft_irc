@@ -3,22 +3,37 @@
 /*                                                        :::      ::::::::   */
 /*   Irc.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
+/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 14:44:45 by arthur            #+#    #+#             */
-/*   Updated: 2025/09/30 14:47:31 by arthur           ###   ########.fr       */
+/*   Updated: 2025/09/30 15:15:55 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-# include "Exception.hpp"
-# include "Client.hpp"
-# include "Lang.hpp"
-# include "Server.hpp"
+/* ************************************************************************** */
+/* Includes headers */
+/* ************************************************************************** */
+
+# include "Errors/Lang.hpp"
+//# include "Errors/Exception.hpp"
+//# include "Server/Server.hpp"
+// # include "Clients/Client.hpp"
+
+/* ************************************************************************** */
+/* Include extern header */
+/* ************************************************************************** */
+
 # include <iostream>
 # include <netinet/in.h>
 # include <poll.h>
 # include <unistd.h>
 # include <sys/socket.h>
 # include <vector>
+# include <cstring>
+# include <cstdlib>
+
+/* ************************************************************************** */
+/* End of file */
+/* ************************************************************************** */

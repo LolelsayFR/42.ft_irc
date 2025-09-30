@@ -6,20 +6,15 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 09:52:28 by emaillet          #+#    #+#             */
-/*   Updated: 2025/09/30 14:35:27 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/09/30 15:15:32 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <cstring>
-#include <iostream>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <unistd.h>
-#include <cstdlib>
 
-#include "Errors/Lang.hpp"
-#include "Errors/Exception.hpp"
+
+#include "Irc.hpp"
 #include "Server/Server.hpp"
+#include "Errors/Exception.hpp"
 
 bool	isOnlyDigit(std::string str) {
     for (int i = 0; str[i] != '\0'; i++) {

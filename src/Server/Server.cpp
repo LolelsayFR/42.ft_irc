@@ -6,11 +6,13 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/09/30 14:46:34 by arthur           ###   ########.fr       */
+/*   Updated: 2025/09/30 15:18:25 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Irc.hpp"
+#include "Server/Server.hpp"
+#include "Errors/Exception.hpp"
 
 /* ************************************************************************** */
 /* All constructors and the destructor */
