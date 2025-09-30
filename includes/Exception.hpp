@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   exception.hpp                                      :+:      :+:    :+:   */
+/*   Exception.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:10:41 by emaillet          #+#    #+#             */
-/*   Updated: 2025/09/30 10:51:30 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/09/30 11:00:15 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,10 +21,10 @@
 
 class ParsingException :public std::exception {};
 
-class PortError : public ParsingException {
+class PortErrorException : public ParsingException {
 	const char* what(void) const throw();
 };
-class PasswordError : public ParsingException {
+class PasswordErrorException : public ParsingException {
 	const char* what(void) const throw();
 };
 
