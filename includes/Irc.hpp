@@ -6,20 +6,11 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 14:44:45 by arthur            #+#    #+#             */
-/*   Updated: 2025/09/30 15:15:55 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/09/30 15:55:36 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
-
-/* ************************************************************************** */
-/* Includes headers */
-/* ************************************************************************** */
-
-# include "Errors/Lang.hpp"
-//# include "Errors/Exception.hpp"
-//# include "Server/Server.hpp"
-// # include "Clients/Client.hpp"
 
 /* ************************************************************************** */
 /* Include extern header */
@@ -33,6 +24,17 @@
 # include <vector>
 # include <cstring>
 # include <cstdlib>
+# include <streambuf>
+
+/* ************************************************************************** */
+/* Includes headers */
+/* ************************************************************************** */
+
+# include "Errors/Lang.hpp"
+# include "Server/FdOutBuf.hpp"
+//# include "Errors/Exception.hpp"
+//# include "Server/Server.hpp"
+// # include "Clients/Client.hpp"
 
 /* ************************************************************************** */
 /* End of file */

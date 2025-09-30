@@ -57,7 +57,7 @@ void Server::start(void){
 	// specifying the serv address
 	sockaddr_in serverAddress;
 	serverAddress.sin_family = AF_INET;
-	serverAddress.sin_port = htons(8080);
+	serverAddress.sin_port = htons(this->_port);
 	serverAddress.sin_addr.s_addr = INADDR_ANY;
 
 	// Configuration du socket...
@@ -69,14 +69,14 @@ void Server::start(void){
 
 	std::vector<struct pollfd> fds;
 
-    // Ajouter le socket serveur
-    pollfd server_poll;
-    server_poll.fd = server_fd;
-    server_poll.events = POLLIN;
-    fds.push_back(server_poll);
+	// Ajouter le socket serveur
+	pollfd server_poll;
+	server_poll.fd = server_fd;
+	server_poll.events = POLLIN;
+	fds.push_back(server_poll);
 
-    // listening to the assigned socket
-    listen(server_fd, 5);
+	// listening to the assigned socket
+	listen(server_fd, 5);
 
 	while (true) {
 		int ret = poll(fds.data(), fds.size(), -1); // -1 = attente infinie
