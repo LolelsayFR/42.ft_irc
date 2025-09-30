@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/09/30 16:47:30 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/09/30 18:57:15 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,8 @@ Server& Server::operator=(const Server& other) {
 /* All members functions */
 /* ************************************************************************** */
 
+bool	checkPass(/*Client client, */char *buf, std::string password);
+
 void Server::start(void){
 	std::cout << "Port : " << this->_port << " Password : " << this->_password << std::endl;
 	// specifying the serv address
@@ -84,23 +86,27 @@ void Server::start(void){
 			if (fds[i].revents & POLLIN) {
 				if (fds[i].fd == server_fd) {
 					// Nouvelle connexion
-					int client = accept(server_fd, NULL, NULL);
-					FdOutBuf		buf(client);
+					int clientSocket = accept(server_fd, NULL, NULL);
+					FdOutBuf		buf(clientSocket);
 					std::ostream	clientStream(&buf);
 
 					pollfd client_poll;
-					client_poll.fd = client;
+					client_poll.fd = clientSocket;
 					client_poll.events = POLLIN;
 					fds.push_back(client_poll);
 
 					std::cout << "user connected" << std::endl;
+
+					//Client	temp;
 				} else {
 					// Données d'un client existant
 					char buffer[1024];
 					int n = read(fds[i].fd, buffer, sizeof(buffer));
-					if (n > 0)
-						std::cout.write(buffer, n);
 					// Traiter les données...
+					write(1, buffer, n);
+					if (n > 0)
+						if (checkPass(/*_clientList[i],*/ buffer, _password) == false)
+								n = 0;
 					if (n == 0) {
 						std::cout << "user disconnected" << std::endl;
 						close(fds[i].fd);
