@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/09/30 15:57:41 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/09/30 16:47:30 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,23 +88,12 @@ void Server::start(void){
 					FdOutBuf		buf(client);
 					std::ostream	clientStream(&buf);
 
-					clientStream << "Enter password to access server" << std::endl;
-					char buffer[1024];
-					int n = read(client, buffer, sizeof(buffer));
-					if (strncmp(buffer, (this->_password + "\n").c_str(), n)) {
-						std::cout << "Client try to connect but access was refused" << std::endl;
-						clientStream << "wrong password" << std::endl;
-						close(client);
-					}
-					else {
-						pollfd client_poll;
-						client_poll.fd = client;
-						client_poll.events = POLLIN;
-						fds.push_back(client_poll);
+					pollfd client_poll;
+					client_poll.fd = client;
+					client_poll.events = POLLIN;
+					fds.push_back(client_poll);
 
-						std::cout << "user connexion" << std::endl;
-						clientStream << "Access granted on server" << std::endl;
-					}
+					std::cout << "user connected" << std::endl;
 				} else {
 					// Données d'un client existant
 					char buffer[1024];
