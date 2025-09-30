@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:35:21 by emaillet          #+#    #+#             */
-/*   Updated: 2025/09/30 11:00:07 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/09/30 11:17:27 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,4 +25,9 @@ const char* PasswordErrorException::what(void) const throw() {
 //Port arg error exception (Parsing)
 const char* PortErrorException::what(void) const throw() {
 	return (E_PARSING_PORT_ERROR);
+}
+
+//Arg number error exception (Parsing)
+const char* ArgsNumberErrorException::what(void) const throw() {
+	return (E_PARSING_ARGS_ERROR);
 }
