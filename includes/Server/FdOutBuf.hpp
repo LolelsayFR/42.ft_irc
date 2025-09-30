@@ -6,9 +6,13 @@
 /*   By: artgirar <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 15:33:44 by artgirar          #+#    #+#             */
-/*   Updated: 2025/09/30 15:44:20 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/09/30 15:58:48 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+#ifndef FdOutBuf_hpp
+# define FdOutBuf_hpp
+# include "Irc.hpp"
 
 class FdOutBuf : public std::streambuf {
 private:
@@ -16,10 +20,10 @@ private:
     
 protected:
     virtual int_type overflow(int_type c) {
-        if (c != EOF) {
+        if (c != -1) {
             char z = c;
             if (write(fd_, &z, 1) != 1) {
-                return EOF;
+                return -1;
             }
         }
         return c;
@@ -32,3 +36,5 @@ protected:
 public:
     FdOutBuf(int fd) : fd_(fd) {}
 };
+
+#endif

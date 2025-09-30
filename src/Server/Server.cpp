@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/09/30 15:43:56 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/09/30 15:57:41 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ void Server::start(void){
 	// specifying the serv address
 	sockaddr_in serverAddress;
 	serverAddress.sin_family = AF_INET;
-	serverAddress.sin_port = htons(8080);
+	serverAddress.sin_port = htons(this->_port);
 	serverAddress.sin_addr.s_addr = INADDR_ANY;
 
 	// Configuration du socket...
