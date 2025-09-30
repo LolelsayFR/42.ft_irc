@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
+/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 09:52:28 by emaillet          #+#    #+#             */
-/*   Updated: 2025/09/30 11:44:02 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/09/30 13:53:47 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,13 +17,13 @@
 #include <unistd.h>
 #include <cstdlib>
 
-#include "Lang.hpp"
-#include "Exception.hpp"
-#include "Server.hpp"
+#include "../includes/Errors/Lang.hpp"
+#include "../includes/Errors/Exception.hpp"
+#include "../includes/Server/Server.hpp"
 
 int main(int argc, char const *argv[])
 {
-	try {		
+	try {
 		if(argc != 3)
 			throw (ArgsNumberErrorException());
 		int port = std::atoi(argv[1]);

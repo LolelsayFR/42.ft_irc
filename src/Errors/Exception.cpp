@@ -3,15 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   Exception.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
+/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:35:21 by emaillet          #+#    #+#             */
-/*   Updated: 2025/09/30 11:45:39 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/09/30 13:53:08 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Lang.hpp"
-#include "Exception.hpp"
+#include "../../includes/Errors/Lang.hpp"
+#include "../../includes/Errors/Exception.hpp"
 
 /* ************************************************************************** */
 /* Main parsing exception */

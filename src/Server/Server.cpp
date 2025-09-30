@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
+/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/09/30 11:52:32 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/09/30 13:54:09 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Server.hpp"
+#include "../../includes/Server/Server.hpp"
 
 /* ************************************************************************** */
 /* All constructors and the destructor */
@@ -48,5 +48,5 @@ Server& Server::operator=(const Server& other) {
 /* ************************************************************************** */
 
 void Server::start(void){
-	std::cout << "Port : " << this->_port << " Password : " << this->_password << std::endl; 
+	std::cout << "Port : " << this->_port << " Password : " << this->_password << std::endl;
 }
