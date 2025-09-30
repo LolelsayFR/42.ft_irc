@@ -10,6 +10,6 @@
 #                                                                              #
 # **************************************************************************** #
 
-SRC_MAIN := ./src/Errors/Exception.cpp ./src/main.cpp ./src/Server/Server.cpp ./src/Server/poll.cpp 
+SRC_MAIN := ./src/main.cpp ./src/Errors/Exception.cpp ./src/Server/Server.cpp 
 
 SRC_FILES := $(SRC_MAIN)
