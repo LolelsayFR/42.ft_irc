@@ -6,13 +6,9 @@
 /*   By: artgirar <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 15:33:44 by artgirar          #+#    #+#             */
-/*   Updated: 2025/09/30 15:35:02 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/09/30 15:44:20 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
-#include <iostream>
-#include <streambuf>
-#include <unistd.h>
 
 class FdOutBuf : public std::streambuf {
 private:
