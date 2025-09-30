@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/09/30 15:18:25 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/09/30 15:57:41 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ void Server::start(void){
 	// specifying the serv address
 	sockaddr_in serverAddress;
 	serverAddress.sin_family = AF_INET;
-	serverAddress.sin_port = htons(8080);
+	serverAddress.sin_port = htons(this->_port);
 	serverAddress.sin_addr.s_addr = INADDR_ANY;
 
 	// Configuration du socket...
@@ -66,14 +66,14 @@ void Server::start(void){
 
 	std::vector<struct pollfd> fds;
 
-    // Ajouter le socket serveur
-    pollfd server_poll;
-    server_poll.fd = server_fd;
-    server_poll.events = POLLIN;
-    fds.push_back(server_poll);
+	// Ajouter le socket serveur
+	pollfd server_poll;
+	server_poll.fd = server_fd;
+	server_poll.events = POLLIN;
+	fds.push_back(server_poll);
 
-    // listening to the assigned socket
-    listen(server_fd, 5);
+	// listening to the assigned socket
+	listen(server_fd, 5);
 
 	while (true) {
 		int ret = poll(fds.data(), fds.size(), -1); // -1 = attente infinie
@@ -85,18 +85,32 @@ void Server::start(void){
 				if (fds[i].fd == server_fd) {
 					// Nouvelle connexion
 					int client = accept(server_fd, NULL, NULL);
-					pollfd client_poll;
-					client_poll.fd = client;
-					client_poll.events = POLLIN;
-					fds.push_back(client_poll);
+					FdOutBuf		buf(client);
+					std::ostream	clientStream(&buf);
 
-					std::cout << "user connexion with fd " << client << std::endl;
+					clientStream << "Enter password to access server" << std::endl;
+					char buffer[1024];
+					int n = read(client, buffer, sizeof(buffer));
+					if (strncmp(buffer, (this->_password + "\n").c_str(), n)) {
+						std::cout << "Client try to connect but access was refused" << std::endl;
+						clientStream << "wrong password" << std::endl;
+						close(client);
+					}
+					else {
+						pollfd client_poll;
+						client_poll.fd = client;
+						client_poll.events = POLLIN;
+						fds.push_back(client_poll);
+
+						std::cout << "user connexion" << std::endl;
+						clientStream << "Access granted on server" << std::endl;
+					}
 				} else {
-						// Données d'un client existant
+					// Données d'un client existant
 					char buffer[1024];
 					int n = read(fds[i].fd, buffer, sizeof(buffer));
 					if (n > 0)
-						write(1, buffer, n);
+						std::cout.write(buffer, n);
 					// Traiter les données...
 					if (n == 0) {
 						std::cout << "user disconnected" << std::endl;
