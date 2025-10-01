@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/01 16:35:54 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/01 17:19:01 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 #include "Client/Client.hpp"
 #include "Errors/Exception.hpp"
 
-# define DEBUG_PRINT 	true
+# define DEBUG_PRINT 	false
 # define WHI 			"\e[1;38;5;0;107m "
 # define RES			" \e[0m"
 
@@ -134,6 +134,12 @@ bool Channel::getNeedInvite(void) const {
 bool Channel::getNeedPassword(void) const {
 	return (this->_needPassword);
 }
+
+//Password setter
+void Channel::setPassword(std::string pass) {
+	this->_password = pass;
+}
+
 
 /* ************************************************************************** */
 /* All members functions */
