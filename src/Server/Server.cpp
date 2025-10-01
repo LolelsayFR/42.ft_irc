@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/01 18:23:11 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/01 19:22:09 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -182,8 +182,11 @@ void Server::start(void){
 
 	std::cout << *this << std::endl;
 
-	makeChannel("test");
-	makeChannel("test2");
+	//Uncomment for basic test
+	//makeChannel("test");
+	//makeChannel("test2");
+	//Client test1(1);
+	//Client test2(2);
 	
 
 	// specifying the serv address
