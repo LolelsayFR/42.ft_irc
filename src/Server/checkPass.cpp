@@ -6,16 +6,19 @@
 /*   By: artgirar <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 17:51:48 by artgirar          #+#    #+#             */
-/*   Updated: 2025/09/30 19:22:51 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/01 09:51:49 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Irc.hpp"
 
-bool	checkPass(/*Client client, */char *buf, std::string password)
+bool	checkPass(int clientSocket, std::string password)
 {
+	char buffer[1024];
+	int n = read(clientSocket, buffer, sizeof(buffer));
 
-	std::string	conv(buf);
+	std::cout.write(buffer, n);
+	std::string	conv(buffer);
 
 	size_t pos = conv.find("PASS");
 	if (pos == std::string::npos)
