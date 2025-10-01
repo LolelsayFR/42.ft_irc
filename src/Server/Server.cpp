@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/01 09:54:24 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/01 13:10:15 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,9 +103,11 @@ void Server::start(void){
 						pollfd client_poll;
 						client_poll.fd = clientSocket;
 						client_poll.events = POLLIN;
+						client_poll.revents = 0;
 						fds.push_back(client_poll);
 						std::cout << "User connected" << std::endl;
 					}
+					std::cout << fds.size() << std::endl;
 
 				} else {
 					// Données d'un client existant
@@ -130,8 +132,8 @@ void Server::start(void){
 						close(fds[i].fd);
 
 						fds.erase(fds.begin() + i);
-						delete _clientList[i - 1];
-						_clientList.erase(_clientList.begin() + i - 1);
+						//delete _clientList[i - 1];
+						//_clientList.erase(_clientList.begin() + i - 1);
 						i--;
 					}
 				}
