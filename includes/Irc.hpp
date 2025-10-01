@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 14:44:45 by arthur            #+#    #+#             */
-/*   Updated: 2025/10/01 16:58:21 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/01 17:14:41 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,8 @@
 # include <cstring>
 # include <cstdlib>
 # include <streambuf>
-#include <sstream>
+# include <sstream>
+# include <iomanip>
 
 /* ************************************************************************** */
 /* Includes headers */
