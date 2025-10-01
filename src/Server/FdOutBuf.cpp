@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   FdOutBuf.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: artgirar <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 16:04:31 by artgirar          #+#    #+#             */
-/*   Updated: 2025/09/30 16:19:16 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/01 10:14:19 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,10 +16,6 @@ FdOutBuf::FdOutBuf(void) : _fd(-1) {
 }
 
 FdOutBuf::FdOutBuf(int fd) : _fd(fd) {
-}
-
-FdOutBuf::FdOutBuf(const FdOutBuf & copy){
-	*this = copy;
 }
 
 FdOutBuf	&FdOutBuf::operator=(const FdOutBuf & other) {
