@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/01 16:23:52 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/01 16:06:44 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,8 +49,6 @@ Server& Server::operator=(const Server& other) {
 /* ************************************************************************** */
 /* All members functions */
 /* ************************************************************************** */
-
-bool	checkPass(int clientSocket, std::string password);
 
 void parseMessage(Client &client, const std::string &msg) {
 	std::istringstream iss(msg);
@@ -110,13 +108,15 @@ void Server::start(void){
 	// listening to the assigned socket
 	listen(server_fd, 5);
 
+	std::cout << "Server is on" << std::endl;
+
 	while (true) {
 		int ret = poll(fds.data(), fds.size(), -1); // -1 = attente infinie
 
 		if (ret < 0) break;
 
 		for (size_t i = 0; i < fds.size(); i++) {
-			if (fds[i].revents & POLLIN) {
+			if (fds[i].revents != 0) {
 				if (fds[i].fd == server_fd) {
 					// Nouvelle connexion
 					clientSocket = accept(server_fd, NULL, NULL);
@@ -134,14 +134,13 @@ void Server::start(void){
 						pollfd client_poll;
 						client_poll.fd = clientSocket;
 						client_poll.events = POLLIN;
+						client_poll.revents = 0;
 						fds.push_back(client_poll);
 						_clientList.push_back(new Client(clientSocket));
 						std::cout << "User connected" << std::endl;
-					//}
-
 				} else {
 					// Données d'un client existant
-					int n = read(fds[i].fd, buffer, sizeof(buffer));
+					int n = recv(fds[i].fd, buffer, 1024, 0);
 					if (n <= 0) {
 						std::cout << "User disconnected" << std::endl;
 						close(fds[i].fd);

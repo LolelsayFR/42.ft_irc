@@ -10,6 +10,6 @@
 #                                                                              #
 # **************************************************************************** #
 
-SRC_MAIN := ./src/Errors/Exception.cpp ./src/main.cpp ./src/Client/Client.cpp ./src/Server/FdOutBuf.cpp ./src/Server/Server.cpp ./src/Server/checkPass.cpp 
+SRC_MAIN := ./src/main.cpp ./src/Client/Client.cpp ./src/Errors/Exception.cpp ./src/Server/FdOutBuf.cpp ./src/Server/checkPass.cpp ./src/Server/Server.cpp 
 
 SRC_FILES := $(SRC_MAIN)
