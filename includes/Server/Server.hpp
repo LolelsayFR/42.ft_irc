@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:52:45 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/01 17:24:45 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/01 17:43:45 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,8 +32,12 @@ public:
 	~Server(void);
 	//All other member functions
 	void start(void);
+	void makeChannel(std::string name);
 	int findClient(Client& client);
-	int findChannel(Channel& client);
+	int findClient(std::string name);
+	int findChannel(Channel& channel);
+	int findChannel(std::string name);
+	void parseMessage(Client &client, const std::string &msg);
 	std::vector<Client*>::iterator isAvailable(Client& client);
 };
 

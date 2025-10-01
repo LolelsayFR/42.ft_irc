@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/01 17:25:08 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/01 17:43:14 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,15 @@ Server::~Server(void) {
 /* All members functions */
 /* ************************************************************************** */
 
-//Client id in join vector list
+//Create new channel
+void Server::makeChannel(std::string name) {
+	int channelPos = this->findChannel(name);
+	if (channelPos == -1)
+		this->_channelList.push_back(new Channel(name));		
+}
+
+
+//Client id in join vector list by ref
 int Server::findClient(Client& client) {
 	std::vector<Client*>::iterator	it = this->_clientList.begin();
 	std::vector<Client*>::iterator	end = this->_clientList.end();
@@ -48,7 +56,19 @@ int Server::findClient(Client& client) {
 	return (-1);
 }
 
-//Channel id in join vector list
+//Channel id in join vector list by name
+int Server::findClient(std::string name) {
+	std::vector<Client*>::iterator	it = this->_clientList.begin();
+	std::vector<Client*>::iterator	end = this->_clientList.end();
+	for(int i = 0; it != end; i++) {
+		if (static_cast<Client*>(*it)->getUsername() == name)
+			return (i);
+		it++;
+	}
+	return (-1);
+}
+
+//Channel id in join vector list by ref
 int Server::findChannel(Channel& channel) {
 	std::vector<Channel*>::iterator	it = this->_channelList.begin();
 	std::vector<Channel*>::iterator	end = this->_channelList.end();
@@ -60,9 +80,20 @@ int Server::findChannel(Channel& channel) {
 	return (-1);
 }
 
+//Channel id in join vector list by name
+int Server::findChannel(std::string name) {
+	std::vector<Channel*>::iterator	it = this->_channelList.begin();
+	std::vector<Channel*>::iterator	end = this->_channelList.end();
+	for(int i = 0; it != end; i++) {
+		if (static_cast<Channel*>(*it)->getName() == name)
+			return (i);
+		it++;
+	}
+	return (-1);
+}
 
 
-void parseMessage(Client &client, const std::string &msg) {
+void Server::parseMessage(Client &client, const std::string &msg) {
 	std::istringstream iss(msg);
 	std::string command;
 	iss >> command;
