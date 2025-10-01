@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
+/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
 /*   Updated: 2025/10/01 09:54:24 by artgirar         ###   ########.fr       */
@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "Irc.hpp"
+#include "Client/Client.hpp"
 #include "Server/Server.hpp"
 #include "Errors/Exception.hpp"
 
@@ -52,6 +53,7 @@ Server& Server::operator=(const Server& other) {
 bool	checkPass(int clientSocket, std::string password);
 
 void Server::start(void){
+	char buffer[1024];
 	std::cout << "Port : " << this->_port << " Password : " << this->_password << std::endl;
 	// specifying the serv address
 	sockaddr_in serverAddress;
@@ -104,17 +106,32 @@ void Server::start(void){
 						fds.push_back(client_poll);
 						std::cout << "User connected" << std::endl;
 					}
+
 				} else {
 					// Données d'un client existant
-					char buffer[1024];
 					int n = read(fds[i].fd, buffer, sizeof(buffer));
 					// Traiter les données...
-					if (n > 0)
-						std::cout.write(buffer, n);
+					buffer[n] = '\0';
+					write(1, buffer, n);
+					if (n > 0 && _clientList[_clientList.size() - 1]->getNickname().empty())
+					{
+						_clientList[_clientList.size() - 1]->extractNickname(buffer);
+						std::cout << "Username set to: " << _clientList[_clientList.size() - 1]->getUsername() << std::endl;
+						std::cout << "Nickname set to: " << _clientList[_clientList.size() - 1]->getNickname() << std::endl;
+					}
+					else if (n > 0 && _clientList[_clientList.size() - 1]->getUsername().empty())
+					{
+						_clientList[_clientList.size() - 1]->extractUsername(buffer);
+						std::cout << "Username set to: " << _clientList[_clientList.size() - 1]->getUsername() << std::endl;
+						std::cout << "Nickname set to: " << _clientList[_clientList.size() - 1]->getNickname() << std::endl;
+					}
 					if (n == 0) {
 						std::cout << "User disconnected" << std::endl;
 						close(fds[i].fd);
+
 						fds.erase(fds.begin() + i);
+						delete _clientList[i - 1];
+						_clientList.erase(_clientList.begin() + i - 1);
 						i--;
 					}
 				}

@@ -2,4 +2,5 @@
 *.swp
 *.vscode
 *.o
+*.vgcore
 ircserv
