@@ -3,15 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
+/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/01 16:06:44 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/01 16:56:55 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Irc.hpp"
 #include "Client/Client.hpp"
+#include "Channel/Channel.hpp"
 #include "Server/Server.hpp"
 #include "Errors/Exception.hpp"
 
@@ -82,6 +83,26 @@ void Server::start(void){
 	char buffer[1024];
 	int clientSocket;
 	std::cout << "Port : " << this->_port << " Password : " << this->_password << std::endl;
+
+	//Channel class test
+	Channel test("Bonjour");
+	Client* jojo = new Client(4);
+	jojo->setUsername("jojo");
+	Client* jojo1 = new Client(5);
+	jojo1->setUsername("jojo1");
+	Client* jojo2 = new Client(6);
+	jojo2->setUsername("jojo2");
+	test.Join(*jojo);
+	test.Join(*jojo);
+	test.Join(*jojo);
+	test.Join(*jojo1);
+	test.Join(*jojo);
+	test.Join(*jojo2);
+
+	std::cout << test << std::endl;
+	delete jojo;
+
+	return ;
 	// specifying the serv address
 	sockaddr_in serverAddress;
 	serverAddress.sin_family = AF_INET;
