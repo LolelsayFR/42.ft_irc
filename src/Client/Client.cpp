@@ -6,12 +6,14 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 15:34:55 by arthur            #+#    #+#             */
-/*   Updated: 2025/09/30 19:03:19 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/01 13:41:21 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Irc.hpp"
 #include "Client/Client.hpp"
+#include "Server/Server.hpp"
+#include "Errors/Exception.hpp"
 
 Client::Client(int fd) : _uid(fd){
 	std::cout << "New client connected with fd: " << fd << std::endl;
@@ -37,42 +39,40 @@ void Client::setNickname(std::string nickname){
 	this->_nickname = nickname;
 }
 
-void Client::extractUsername(const std::string& buffer) {
-	std::string prefix;
-	size_t start;
-
-	if (this->_username.empty())
-		prefix = "USER ";
-	start = buffer.find(prefix);
-		if (start != std::string::npos) {
-		start += prefix.length();
-		size_t end = buffer.find(' ', start);
-		if (this->_username.empty() && end != std::string::npos) {
-			this->setUsername(buffer.substr(start, end - start));
-			return;
-		} else {
-			this->setUsername(buffer.substr(start));
-			return;
-		}
-	}
+int Client::getFd(void) const {
+	return (this->_uid);
 }
 
-void Client::extractNickname(const std::string& buffer) {
-	std::string prefix;
-	size_t start;
-
-	if (this->_nickname.empty())
-		prefix = "NICK ";
-	start = buffer.find(prefix);
-		if (start != std::string::npos) {
-		start += prefix.length();
-		size_t end = buffer.find(' ', start);
-		if (this->_nickname.empty() && end != std::string::npos) {
-			this->setNickname(buffer.substr(start, end - start));
-			return;
-		} else {
-			this->setNickname(buffer.substr(start));
-			return;
-		}
-	}
+void Client::appendBuffer(const char* data, int len) {
+	_buffer.append(data, len);
 }
+
+bool Client::hasMessage() const {
+	return _buffer.find("\r\n") != std::string::npos;
+}
+
+std::string Client::popMessage() {
+	size_t pos = _buffer.find("\r\n");
+	std::string msg = _buffer.substr(0, pos);
+	_buffer.erase(0, pos + 2);
+	return msg;
+}
+
+bool Client::isRegistered() const
+{
+	return _isRegistered;
+}
+
+void Client::checkRegistration() {
+	if (!_nickname.empty() && !_username.empty())
+		_isRegistered = true;
+}
+
+Client* findClientByFd(std::vector<Client*> &clients, int fd) {
+	for (std::vector<Client*>::iterator it = clients.begin(); it != clients.end(); ++it) {
+		if ((*it)->getFd() == fd)
+			return *it;
+	}
+	return NULL;
+}
+
