@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/01 11:20:02 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/01 14:13:00 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,8 +52,38 @@ Server& Server::operator=(const Server& other) {
 
 bool	checkPass(int clientSocket, std::string password);
 
+void parseMessage(Client &client, const std::string &msg) {
+	std::istringstream iss(msg);
+	std::string command;
+	iss >> command;
+
+	if (command == "NICK") {
+		std::string nick;
+		iss >> nick;
+		if (nick.empty())
+			throwRFCException(ERR_ALREADYREGISTRED);
+		client.setNickname(nick);
+		std::cout << "Nickname set to " << nick << " for fd " << client.getFd() << std::endl;
+	}
+	else if (command == "USER") {
+		std::string username, host, server, realname;
+		iss >> username >> host >> server;
+		std::getline(iss, realname);
+		if (!realname.empty() && realname[0] == ':')
+			realname.erase(0, 1);
+
+		client.setUsername(username);
+		std::cout << "Username set to " << username
+				  << " for fd " << client.getFd() << std::endl;
+	}
+	else {
+		std::cout << "Unknown command: " << command << std::endl;
+	}
+}
+
 void Server::start(void){
 	char buffer[1024];
+	int clientSocket;
 	std::cout << "Port : " << this->_port << " Password : " << this->_password << std::endl;
 	// specifying the serv address
 	sockaddr_in serverAddress;
@@ -63,6 +93,8 @@ void Server::start(void){
 
 	// Configuration du socket...
 	int server_fd = socket(AF_INET, SOCK_STREAM, 0);
+	int opt = 1;
+	setsockopt(server_fd, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt));
 	// binding socket.
 	if (bind(server_fd, (struct sockaddr*)&serverAddress,
 		sizeof(serverAddress)) == -1)
@@ -88,7 +120,7 @@ void Server::start(void){
 			if (fds[i].revents & POLLIN) {
 				if (fds[i].fd == server_fd) {
 					// Nouvelle connexion
-					int clientSocket = accept(server_fd, NULL, NULL);
+					clientSocket = accept(server_fd, NULL, NULL);
 					FdOutBuf		buf(clientSocket);
 					std::ostream	clientStream(&buf);
 
@@ -111,23 +143,51 @@ void Server::start(void){
 				} else {
 					// Données d'un client existant
 					int n = read(fds[i].fd, buffer, sizeof(buffer));
-					// Traiter les données...
-					buffer[n] = '\0';
-					write(1, buffer, n);
-					if (n > 0)
-						Client::initClient(_clientList, buffer, i);
-					if (n == 0) {
+					if (n <= 0) {
 						std::cout << "User disconnected" << std::endl;
 						close(fds[i].fd);
+						delete findClientByFd(_clientList, fds[i].fd);
 
 						fds.erase(fds.begin() + i);
-						delete _clientList[i - 1];
-						_clientList.erase(_clientList.begin() + i - 1);
-						i--;
+						continue;
 					}
+					Client *client = findClientByFd(_clientList, fds[i].fd);
+					if (client)
+					{
+						client->appendBuffer(buffer, n);
+
+						while (client->hasMessage())
+						{
+							std::string msg = client->popMessage();
+							try {
+								parseMessage(*client, msg);
+								Server::isAvailable(*client);
+							}
+							catch (RFCException &e) {
+								std::cerr << e.what() << std::endl;
+								close(fds[i].fd);
+
+								fds.erase(fds.begin() + i);
+								break;
+							}
+						}
+					}
+
 				}
 			}
 		}
 	}
 	close(server_fd);
 }
+
+std::vector<Client*>::iterator Server::isAvailable(Client& client) {
+	std::vector<Client*>::iterator	it = this->_clientList.begin();
+	std::vector<Client*>::iterator	end = this->_clientList.end();
+	while(it != end) {
+		if (*it != &client && (static_cast<Client*>(*it)->getNickname() == client.getNickname() || static_cast<Client*>(*it)->getUsername() == client.getUsername()))
+			throwRFCException(ERR_ALREADYREGISTRED);
+		it++;
+	}
+	return (end);
+}
+
