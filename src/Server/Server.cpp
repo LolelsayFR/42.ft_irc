@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/01 13:10:15 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/01 13:41:45 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,8 @@ void Server::start(void){
 
 	// Configuration du socket...
 	int server_fd = socket(AF_INET, SOCK_STREAM, 0);
+	int opt = 1;
+	setsockopt(server_fd, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt));
 	// binding socket.
 	if (bind(server_fd, (struct sockaddr*)&serverAddress,
 		sizeof(serverAddress)) == -1)
@@ -78,6 +80,8 @@ void Server::start(void){
 
 	// listening to the assigned socket
 	listen(server_fd, 5);
+
+	std::cout << "Server is on" << std::endl;
 
 	while (true) {
 		int ret = poll(fds.data(), fds.size(), -1); // -1 = attente infinie
