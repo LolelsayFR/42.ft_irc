@@ -3,14 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
+/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-<<<<<<< Updated upstream
-/*   Updated: 2025/09/30 19:11:20 by arthur           ###   ########.fr       */
-=======
-/*   Updated: 2025/09/30 15:57:35 by emaillet         ###   ########.fr       */
->>>>>>> Stashed changes
+/*   Updated: 2025/10/01 09:03:09 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
