@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/09/30 19:11:20 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/01 09:54:24 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,7 @@ Server& Server::operator=(const Server& other) {
 /* All members functions */
 /* ************************************************************************** */
 
+bool	checkPass(int clientSocket, std::string password);
 
 void Server::start(void){
 	char buffer[1024];
@@ -87,16 +88,29 @@ void Server::start(void){
 			if (fds[i].revents & POLLIN) {
 				if (fds[i].fd == server_fd) {
 					// Nouvelle connexion
-					int client = accept(server_fd, NULL, NULL);
-					pollfd client_poll;
-					client_poll.fd = client;
-					client_poll.events = POLLIN;
-					fds.push_back(client_poll);
-					_clientList.push_back(new Client(client));
-					std::cout << "user connexion with fd " << client << std::endl;
+					int clientSocket = accept(server_fd, NULL, NULL);
+					FdOutBuf		buf(clientSocket);
+					std::ostream	clientStream(&buf);
+
+					std::cout << "User try to connect..." << std::endl;
+					if (checkPass(clientSocket, _password) == false)
+					{
+						close(clientSocket);
+						std::cout << "User failed to connect" << std::endl;
+					}
+					else
+					{
+						pollfd client_poll;
+						client_poll.fd = clientSocket;
+						client_poll.events = POLLIN;
+						fds.push_back(client_poll);
+						std::cout << "User connected" << std::endl;
+					}
+
 				} else {
 					// Données d'un client existant
 					int n = read(fds[i].fd, buffer, sizeof(buffer));
+					// Traiter les données...
 					buffer[n] = '\0';
 					write(1, buffer, n);
 					if (n > 0 && _clientList[_clientList.size() - 1]->getNickname().empty())
@@ -112,7 +126,7 @@ void Server::start(void){
 						std::cout << "Nickname set to: " << _clientList[_clientList.size() - 1]->getNickname() << std::endl;
 					}
 					if (n == 0) {
-						std::cout << "user disconnected" << std::endl;
+						std::cout << "User disconnected" << std::endl;
 						close(fds[i].fd);
 
 						fds.erase(fds.begin() + i);
