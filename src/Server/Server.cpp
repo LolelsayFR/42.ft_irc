@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/01 13:51:27 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/01 16:06:44 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,7 +87,7 @@ void Server::start(void){
 		if (ret < 0) break;
 
 		for (size_t i = 0; i < fds.size(); i++) {
-			if (fds[i].revents & POLLIN) {
+			if (fds[i].revents != 0) {
 				if (fds[i].fd == server_fd) {
 					// Nouvelle connexion
 					int clientSocket = accept(server_fd, NULL, NULL);
@@ -113,10 +113,10 @@ void Server::start(void){
 
 				} else {
 					// Données d'un client existant
-					int n = read(fds[i].fd, buffer, sizeof(buffer));
+					int n = recv(fds[i].fd, buffer, 1024, 0);
 					// Traiter les données...
 					buffer[n] = '\0';
-					write(1, buffer, n);
+					std::cout.write(buffer, n);
 					if (n > 0 && _clientList[_clientList.size() - 1]->getNickname().empty())
 					{
 						_clientList[_clientList.size() - 1]->extractNickname(buffer);

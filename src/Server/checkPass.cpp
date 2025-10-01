@@ -6,7 +6,7 @@
 /*   By: artgirar <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 17:51:48 by artgirar          #+#    #+#             */
-/*   Updated: 2025/10/01 13:16:19 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/01 16:00:02 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ bool	checkPass(int clientSocket, std::string password)
 	size_t pos = 0;
 	char buffer[1024];
 	std::string	conv;
-	while (int n = read(clientSocket, buffer, sizeof(buffer)))
+	while (int n = recv(clientSocket, buffer, 1024, 0))
 	{
 		buffer[n] = '\0';
 		std::cout.write(buffer, n);
