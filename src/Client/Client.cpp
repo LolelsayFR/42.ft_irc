@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 15:34:55 by arthur            #+#    #+#             */
-/*   Updated: 2025/10/01 13:41:21 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/01 18:25:44 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 #include "Server/Server.hpp"
 #include "Errors/Exception.hpp"
 
-Client::Client(int fd) : _uid(fd){
+Client::Client(int fd) : _uid(fd), _isRegistered(false){
 	std::cout << "New client connected with fd: " << fd << std::endl;
 }
 
@@ -60,7 +60,7 @@ std::string Client::popMessage() {
 
 bool Client::isRegistered() const
 {
-	return _isRegistered;
+	return (_isRegistered);
 }
 
 void Client::checkRegistration() {
@@ -76,3 +76,9 @@ Client* findClientByFd(std::vector<Client*> &clients, int fd) {
 	return NULL;
 }
 
+bool Client::getWelcomeSent(void) const {
+	return (this->_welcomeSent);
+}
+void Client::setWelcomeSent(bool val) {
+	this->_welcomeSent = val;
+}
