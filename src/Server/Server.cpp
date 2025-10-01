@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/01 18:18:09 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/01 18:20:28 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ int Server::findChannel(Channel& channel) {
 
 
 
-void parseMessage(Client &client, const std::string &msg) {
+void parseMessage(Client &client, const std::string &msg, const std::string &passwordGoal) {
 	std::istringstream iss(msg);
 	std::string command;
 	iss >> command;
