@@ -6,12 +6,13 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 15:34:55 by arthur            #+#    #+#             */
-/*   Updated: 2025/09/30 19:03:19 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/01 11:04:28 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Irc.hpp"
 #include "Client/Client.hpp"
+#include "Server/Server.hpp"
 
 Client::Client(int fd) : _uid(fd){
 	std::cout << "New client connected with fd: " << fd << std::endl;
@@ -74,5 +75,23 @@ void Client::extractNickname(const std::string& buffer) {
 			this->setNickname(buffer.substr(start));
 			return;
 		}
+	}
+}
+
+void Client::initClient(std::vector<Client *> &_clientList, char *buffer, int i)
+{
+	(void)i;
+	std::cout << "Init client with buffer: " << buffer << std::endl;
+	if (_clientList[_clientList.size() - 1]->getNickname().empty())
+	{
+		_clientList[_clientList.size() - 1]->extractNickname(buffer);
+		std::cout << "Username set to: " << _clientList[_clientList.size() - 1]->getUsername() << std::endl;
+		std::cout << "Nickname set to: " << _clientList[_clientList.size() - 1]->getNickname() << std::endl;
+	}
+	else if (_clientList[_clientList.size() - 1]->getUsername().empty())
+	{
+		_clientList[_clientList.size() - 1]->extractUsername(buffer);
+		std::cout << "Username set to: " << _clientList[_clientList.size() - 1]->getUsername() << std::endl;
+		std::cout << "Nickname set to: " << _clientList[_clientList.size() - 1]->getNickname() << std::endl;
 	}
 }

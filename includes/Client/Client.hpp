@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 14:43:51 by arthur            #+#    #+#             */
-/*   Updated: 2025/09/30 19:03:10 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/01 10:38:36 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,9 +30,11 @@ public :
 	void setUsername(std::string username);
 	void extractNickname(const std::string& buffer);
 	void extractUsername(const std::string& buffer);
+	static void initClient(std::vector<Client *> &_clientList, char *buffer, int i);
 
 	// std::string getNickname(void)const;
 	// void setNickname(std::string nickname);
 	//Client Command
 	//void join(std::string channel);
 };
+
