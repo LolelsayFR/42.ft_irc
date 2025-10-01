@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Exception.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
+/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:35:21 by emaillet          #+#    #+#             */
-/*   Updated: 2025/09/30 15:17:45 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/01 12:54:39 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,3 +32,18 @@ const char* PortErrorException::what(void) const throw() {
 const char* ArgsNumberErrorException::what(void) const throw() {
 	return (E_PARSING_ARGS_ERROR);
 }
+
+const char* AlreadyRegisteredException::what(void) const throw() {
+	return (E_ALREADY_REGISTERED);
+}
+
+std::exception throwRFCException(enum Exceptions exception) {
+	switch (exception)
+	{
+		case ERR_ALREADYREGISTRED:
+			throw AlreadyRegisteredException();
+		default :
+			throw RFCException();
+	}
+}
+

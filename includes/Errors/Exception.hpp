@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Exception.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
+/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:10:41 by emaillet          #+#    #+#             */
-/*   Updated: 2025/09/30 15:14:25 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/01 12:40:53 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,14 @@
 /* Main parsing exception */
 /* ************************************************************************** */
 
-class ParsingException :public std::exception {};
+enum Exceptions
+{
+	ERR_ALREADYREGISTRED = 461,
+};
+
+class ParsingException : public std::exception
+{
+};
 
 class PortErrorException : public ParsingException {
 	const char* what(void) const throw();
@@ -32,5 +39,16 @@ class PasswordErrorException : public ParsingException {
 class ArgsNumberErrorException : public ParsingException {
 	const char* what(void) const throw();
 };
+
+class RFCException : public std::exception
+{
+};
+
+class AlreadyRegisteredException : public RFCException
+{
+	const char* what(void) const throw();
+};
+
+std::exception throwRFCException(enum Exceptions exception);
 
 #endif // EXCEPTION_HPP
