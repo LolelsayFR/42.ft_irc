@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/01 17:48:47 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/01 17:55:55 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,6 +157,7 @@ void Server::start(void){
 						fds.erase(fds.begin() + i);
 						continue;
 					}
+					// Traitement des donnees
 					Client *client = findClientByFd(_clientList, fds[i].fd);
 					if (client)
 					{
