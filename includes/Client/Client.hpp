@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
+/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 14:43:51 by arthur            #+#    #+#             */
-/*   Updated: 2025/10/01 16:57:49 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/01 18:25:32 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ private :
 	std::string			_nickname;
 	std::string			_buffer;
 	bool				_isRegistered;
+	bool				_welcomeSent;
 	//std::ostream		_clientStream;
 	//std::vector<Channel&> <--- All channel joined;
 public :
@@ -38,6 +39,8 @@ public :
 	std::string popMessage();
 	bool isRegistered(void) const;
 	void checkRegistration();
+	bool getWelcomeSent(void) const;
+	void setWelcomeSent(bool val);
 
 
 	// std::string getNickname(void)const;
