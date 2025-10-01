@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:10:41 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/01 12:40:53 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/01 17:43:10 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,12 @@ class RFCException : public std::exception
 class AlreadyRegisteredException : public RFCException
 {
 	const char* what(void) const throw();
+};
+
+class ClientPasswordException : public std::exception
+{
+	public:
+		const char* what(void) const throw();
 };
 
 std::exception throwRFCException(enum Exceptions exception);

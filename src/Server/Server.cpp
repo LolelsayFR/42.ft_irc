@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/01 16:06:44 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/01 17:48:47 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,12 +50,21 @@ Server& Server::operator=(const Server& other) {
 /* All members functions */
 /* ************************************************************************** */
 
-void parseMessage(Client &client, const std::string &msg) {
+void parseMessage(Client &client, const std::string &msg, const std::string &passwordGoal) {
 	std::istringstream iss(msg);
 	std::string command;
 	iss >> command;
 
-	if (command == "NICK") {
+	if (command == "PASS") {
+		std::string pass;
+		iss >> pass;
+		if (pass.empty())
+			throw ClientPasswordException();
+		if (pass != passwordGoal)
+			throw ClientPasswordException();
+		std::cout << "Password Correct" << std::endl;
+	}
+	else if (command == "NICK") {
 		std::string nick;
 		iss >> nick;
 		if (nick.empty())
@@ -124,20 +133,13 @@ void Server::start(void){
 					std::ostream	clientStream(&buf);
 
 					std::cout << "User try to connect..." << std::endl;
-					// if (checkPass(clientSocket, _password) == false)
-					// {
-					// 	close(clientSocket);
-					// 	std::cout << "User failed to connect" << std::endl;
-					// }
-					//else
-					//{
-						pollfd client_poll;
-						client_poll.fd = clientSocket;
-						client_poll.events = POLLIN;
-						client_poll.revents = 0;
-						fds.push_back(client_poll);
-						_clientList.push_back(new Client(clientSocket));
-						std::cout << "User connected" << std::endl;
+
+					pollfd client_poll;
+					client_poll.fd = clientSocket;
+					client_poll.events = POLLIN;
+					client_poll.revents = 0;
+					fds.push_back(client_poll);
+					_clientList.push_back(new Client(clientSocket));
 				} else {
 					// Données d'un client existant
 					int n = recv(fds[i].fd, buffer, 1024, 0);
@@ -164,7 +166,7 @@ void Server::start(void){
 						{
 							std::string msg = client->popMessage();
 							try {
-								parseMessage(*client, msg);
+								parseMessage(*client, msg, _password);
 								Server::isAvailable(*client);
 							}
 							catch (RFCException &e) {
@@ -180,6 +182,19 @@ void Server::start(void){
 								close(fds[i].fd);
 								fds.erase(fds.begin() + i);
 								break;
+							}
+							catch (ClientPasswordException & e) {
+								Client* target = findClientByFd(_clientList, fds[i].fd);
+								for (size_t j = 0; j < _clientList.size(); j++) {
+									if (_clientList[j] == target) {
+										_clientList.erase(_clientList.begin() + j);
+										break;
+									}
+								}
+								std::cerr << e.what() << std::endl;
+								close(fds[i].fd);
+								fds.erase(fds.begin() + i);
+								break ;
 							}
 						}
 					}
