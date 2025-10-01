@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 17:46:54 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/01 15:50:29 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/01 17:17:51 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ public:
 	//All constructor and destructor
 	Channel(std::string name);
 	~Channel(void);
-	//All getter
+	//All getter and setter
 	const std::vector<Client*>&	getJoinList(void) const;
 	const std::vector<Client*>&	getOpList(void) const;
 	const std::vector<Client*>&	getInviteList(void) const;
@@ -40,6 +40,7 @@ public:
 	const std::string getPassword(void) const;
 	bool getNeedInvite(void) const;
 	bool getNeedPassword(void) const;
+	void setPassword(std::string pass);
 	//All channel member functions
 	void Join(Client& client);
 	void Kick(Client& client);
