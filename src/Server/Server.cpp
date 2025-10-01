@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/01 18:27:09 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/01 18:46:07 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,6 +91,7 @@ void parseMessage(Client &client, const std::string &msg, const std::string &pas
 		std::string pongResponse = "PONG :" + server + "\r\n";
 		send(client.getFd(), pongResponse.c_str(), pongResponse.size(), MSG_NOSIGNAL);
 		std::cout << "Responded to PING with PONG" << std::endl;
+	}
 	if (command == "PASS") {
 		std::string pass;
 		iss >> pass;
