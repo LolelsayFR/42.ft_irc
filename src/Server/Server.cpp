@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
+/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
 /*   Updated: 2025/10/01 17:55:55 by artgirar         ###   ########.fr       */
@@ -12,21 +12,13 @@
 
 #include "Irc.hpp"
 #include "Client/Client.hpp"
+#include "Channel/Channel.hpp"
 #include "Server/Server.hpp"
 #include "Errors/Exception.hpp"
 
 /* ************************************************************************** */
 /* All constructors and the destructor */
 /* ************************************************************************** */
-
-// Default constructor
-Server::Server(void) : _port(-1), _password("") {
-}
-
-// Copy constructor
-Server::Server(const Server& other) : _port(-1), _password("") {
-	(void)other;
-}
 
 // Assignation constructor
 Server::Server(int port, std::string password) : _port(port), _password(password) {}
@@ -40,17 +32,37 @@ Server::~Server(void) {
 /* All operator overload */
 /* ************************************************************************** */
 
-// Copy Operator
-Server& Server::operator=(const Server& other) {
-	(void)other;
-	return (*this);
-}
-
 /* ************************************************************************** */
 /* All members functions */
 /* ************************************************************************** */
 
-void parseMessage(Client &client, const std::string &msg, const std::string &passwordGoal) {
+//Client id in join vector list
+int Server::findClient(Client& client) {
+	std::vector<Client*>::iterator	it = this->_clientList.begin();
+	std::vector<Client*>::iterator	end = this->_clientList.end();
+	for(int i = 0; it != end; i++) {
+		if (*it == &client)
+			return (i);
+		it++;
+	}
+	return (-1);
+}
+
+//Channel id in join vector list
+int Server::findChannel(Channel& channel) {
+	std::vector<Channel*>::iterator	it = this->_channelList.begin();
+	std::vector<Channel*>::iterator	end = this->_channelList.end();
+	for(int i = 0; it != end; i++) {
+		if (*it == &channel)
+			return (i);
+		it++;
+	}
+	return (-1);
+}
+
+
+
+void parseMessage(Client &client, const std::string &msg) {
 	std::istringstream iss(msg);
 	std::string command;
 	iss >> command;
@@ -91,6 +103,7 @@ void Server::start(void){
 	char buffer[1024];
 	int clientSocket;
 	std::cout << "Port : " << this->_port << " Password : " << this->_password << std::endl;
+
 	// specifying the serv address
 	sockaddr_in serverAddress;
 	serverAddress.sin_family = AF_INET;

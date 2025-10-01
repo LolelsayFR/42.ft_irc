@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   Irc.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
+/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 14:44:45 by arthur            #+#    #+#             */
 /*   Updated: 2025/10/01 16:57:54 by artgirar         ###   ########.fr       */
@@ -25,7 +25,8 @@
 # include <cstring>
 # include <cstdlib>
 # include <streambuf>
-#include <sstream>
+# include <sstream>
+# include <iomanip>
 
 /* ************************************************************************** */
 /* Includes headers */
