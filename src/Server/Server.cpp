@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/01 17:43:14 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/01 18:23:11 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,9 +32,64 @@ Server::~Server(void) {
 /* All operator overload */
 /* ************************************************************************** */
 
+//Ostream insertion operator
+std::ostream& operator<<(std::ostream& o, Server& s) {
+	Client* ptr;
+	o << "/* Server View ********************************************************* */" << std::endl;
+	o << "/\tPort : " << s.getPort() << "\n/\tPassword : " << s.getPassword() << std::endl;
+	{
+		std::vector<Client*> list = s.getClientList();
+		std::vector<Client*>::iterator	it = list.begin();
+		std::vector<Client*>::iterator	end = list.end();
+		o << "/* Client connected **************************************************** */" << std::endl;
+		for (int i = 0; it != end; i++, it++) {
+			ptr = *it;
+			{
+			o 	<< "| n°" << std::setw(5) << i
+				<< " | Username = " <<  std::setw(10) << ptr->getUsername()
+				<< " | Nickname = " <<  std::setw(10) << ptr->getNickname()
+				<< " |"  << std::endl;	
+			}	
+		}
+		if (list.empty())
+			o << "/\tEmpty.." << std::endl;
+		o << "/* ********************************************************************* */" << std::endl;
+	}
+	{
+		std::vector<Channel*> list = s.getChannelList();
+		std::vector<Channel*>::iterator	it = list.begin();
+		std::vector<Channel*>::iterator	end = list.end();
+		for (int i = 0; it != end; i++, it++) {
+			o << *(static_cast<Channel*>(*it));
+			if (list.empty())
+				o << "\tEmpty.." << std::endl;
+		}
+	}
+	return (o);
+}
+
 /* ************************************************************************** */
 /* All members functions */
 /* ************************************************************************** */
+
+int Server::getPort(void) const {
+	return (this->_port);
+}
+
+std::string Server::getPassword(void) const {
+	return (this->_password);
+}
+
+
+//Channel JoinList getter
+const std::vector<Client*>&	Server::getClientList(void) const {
+	return (this->_clientList);
+}
+
+//Channel OpList getter
+const std::vector<Channel*>&	Server::getChannelList(void) const {
+	return (this->_channelList);
+}
 
 //Create new channel
 void Server::makeChannel(std::string name) {
@@ -124,7 +179,12 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 void Server::start(void){
 	char buffer[1024];
 	int clientSocket;
-	std::cout << "Port : " << this->_port << " Password : " << this->_password << std::endl;
+
+	std::cout << *this << std::endl;
+
+	makeChannel("test");
+	makeChannel("test2");
+	
 
 	// specifying the serv address
 	sockaddr_in serverAddress;

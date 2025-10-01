@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/01 17:19:01 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/01 18:22:02 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,21 +47,21 @@ Channel::~Channel(void) {
 //Ostream insertion operator
 std::ostream& operator<<(std::ostream& o, Channel& c) {
 	Client* ptr;
-	o << "/* Channel View ******************************************************** */" << std::endl;
+	o << "\n/* Channel View ******************************************************** */" << std::endl;
 	{
 		std::vector<Client*> list = c.getJoinList();
 		std::vector<Client*>::iterator	it = list.begin();
 		std::vector<Client*>::iterator	end = list.end();
-		o << "Channel name : " << c.getName() << std::endl;
+		o << "/\tChannel name : " << c.getName() << std::endl;
 		if (c.getNeedPassword())
-			o << "Need password : true, the pass is '" << c.getPassword() << "'" << std::endl; 
+			o << "/\tNeed password : true, the pass is '" << c.getPassword() << "'" << std::endl; 
 		else
-			o << "Need password : false" << std::endl; 
-		o << "Client topic : " << std::endl;
-		o << "/* Client list from channel ******************************************** */" << std::endl;
+			o << "/\tNeed password : false" << std::endl; 
+		o << "/\tChannel topic : " << c.getTopic() << std::endl;
+		o << "/* Client in channel *************************************************** */" << std::endl;
 		for (int i = 0; it != end; i++, it++) {
 			ptr = *it;
-			{//BLOC A METRE DANS L'OVERLOAD CLIENT
+			{
 			o 	<< "| n°" << std::setw(5) << i
 				<< " | Username = " <<  std::setw(10) << ptr->getUsername()
 				<< " | Nickname = " <<  std::setw(10) << ptr->getNickname()
@@ -69,6 +69,8 @@ std::ostream& operator<<(std::ostream& o, Channel& c) {
 				<< " |"  << std::endl;	
 			}	
 		}
+		if (list.empty())
+			o << "/\tEmpty.." << std::endl;
 		o << "/* ********************************************************************* */" << std::endl;
 	}
 	if (!c.getNeedInvite())
@@ -85,6 +87,8 @@ std::ostream& operator<<(std::ostream& o, Channel& c) {
 				<< " | Nickname = " <<  std::setw(10) << ptr->getNickname()
 				<< " |"  << std::endl;		
 		}
+		if (list.empty())
+			o << "\tEmpty.." << std::endl;
 		o << "/* ********************************************************************* */" << std::endl;
 	}
 	return (o);
