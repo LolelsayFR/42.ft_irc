@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/01 13:41:45 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/01 13:51:27 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,8 +49,6 @@ Server& Server::operator=(const Server& other) {
 /* ************************************************************************** */
 /* All members functions */
 /* ************************************************************************** */
-
-bool	checkPass(int clientSocket, std::string password);
 
 void Server::start(void){
 	char buffer[1024];

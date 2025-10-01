@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 14:44:45 by arthur            #+#    #+#             */
-/*   Updated: 2025/09/30 15:55:36 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/01 13:51:19 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,12 @@
 //# include "Errors/Exception.hpp"
 //# include "Server/Server.hpp"
 // # include "Clients/Client.hpp"
+
+/* ************************************************************************** */
+/* Other functions */
+/* ************************************************************************** */
+
+bool	checkPass(int clientSocket, std::string password);
 
 /* ************************************************************************** */
 /* End of file */
