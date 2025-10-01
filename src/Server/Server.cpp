@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/01 19:22:09 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/01 19:28:58 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -184,7 +184,7 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 		iss >> pass;
 		if (pass.empty())
 			throw ClientPasswordException();
-		if (pass != passwordGoal)
+		if (pass != _password)
 			throw ClientPasswordException();
 		std::cout << "Password Correct" << std::endl;
 	}
@@ -310,7 +310,7 @@ void Server::start(void){
 							std::cout << "Message received from client: ";
 							std::string msg = client->popMessage();
 							try {
-								parseMessage(*client, msg, _password);
+								parseMessage(*client, msg);
 								Server::isAvailable(*client);
 								client->checkRegistration();
 								if (client->isRegistered())
@@ -340,6 +340,7 @@ void Server::start(void){
 										break;
 									}
 								}
+								delete target;
 								std::cerr << e.what() << std::endl;
 								close(fds[i].fd);
 								fds.erase(fds.begin() + i);
