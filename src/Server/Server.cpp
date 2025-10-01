@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/01 18:20:28 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/01 18:27:09 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,22 @@ Server::~Server(void) {
 /* ************************************************************************** */
 /* All members functions */
 /* ************************************************************************** */
+
+void welcomeUser(Client *client)
+{
+	if (!client->getWelcomeSent())
+	{
+		std::string welcomeMsg = ": ""001 " + client->getNickname() + " :Welcome to the IRC Network, " + client->getNickname() + "\r\n";
+		std::string infoMsg = ": ""002 " + client->getNickname() + " :Your host is localhost, running version 1.0\r\n";
+		std::string yourHostMsg = ": ""003 " + client->getNickname() + " :This server was created today\r\n";
+		std::string myInfoMsg = ": ""004 " + client->getNickname() + " localhost 1.0 o o\r\n";
+		send(client->getFd(), welcomeMsg.c_str(), welcomeMsg.size(), MSG_NOSIGNAL);
+		send(client->getFd(), infoMsg.c_str(), infoMsg.size(), MSG_NOSIGNAL);
+		send(client->getFd(), yourHostMsg.c_str(), yourHostMsg.size(), MSG_NOSIGNAL);
+		send(client->getFd(), myInfoMsg.c_str(), myInfoMsg.size(), MSG_NOSIGNAL);
+		client->setWelcomeSent(true);
+	}
+}
 
 //Client id in join vector list
 int Server::findClient(Client& client) {
@@ -67,6 +83,14 @@ void parseMessage(Client &client, const std::string &msg, const std::string &pas
 	std::string command;
 	iss >> command;
 
+	if (command == "PING")
+	{
+		std::string server;
+		iss >> server;
+		std::cout << "Received PING from " << server << std::endl;
+		std::string pongResponse = "PONG :" + server + "\r\n";
+		send(client.getFd(), pongResponse.c_str(), pongResponse.size(), MSG_NOSIGNAL);
+		std::cout << "Responded to PING with PONG" << std::endl;
 	if (command == "PASS") {
 		std::string pass;
 		iss >> pass;
@@ -161,6 +185,10 @@ void Server::start(void){
 				} else {
 					// Données d'un client existant
 					int n = recv(fds[i].fd, buffer, 1024, 0);
+					if (n > 0) {
+					    std::string msg(buffer, n);
+					    std::cout << "Received: " << msg << std::endl;
+					}
 					if (n <= 0) {
 						std::cout << "User disconnected" << std::endl;
 						close(fds[i].fd);
@@ -183,10 +211,16 @@ void Server::start(void){
 
 						while (client->hasMessage())
 						{
+							std::cout << "Message received from client: ";
 							std::string msg = client->popMessage();
 							try {
 								parseMessage(*client, msg, _password);
 								Server::isAvailable(*client);
+								client->checkRegistration();
+								if (client->isRegistered())
+								{
+									welcomeUser(client);
+								}
 							}
 							catch (RFCException &e) {
 								Client* target = findClientByFd(_clientList, fds[i].fd);
