@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/01 18:46:07 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/01 19:22:09 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,10 +32,74 @@ Server::~Server(void) {
 /* All operator overload */
 /* ************************************************************************** */
 
+//Ostream insertion operator
+std::ostream& operator<<(std::ostream& o, Server& s) {
+	Client* ptr;
+	o << "/* Server View ********************************************************* */" << std::endl;
+	o << "/\tPort : " << s.getPort() << "\n/\tPassword : " << s.getPassword() << std::endl;
+	{
+		std::vector<Client*> list = s.getClientList();
+		std::vector<Client*>::iterator	it = list.begin();
+		std::vector<Client*>::iterator	end = list.end();
+		o << "/* Client connected **************************************************** */" << std::endl;
+		for (int i = 0; it != end; i++, it++) {
+			ptr = *it;
+			{
+			o 	<< "| n°" << std::setw(5) << i
+				<< " | Username = " <<  std::setw(10) << ptr->getUsername()
+				<< " | Nickname = " <<  std::setw(10) << ptr->getNickname()
+				<< " |"  << std::endl;	
+			}	
+		}
+		if (list.empty())
+			o << "/\tEmpty.." << std::endl;
+		o << "/* ********************************************************************* */" << std::endl;
+	}
+	{
+		std::vector<Channel*> list = s.getChannelList();
+		std::vector<Channel*>::iterator	it = list.begin();
+		std::vector<Channel*>::iterator	end = list.end();
+		for (int i = 0; it != end; i++, it++) {
+			o << *(static_cast<Channel*>(*it));
+			if (list.empty())
+				o << "\tEmpty.." << std::endl;
+		}
+	}
+	return (o);
+}
+
 /* ************************************************************************** */
 /* All members functions */
 /* ************************************************************************** */
 
+int Server::getPort(void) const {
+	return (this->_port);
+}
+
+std::string Server::getPassword(void) const {
+	return (this->_password);
+}
+
+
+//Channel JoinList getter
+const std::vector<Client*>&	Server::getClientList(void) const {
+	return (this->_clientList);
+}
+
+//Channel OpList getter
+const std::vector<Channel*>&	Server::getChannelList(void) const {
+	return (this->_channelList);
+}
+
+//Create new channel
+void Server::makeChannel(std::string name) {
+	int channelPos = this->findChannel(name);
+	if (channelPos == -1)
+		this->_channelList.push_back(new Channel(name));		
+}
+
+
+//Client id in join vector list by ref
 void welcomeUser(Client *client)
 {
 	if (!client->getWelcomeSent())
@@ -64,7 +128,19 @@ int Server::findClient(Client& client) {
 	return (-1);
 }
 
-//Channel id in join vector list
+//Channel id in join vector list by name
+int Server::findClient(std::string name) {
+	std::vector<Client*>::iterator	it = this->_clientList.begin();
+	std::vector<Client*>::iterator	end = this->_clientList.end();
+	for(int i = 0; it != end; i++) {
+		if (static_cast<Client*>(*it)->getUsername() == name)
+			return (i);
+		it++;
+	}
+	return (-1);
+}
+
+//Channel id in join vector list by ref
 int Server::findChannel(Channel& channel) {
 	std::vector<Channel*>::iterator	it = this->_channelList.begin();
 	std::vector<Channel*>::iterator	end = this->_channelList.end();
@@ -76,9 +152,20 @@ int Server::findChannel(Channel& channel) {
 	return (-1);
 }
 
+//Channel id in join vector list by name
+int Server::findChannel(std::string name) {
+	std::vector<Channel*>::iterator	it = this->_channelList.begin();
+	std::vector<Channel*>::iterator	end = this->_channelList.end();
+	for(int i = 0; it != end; i++) {
+		if (static_cast<Channel*>(*it)->getName() == name)
+			return (i);
+		it++;
+	}
+	return (-1);
+}
 
 
-void parseMessage(Client &client, const std::string &msg, const std::string &passwordGoal) {
+void Server::parseMessage(Client &client, const std::string &msg) {
 	std::istringstream iss(msg);
 	std::string command;
 	iss >> command;
@@ -127,7 +214,15 @@ void parseMessage(Client &client, const std::string &msg, const std::string &pas
 void Server::start(void){
 	char buffer[1024];
 	int clientSocket;
-	std::cout << "Port : " << this->_port << " Password : " << this->_password << std::endl;
+
+	std::cout << *this << std::endl;
+
+	//Uncomment for basic test
+	//makeChannel("test");
+	//makeChannel("test2");
+	//Client test1(1);
+	//Client test2(2);
+	
 
 	// specifying the serv address
 	sockaddr_in serverAddress;
