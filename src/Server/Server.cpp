@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/01 17:25:08 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/01 18:20:28 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,12 +62,21 @@ int Server::findChannel(Channel& channel) {
 
 
 
-void parseMessage(Client &client, const std::string &msg) {
+void parseMessage(Client &client, const std::string &msg, const std::string &passwordGoal) {
 	std::istringstream iss(msg);
 	std::string command;
 	iss >> command;
 
-	if (command == "NICK") {
+	if (command == "PASS") {
+		std::string pass;
+		iss >> pass;
+		if (pass.empty())
+			throw ClientPasswordException();
+		if (pass != passwordGoal)
+			throw ClientPasswordException();
+		std::cout << "Password Correct" << std::endl;
+	}
+	else if (command == "NICK") {
 		std::string nick;
 		iss >> nick;
 		if (nick.empty())
@@ -103,8 +112,11 @@ void Server::start(void){
 
 	// Configuration du socket...
 	int server_fd = socket(AF_INET, SOCK_STREAM, 0);
+	if (server_fd == -1)
+		throw SocketErrorException();
 	int opt = 1;
-	setsockopt(server_fd, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt));
+	if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt)) == -1)
+		throw SetOptionSocketErrorException();
 	// binding socket.
 	if (bind(server_fd, (struct sockaddr*)&serverAddress,
 		sizeof(serverAddress)) == -1)
@@ -133,24 +145,19 @@ void Server::start(void){
 				if (fds[i].fd == server_fd) {
 					// Nouvelle connexion
 					clientSocket = accept(server_fd, NULL, NULL);
+					if (clientSocket == -1)
+						throw SocketErrorException();
 					FdOutBuf		buf(clientSocket);
 					std::ostream	clientStream(&buf);
 
 					std::cout << "User try to connect..." << std::endl;
-					// if (checkPass(clientSocket, _password) == false)
-					// {
-					// 	close(clientSocket);
-					// 	std::cout << "User failed to connect" << std::endl;
-					// }
-					//else
-					//{
-						pollfd client_poll;
-						client_poll.fd = clientSocket;
-						client_poll.events = POLLIN;
-						client_poll.revents = 0;
-						fds.push_back(client_poll);
-						_clientList.push_back(new Client(clientSocket));
-						std::cout << "User connected" << std::endl;
+
+					pollfd client_poll;
+					client_poll.fd = clientSocket;
+					client_poll.events = POLLIN;
+					client_poll.revents = 0;
+					fds.push_back(client_poll);
+					_clientList.push_back(new Client(clientSocket));
 				} else {
 					// Données d'un client existant
 					int n = recv(fds[i].fd, buffer, 1024, 0);
@@ -168,6 +175,7 @@ void Server::start(void){
 						fds.erase(fds.begin() + i);
 						continue;
 					}
+					// Traitement des donnees
 					Client *client = findClientByFd(_clientList, fds[i].fd);
 					if (client)
 					{
@@ -177,7 +185,7 @@ void Server::start(void){
 						{
 							std::string msg = client->popMessage();
 							try {
-								parseMessage(*client, msg);
+								parseMessage(*client, msg, _password);
 								Server::isAvailable(*client);
 							}
 							catch (RFCException &e) {
@@ -193,6 +201,19 @@ void Server::start(void){
 								close(fds[i].fd);
 								fds.erase(fds.begin() + i);
 								break;
+							}
+							catch (ClientPasswordException & e) {
+								Client* target = findClientByFd(_clientList, fds[i].fd);
+								for (size_t j = 0; j < _clientList.size(); j++) {
+									if (_clientList[j] == target) {
+										_clientList.erase(_clientList.begin() + j);
+										break;
+									}
+								}
+								std::cerr << e.what() << std::endl;
+								close(fds[i].fd);
+								fds.erase(fds.begin() + i);
+								break ;
 							}
 						}
 					}

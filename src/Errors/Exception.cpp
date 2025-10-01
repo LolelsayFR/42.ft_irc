@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:35:21 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/01 12:54:39 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/01 18:14:24 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,3 +47,14 @@ std::exception throwRFCException(enum Exceptions exception) {
 	}
 }
 
+const char* ClientPasswordException::what(void) const throw () {
+	return (E_ERR_WRONGPASSWORD);
+}
+
+const char* SocketErrorException::what(void) const throw () {
+	return (E_SOCKETERROR);
+}
+
+const char *SetOptionSocketErrorException::what(void) const throw() {
+	return(E_SETSOCKETOPTERROR);
+}
