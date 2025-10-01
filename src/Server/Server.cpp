@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/01 17:55:55 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/01 18:18:09 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,8 +112,11 @@ void Server::start(void){
 
 	// Configuration du socket...
 	int server_fd = socket(AF_INET, SOCK_STREAM, 0);
+	if (server_fd == -1)
+		throw SocketErrorException();
 	int opt = 1;
-	setsockopt(server_fd, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt));
+	if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt)) == -1)
+		throw SetOptionSocketErrorException();
 	// binding socket.
 	if (bind(server_fd, (struct sockaddr*)&serverAddress,
 		sizeof(serverAddress)) == -1)
@@ -142,6 +145,8 @@ void Server::start(void){
 				if (fds[i].fd == server_fd) {
 					// Nouvelle connexion
 					clientSocket = accept(server_fd, NULL, NULL);
+					if (clientSocket == -1)
+						throw SocketErrorException();
 					FdOutBuf		buf(clientSocket);
 					std::ostream	clientStream(&buf);
 
