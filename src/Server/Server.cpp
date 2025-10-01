@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/01 14:13:00 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/01 16:23:52 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,6 @@ void parseMessage(Client &client, const std::string &msg) {
 		std::getline(iss, realname);
 		if (!realname.empty() && realname[0] == ':')
 			realname.erase(0, 1);
-
 		client.setUsername(username);
 		std::cout << "Username set to " << username
 				  << " for fd " << client.getFd() << std::endl;
@@ -146,8 +145,14 @@ void Server::start(void){
 					if (n <= 0) {
 						std::cout << "User disconnected" << std::endl;
 						close(fds[i].fd);
-						delete findClientByFd(_clientList, fds[i].fd);
-
+						Client* target = findClientByFd(_clientList, fds[i].fd);
+						for (size_t j = 0; j < _clientList.size(); j++) {
+							if (_clientList[j] == target) {
+								_clientList.erase(_clientList.begin() + j);
+									break;
+							}
+						}
+						delete target;
 						fds.erase(fds.begin() + i);
 						continue;
 					}
@@ -164,9 +169,16 @@ void Server::start(void){
 								Server::isAvailable(*client);
 							}
 							catch (RFCException &e) {
+								Client* target = findClientByFd(_clientList, fds[i].fd);
+								for (size_t j = 0; j < _clientList.size(); j++) {
+									if (_clientList[j] == target) {
+										_clientList.erase(_clientList.begin() + j);
+											break;
+									}
+								}
+								delete target;
 								std::cerr << e.what() << std::endl;
 								close(fds[i].fd);
-
 								fds.erase(fds.begin() + i);
 								break;
 							}
