@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/02 16:25:06 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/02 17:28:36 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -278,14 +278,13 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 }
 
 void Server::linkClientToChannel(Client& client, std::string& arg) {
-	makeChannel(arg.c_str() + 1 )->Join(client);
+	makeChannel(arg)->Join(client);
 }
 
 void Server::privMsgSend(Client& client, const std::string& arg) {
 	int separatorPos = arg.find(":");
 	std::string	msg(arg.substr(separatorPos + 1)), dest(arg.substr(8, separatorPos - 9));
 	if (dest[0] == '#') {
-		dest = dest.c_str() + 1;
 		int Pos = this->findChannel(dest);
 		if (Pos == -1)
 			;//Throw error cant find any channel
@@ -308,8 +307,7 @@ void Server::clientLeaveChannel(Client& client, const std::string& arg) {
 		dest = std::string(arg.substr(5, separatorPos - 6));
 	else
 		dest = std::string(arg.substr(5));
-	std::cout << "&&&&&&&&&&&&&&&&&" << std::endl;
-	dest = dest.c_str() + 1;
+	std::cout << "&&&&&&&&&&&&&&&&&" << dest << std::endl;
 	int Pos = this->findChannel(dest);
 	if (Pos == -1)
 		;//Throw error cant find any channel
