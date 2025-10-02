@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/02 12:35:47 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/02 12:47:55 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,10 +108,10 @@ void welcomeUser(Client *client)
 		std::string infoMsg = ": ""002 " + client->getNickname() + " :Your host is localhost, running version 1.0\r\n";
 		std::string yourHostMsg = ": ""003 " + client->getNickname() + " :This server was created today\r\n";
 		std::string myInfoMsg = ": ""004 " + client->getNickname() + " localhost 1.0 o o\r\n";
-		send(client->getFd(), welcomeMsg.c_str(), welcomeMsg.size(), MSG_NOSIGNAL);
-		send(client->getFd(), infoMsg.c_str(), infoMsg.size(), MSG_NOSIGNAL);
-		send(client->getFd(), yourHostMsg.c_str(), yourHostMsg.size(), MSG_NOSIGNAL);
-		send(client->getFd(), myInfoMsg.c_str(), myInfoMsg.size(), MSG_NOSIGNAL);
+		send(client->getUid(), welcomeMsg.c_str(), welcomeMsg.size(), MSG_NOSIGNAL);
+		send(client->getUid(), infoMsg.c_str(), infoMsg.size(), MSG_NOSIGNAL);
+		send(client->getUid(), yourHostMsg.c_str(), yourHostMsg.size(), MSG_NOSIGNAL);
+		send(client->getUid(), myInfoMsg.c_str(), myInfoMsg.size(), MSG_NOSIGNAL);
 		client->setWelcomeSent(true);
 	}
 }
@@ -198,7 +198,7 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 		iss >> server;
 		std::cout << "Received PING from " << server << std::endl;
 		std::string pongResponse = "PONG :" + server + "\r\n";
-		send(client.getFd(), pongResponse.c_str(), pongResponse.size(), MSG_NOSIGNAL);
+		send(client.getUid(), pongResponse.c_str(), pongResponse.size(), MSG_NOSIGNAL);
 		std::cout << "Responded to PING with PONG" << std::endl;
 	}
 	if (command == "PASS") {
@@ -216,7 +216,7 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 		if (nick.empty())
 			throwRFCException(ERR_ALREADYREGISTRED);
 		client.setNickname(nick);
-		std::cout << "Nickname set to " << nick << " for fd " << client.getFd() << std::endl;
+		std::cout << "Nickname set to " << nick << " for fd " << client.getUid() << std::endl;
 	}
 	else if (command == "USER") {
 		std::string username, host, server, realname;
@@ -225,7 +225,7 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 		if (!realname.empty() && realname[0] == ':')
 			realname.erase(0, 1);
 		client.setUsername(username);
-		std::cout << "Username set to " << username << " for fd " << client.getFd() << std::endl;
+		std::cout << "Username set to " << username << " for fd " << client.getUid() << std::endl;
 	}
 	else {
 		std::cout << "Unknown command: " << command << std::endl;
