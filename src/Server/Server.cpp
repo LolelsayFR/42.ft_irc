@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/02 10:25:48 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/02 10:34:56 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -269,8 +269,9 @@ void Server::start(void){
 	// listening to the assigned socket
 	if (listen(server_fd, 5) == -1) {
 		close(server_fd);
-		fds[0].erase();
-		throw ListeningErrorException();
+		fds.erase(fds.begin());
+		return ;
+		//throw ListeningErrorException();
 	}
 
 	std::cout << "Server is on" << std::endl;
