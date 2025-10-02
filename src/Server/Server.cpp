@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/02 17:28:36 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/02 18:00:24 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -278,23 +278,32 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 }
 
 void Server::linkClientToChannel(Client& client, std::string& arg) {
-	makeChannel(arg)->Join(client);
+	std::string name;
+	int pos = arg.rfind(",");
+	while (pos > 0 && pos < (int)arg.length()) {
+		name = arg.substr(pos + 1, arg.length() - pos);
+		arg.erase(pos, arg.length() - pos);
+		pos = arg.rfind(",");
+		makeChannel(name)->Join(client);
+	}
+	name = arg.substr(pos + 1, arg.length() - pos);
+	makeChannel(name)->Join(client);
 }
 
 void Server::privMsgSend(Client& client, const std::string& arg) {
 	int separatorPos = arg.find(":");
 	std::string	msg(arg.substr(separatorPos + 1)), dest(arg.substr(8, separatorPos - 9));
-	if (dest[0] == '#') {
+	if (dest[0] == '#' || dest[0] == '&' || dest[0] == '+' || dest[0] == '!') {
 		int Pos = this->findChannel(dest);
 		if (Pos == -1)
-			;//Throw error cant find any channel
+			;//Throw error cant find any channel :<serveur> 401 <nick> <nickname> :No such nick/channel
 		else
 			this->_channelList[Pos]->Broadcast(client, msg);
 	}
 	else {
 		int Pos = this->findClientByNick(dest);
 		if (Pos == -1)
-			;//Throw error Cant find any user
+			;//Throw error Cant find any user :<serveur> 401 <nick> <nickname> :No such nick/channel
 		else
 			this->_clientList[Pos]->receptMessage(client, msg);
 	}
@@ -307,10 +316,9 @@ void Server::clientLeaveChannel(Client& client, const std::string& arg) {
 		dest = std::string(arg.substr(5, separatorPos - 6));
 	else
 		dest = std::string(arg.substr(5));
-	std::cout << "&&&&&&&&&&&&&&&&&" << dest << std::endl;
 	int Pos = this->findChannel(dest);
 	if (Pos == -1)
-		;//Throw error cant find any channel
+		;//Throw error cant find any channel :<serveur> 442 <nick> <channel> :You're not on that channel
 	else { 
 		this->_channelList[Pos]->Kick(client);
 		if (separatorPos > 0 && separatorPos < (int)arg.length()) {

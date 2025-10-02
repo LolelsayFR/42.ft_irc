@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/02 16:53:22 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/02 17:40:35 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -145,7 +145,11 @@ void Channel::setPassword(std::string pass) {
 /* ************************************************************************** */
 
 
-void Channel::Broadcast(Client& sender, std::string msg){
+void Channel::Broadcast(Client& sender, std::string msg) {
+	if (this->findClientJoin(sender) == -1){
+		//throw :<serveur> 442 <nick> <channel> :You're not on that channel
+		return ;
+	}
 	std::vector<Client*>::iterator	it = this->_joinedList.begin();
 	std::vector<Client*>::iterator	end = this->_joinedList.end();
 	for(int i = 0; it != end; i++) {
