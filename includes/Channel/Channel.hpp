@@ -40,8 +40,9 @@ public:
 	const std::vector<Client*>&     getOpList(void) const;
 	const std::vector<Client*>&	getInviteList(void) const;
 
+  void Broadcast(Client& sender, std::string msg);
+ 
 	void setPassword(std::string pass);
-
 	void Op(Client& client);
 	void DeOp(Client& client);
 	void Join(Client& client);
@@ -51,8 +52,8 @@ public:
 	void Topic(std::string topic);
 	void Mode(std::string option);
 
+  int findClientOp(Client& client);
 	int findClientJoin(Client& client);
-	int findClientOp(Client& client);
 	int findClientInvite(Client& client);
 };
 

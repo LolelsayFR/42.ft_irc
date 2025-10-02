@@ -37,15 +37,20 @@ public:
 	void start(void);
 	void parseMessage(Client &client, const std::string &msg);
 
+	Channel* makeChannel(std::string name);
+
 	int findClient(Client& client);
 	int findClient(std::string name);
-
+	int findClientByNick(std::string nick);
+ 
 	int findChannel(Channel& channel);
 	int findChannel(std::string name);
 
 	void makeChannel(std::string name);
 
+	void privMsgSend(Client& client, const std::string& name);
 	std::vector<Client*>::iterator isAvailable(Client& client);
+  void linkClientToChannel(Client& client, std::string& name);
 	void destroyOneClient(std::vector<struct pollfd> &fds, int i);
 };
 

@@ -142,6 +142,16 @@ void Channel::setPassword(std::string pass) {
 /* ************************************************************************** */
 
 
+void Channel::Broadcast(Client& sender, std::string msg){
+	std::vector<Client*>::iterator	it = this->_joinedList.begin();
+	std::vector<Client*>::iterator	end = this->_joinedList.end();
+	for(int i = 0; it != end; i++) {
+		if (*it != &sender)
+			static_cast<Client*>(*it)->receptMessage(*this, sender, msg);
+		it++;
+	}
+}
+
 //Channel command to join
 void Channel::Join(Client& client) {
 	int clientPos = this->findClientJoin(client);
