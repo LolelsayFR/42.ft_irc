@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/01 18:22:02 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/02 14:22:50 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,18 +15,12 @@
 #include "Client/Client.hpp"
 #include "Errors/Exception.hpp"
 
-# define DEBUG_PRINT 	false
-# define WHI 			"\e[1;38;5;0;107m "
-# define RES			" \e[0m"
-
 /* ************************************************************************** */
 /* All constructors and the destructor */
 /* ************************************************************************** */
 
 // Assignation constructor
 Channel::Channel(std::string name) : _name(name) {
-	if (DEBUG_PRINT)
-		std::cout << WHI"Channel" << RES << " name assignement constructor called : " << name << std::endl;	
 	this->_topic = "";
 	this->_password = "";
 	this->_needInvite = false;
@@ -35,8 +29,6 @@ Channel::Channel(std::string name) : _name(name) {
 
 // Default destructor
 Channel::~Channel(void) {
-		if (DEBUG_PRINT)
-		std::cout << WHI"Channel" << RES << " destructor called : " << _name << std::endl;	
 }
 
 
@@ -153,8 +145,6 @@ void Channel::setPassword(std::string pass) {
 //Channel command to join
 void Channel::Join(Client& client) {
 	int clientPos = this->findClientJoin(client);
-	if (DEBUG_PRINT)
-		std::cout << WHI"CHANNEL INTERN Join" << RES << " Try : " << client.getUsername() << " | Pos : " << clientPos << std::endl;	
 	if (this->_joinedList.empty()) {
 		this->_opList.push_back(&client);
 	}	
@@ -165,8 +155,6 @@ void Channel::Join(Client& client) {
 //Channel command to kick
 void Channel::Kick(Client& client) {
 	int clientPos = this->findClientJoin(client);
-	if (DEBUG_PRINT)
-		std::cout << WHI"CHANNEL INTERN Kick" << RES << " Try : " << client.getUsername() << " | Pos : " << clientPos << std::endl;	
 	if (clientPos >= 0)
 		this->_joinedList.erase(_joinedList.begin() + clientPos);
 }
@@ -174,8 +162,6 @@ void Channel::Kick(Client& client) {
 //Channel command to add invite
 void Channel::Invite(Client& client) {
 	int clientPos = this->findClientInvite(client);
-	if (DEBUG_PRINT)
-		std::cout << WHI"CHANNEL INTERN Invite" << RES << " Try : " << client.getUsername() << " | Pos : " << clientPos << std::endl;	
 	if (clientPos == -1)
 		this->_inviteList.push_back(&client);
 }
@@ -183,8 +169,6 @@ void Channel::Invite(Client& client) {
 //Channel command to remove invite
 void Channel::DeInvite(Client& client) {
 	int clientPos = this->findClientInvite(client);
-	if (DEBUG_PRINT)
-		std::cout << WHI"CHANNEL INTERN Deinvite" << RES << " Try : " << client.getUsername() << " | Pos : " << clientPos << std::endl;	
 	if (clientPos >= 0)
 		this->_inviteList.erase(_inviteList.begin() + clientPos);
 }
@@ -192,8 +176,6 @@ void Channel::DeInvite(Client& client) {
 //Channel command to add operator
 void Channel::Op(Client& client) {
 	int clientPos = this->findClientOp(client);
-	if (DEBUG_PRINT)
-		std::cout << WHI"CHANNEL INTERN Op" << RES << " Try : " << client.getUsername() << " | Pos : " << clientPos << std::endl;	
 	if (clientPos == -1)
 		this->_opList.push_back(&client);
 }
@@ -201,8 +183,6 @@ void Channel::Op(Client& client) {
 //Channel command to remove operator
 void Channel::DeOp(Client& client) {
 	int clientPos = this->findClientOp(client);
-	if (DEBUG_PRINT)
-		std::cout << WHI"CHANNEL INTERN Deop" << RES << " Try : " << client.getUsername() << " | Pos : " << clientPos << std::endl;		
 	if (clientPos >= 0)
 		this->_opList.erase(_opList.begin() + clientPos);
 }
