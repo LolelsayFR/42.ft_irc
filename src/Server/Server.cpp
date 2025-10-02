@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/02 18:02:28 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/02 18:28:49 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,17 @@ Server::Server(int port, std::string password) : _port(port), _password(password
 
 // Default destructor
 Server::~Server(void) {
+	for (int i = this->_clientList.size(); i > 0; i--) {
+		this->destroyOneClient(this->getFds(), i);
+	}
+	std::vector<Channel*>::iterator	it = this->_channelList.begin();
+	std::vector<Channel*>::iterator	end = this->_channelList.end();
+	for(int i = 0; it != end; i++) {
+		delete	static_cast<Channel*>(*it);
+		it++;
+	}
+	this->_channelList.clear();
+	this->_channelList.clear();
 }
 
 
