@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:52:45 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/02 15:42:04 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/02 15:29:47 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,8 @@ public:
 	std::vector<Client*>::iterator isAvailable(Client& client);
 	void linkClientToChannel(Client& client, std::string& name);
 	void destroyOneClient(std::vector<struct pollfd> &fds, int i);
+
+	void clientLeaveChannel(Client& client, const std::string& name);
 };
 
 std::ostream& operator<<(std::ostream& o, Server& s);

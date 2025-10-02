@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/02 15:42:08 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/02 16:25:06 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -186,6 +186,21 @@ int Server::findChannel(std::string name) {
 void	Server::destroyOneClient(std::vector<struct pollfd> &fds , int i)
 {
 	Client* target = findClientByFd(_clientList, fds[i].fd);
+	Channel* channel;
+	//destroy client in all channel
+	std::vector<Channel*>::iterator	it = this->_channelList.begin();
+	std::vector<Channel*>::iterator	end = this->_channelList.end();
+	for(int i = 0; it != end; i++) {
+		channel = static_cast<Channel*>(*it);
+		if (channel->findClientJoin(*target) != -1)
+			channel->Kick(*target);
+		if (channel->findClientInvite(*target) != -1)
+			channel->DeInvite(*target);
+		if (channel->findClientOp(*target) != -1)
+			channel->DeOp(*target);
+		it++;
+	}
+	//destroy client in server base class
 	for (size_t j = 0; j < _clientList.size(); j++) {
 		if (_clientList[j] == target) {
 			_clientList.erase(_clientList.begin() + j);
@@ -254,6 +269,9 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 	else if (command == "PRIVMSG") {
 		this->privMsgSend(client, msg);
 	}
+	else if (command == "PART") {
+		this->clientLeaveChannel(client, msg);
+	}
 	else {
 		std::cout << "Unknown command: " << command << std::endl << *this;
 	}
@@ -283,6 +301,28 @@ void Server::privMsgSend(Client& client, const std::string& arg) {
 	}
 }
 
+void Server::clientLeaveChannel(Client& client, const std::string& arg) {
+	int separatorPos = arg.find(":");
+	std::string dest;
+	if (separatorPos > 0 && separatorPos < (int)arg.length())
+		dest = std::string(arg.substr(5, separatorPos - 6));
+	else
+		dest = std::string(arg.substr(5));
+	std::cout << "&&&&&&&&&&&&&&&&&" << std::endl;
+	dest = dest.c_str() + 1;
+	int Pos = this->findChannel(dest);
+	if (Pos == -1)
+		;//Throw error cant find any channel
+	else { 
+		this->_channelList[Pos]->Kick(client);
+		if (separatorPos > 0 && separatorPos < (int)arg.length()) {
+			std::string	msg(arg.substr(separatorPos + 1));
+			client.leaveChannel(msg, *this->_channelList[Pos]);
+		}
+		else
+			client.leaveChannel(*this->_channelList[Pos]);
+	}
+}
 
 void Server::start(void){
 	char buffer[4096];
