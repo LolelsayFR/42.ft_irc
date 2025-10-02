@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 15:34:55 by arthur            #+#    #+#             */
-/*   Updated: 2025/10/02 12:53:57 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/02 13:44:40 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,12 +90,12 @@ void Client::setWelcomeSent(bool val) {
 //PRIVMSG handler channel
 void Client::receptMessage(Channel& channel, Client& sender, std::string& msg) {
 	std::string myMsg = ":" + sender.getNickname() + " PRIVMSG " + "#" + channel.getName() + " :" + msg + "\r\n";
-	send(this->getFd(), myMsg.c_str(), myMsg.size(), MSG_NOSIGNAL);
+	send(this->getUid(), myMsg.c_str(), myMsg.size(), MSG_NOSIGNAL);
 }
 
 //PRIVMSG handler
 void Client::receptMessage(Client& sender, std::string& msg) {
 	std::string myMsg = ":" + sender.getNickname() + " PRIVMSG " + this->getNickname() + " :" + msg + "\r\n";
-	send(this->getFd(), myMsg.c_str(), myMsg.size(), MSG_NOSIGNAL);
+	send(this->getUid(), myMsg.c_str(), myMsg.size(), MSG_NOSIGNAL);
 }
 
