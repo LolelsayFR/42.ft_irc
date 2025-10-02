@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/02 10:34:56 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/02 10:52:43 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -234,8 +234,7 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 }
 
 void Server::start(void){
-	char buffer[1024];
-	int clientSocket;
+	char buffer[4096];
 
 	std::cout << *this << std::endl;
 
@@ -270,8 +269,7 @@ void Server::start(void){
 	if (listen(server_fd, 5) == -1) {
 		close(server_fd);
 		fds.erase(fds.begin());
-		return ;
-		//throw ListeningErrorException();
+		throw ListeningErrorException();
 	}
 
 	std::cout << "Server is on" << std::endl;
@@ -279,13 +277,14 @@ void Server::start(void){
 	while (true) {
 		int ret = poll(fds.data(), fds.size(), -1); // -1 = attente infinie
 
-		if (ret < 0) break;
+		if (ret < 0)
+			break;
 
 		for (size_t i = 0; i < fds.size(); i++) {
 			if (fds[i].revents != 0) {
 				if (fds[i].fd == server_fd) {
 					// Nouvelle connexion
-					clientSocket = accept(server_fd, NULL, NULL);
+					int clientSocket = accept(server_fd, NULL, NULL);
 					if (clientSocket == -1)
 						throw SocketErrorException();
 					FdOutBuf		buf(clientSocket);
@@ -336,22 +335,20 @@ void Server::start(void){
 							}
 						}
 					}
-
 				}
 			}
 		}
 	}
-	close(server_fd);
 }
 
 std::vector<Client*>::iterator Server::isAvailable(Client& client) {
 	std::vector<Client*>::iterator	it = this->_clientList.begin();
 	std::vector<Client*>::iterator	end = this->_clientList.end();
 	while(it != end) {
-		if (*it != &client && (static_cast<Client*>(*it)->getNickname() == client.getNickname() || static_cast<Client*>(*it)->getUsername() == client.getUsername()))
+		if (*it != &client && (static_cast<Client*>(*it)->getNickname() == client.getNickname() ||
+				static_cast<Client*>(*it)->getUsername() == client.getUsername()))
 			throwRFCException(ERR_ALREADYREGISTRED);
 		it++;
 	}
 	return (end);
 }
-
