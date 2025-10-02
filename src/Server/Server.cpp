@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/01 19:28:58 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/02 10:58:23 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ Server::~Server(void) {
 //Ostream insertion operator
 std::ostream& operator<<(std::ostream& o, Server& s) {
 	Client* ptr;
-	o << "/* Server View ********************************************************* */" << std::endl;
+	o << "\n/* Server View ********************************************************* */" << std::endl;
 	o << "/\tPort : " << s.getPort() << "\n/\tPassword : " << s.getPassword() << std::endl;
 	{
 		std::vector<Client*> list = s.getClientList();
@@ -92,10 +92,13 @@ const std::vector<Channel*>&	Server::getChannelList(void) const {
 }
 
 //Create new channel
-void Server::makeChannel(std::string name) {
+Channel* Server::makeChannel(std::string name) {
 	int channelPos = this->findChannel(name);
 	if (channelPos == -1)
-		this->_channelList.push_back(new Channel(name));		
+		this->_channelList.push_back(new Channel(name));
+	else
+		return (this->_channelList[channelPos]);
+	return (this->_channelList.back());
 }
 
 
@@ -179,7 +182,7 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 		send(client.getFd(), pongResponse.c_str(), pongResponse.size(), MSG_NOSIGNAL);
 		std::cout << "Responded to PING with PONG" << std::endl;
 	}
-	if (command == "PASS") {
+	else if (command == "PASS") {
 		std::string pass;
 		iss >> pass;
 		if (pass.empty())
@@ -206,10 +209,40 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 		std::cout << "Username set to " << username
 				  << " for fd " << client.getFd() << std::endl;
 	}
+	else if (command == "JOIN") {
+		std::string arg;
+		iss >> arg;
+		this->linkClientToChannel(client, arg);
+	}
+	else if (command == "PRIVMSG") {
+		this->privMsgSend(client, msg);
+	}
 	else {
-		std::cout << "Unknown command: " << command << std::endl;
+		std::cout << "Unknown command: " << command << std::endl << *this;
 	}
 }
+
+void Server::linkClientToChannel(Client& client, std::string& arg) {
+	makeChannel(arg.c_str() + 1 )->Join(client);
+}
+
+void Server::privMsgSend(Client& client, const std::string& arg) {
+	(void)client;
+	int separatorPos = arg.find(":");
+	std::string	msg(arg.substr(separatorPos + 1)), dest(arg.substr(8, separatorPos - 9));
+	std::cout << arg <<  "\nPos" << separatorPos << "\nDEST = " << dest << "\nMSG = " << msg << std::endl;
+	if (arg[0] == '#') {
+		int Pos = this->findChannel(arg);
+		if (Pos == -1)
+			;
+	}
+	else {
+		int Pos = this->findClient(arg);
+		if (Pos == -1)
+			;
+	}
+}
+
 
 void Server::start(void){
 	char buffer[1024];
