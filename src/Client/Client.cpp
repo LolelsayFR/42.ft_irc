@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 15:34:55 by arthur            #+#    #+#             */
-/*   Updated: 2025/10/02 12:32:42 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/02 12:48:17 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ void Client::setNickname(std::string nickname){
 	this->_nickname = nickname;
 }
 
-int Client::getFd(void) const {
+int Client::getUid(void) const {
 	return (this->_uid);
 }
 
@@ -70,7 +70,7 @@ void Client::checkRegistration() {
 
 Client* findClientByFd(std::vector<Client*> &clients, int fd) {
 	for (std::vector<Client*>::iterator it = clients.begin(); it != clients.end(); ++it) {
-		if ((*it)->getFd() == fd)
+		if ((*it)->getUid() == fd)
 			return *it;
 	}
 	return NULL;
