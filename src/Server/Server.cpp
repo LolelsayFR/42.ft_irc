@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/02 10:58:23 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/02 12:51:45 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -143,6 +143,19 @@ int Server::findClient(std::string name) {
 	return (-1);
 }
 
+//Channel id in join vector list by nick
+int Server::findClientByNick(std::string nickname) {
+	std::vector<Client*>::iterator	it = this->_clientList.begin();
+	std::vector<Client*>::iterator	end = this->_clientList.end();
+	for(int i = 0; it != end; i++) {
+		if (static_cast<Client*>(*it)->getNickname() == nickname) {
+			return (i);
+		}
+		it++;
+	}
+	return (-1);
+}
+
 //Channel id in join vector list by ref
 int Server::findChannel(Channel& channel) {
 	std::vector<Channel*>::iterator	it = this->_channelList.begin();
@@ -227,19 +240,22 @@ void Server::linkClientToChannel(Client& client, std::string& arg) {
 }
 
 void Server::privMsgSend(Client& client, const std::string& arg) {
-	(void)client;
 	int separatorPos = arg.find(":");
 	std::string	msg(arg.substr(separatorPos + 1)), dest(arg.substr(8, separatorPos - 9));
-	std::cout << arg <<  "\nPos" << separatorPos << "\nDEST = " << dest << "\nMSG = " << msg << std::endl;
-	if (arg[0] == '#') {
-		int Pos = this->findChannel(arg);
+	if (dest[0] == '#') {
+		dest = dest.c_str() + 1;
+		int Pos = this->findChannel(dest);
 		if (Pos == -1)
-			;
+			;//Throw error cant find any channel
+		else
+			this->_channelList[Pos]->Broadcast(client, msg);
 	}
 	else {
-		int Pos = this->findClient(arg);
+		int Pos = this->findClientByNick(dest);
 		if (Pos == -1)
-			;
+			;//Throw error Cant find any user
+		else
+			this->_clientList[Pos]->receptMessage(client, msg);
 	}
 }
 
