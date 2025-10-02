@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:10:41 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/01 18:14:12 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/02 10:43:34 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,12 @@ class SocketErrorException : public std::exception
 };
 
 class SetOptionSocketErrorException : public std::exception
+{
+	public:
+		const char* what(void) const throw();
+};
+
+class ListeningErrorException : public std::exception
 {
 	public:
 		const char* what(void) const throw();

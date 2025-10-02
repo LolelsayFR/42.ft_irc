@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/02 10:34:56 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/02 12:35:47 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -169,7 +169,7 @@ void	Server::destroyOneClient(std::vector<struct pollfd> &fds , int i)
 	Client* target = findClientByFd(_clientList, fds[i].fd);
 	for (size_t j = 0; j < _clientList.size(); j++) {
 		if (_clientList[j] == target) {
-			_clientList.erase(_clientList.begin() + j);\
+			_clientList.erase(_clientList.begin() + j);
 				break;
 		}
 	}
@@ -178,10 +178,10 @@ void	Server::destroyOneClient(std::vector<struct pollfd> &fds , int i)
 	fds.erase(fds.begin() + i);
 }
 
-void	addNewSocket(std::vector<struct pollfd> &fds , int server_fd)
+void	addNewSocket(std::vector<struct pollfd> &fds , int socketFD)
 {
 	pollfd server_poll;
-	server_poll.fd = server_fd;
+	server_poll.fd = socketFD;
 	server_poll.events = POLLIN;
 	server_poll.revents = 0;
 	fds.push_back(server_poll);
@@ -225,8 +225,7 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 		if (!realname.empty() && realname[0] == ':')
 			realname.erase(0, 1);
 		client.setUsername(username);
-		std::cout << "Username set to " << username
-				  << " for fd " << client.getFd() << std::endl;
+		std::cout << "Username set to " << username << " for fd " << client.getFd() << std::endl;
 	}
 	else {
 		std::cout << "Unknown command: " << command << std::endl;
@@ -234,8 +233,7 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 }
 
 void Server::start(void){
-	char buffer[1024];
-	int clientSocket;
+	char buffer[4096];
 
 	std::cout << *this << std::endl;
 
@@ -250,7 +248,7 @@ void Server::start(void){
 	if (server_fd == -1)
 		throw SocketErrorException();
 	int opt = 1;
-	if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt)) == -1) {
+	if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1) {
 		close(server_fd);
 		throw SetOptionSocketErrorException();
 	}
@@ -270,8 +268,7 @@ void Server::start(void){
 	if (listen(server_fd, 5) == -1) {
 		close(server_fd);
 		fds.erase(fds.begin());
-		return ;
-		//throw ListeningErrorException();
+		throw ListeningErrorException();
 	}
 
 	std::cout << "Server is on" << std::endl;
@@ -279,17 +276,19 @@ void Server::start(void){
 	while (true) {
 		int ret = poll(fds.data(), fds.size(), -1); // -1 = attente infinie
 
-		if (ret < 0) break;
+		if (ret < 0)
+			break;
 
 		for (size_t i = 0; i < fds.size(); i++) {
 			if (fds[i].revents != 0) {
 				if (fds[i].fd == server_fd) {
 					// Nouvelle connexion
-					clientSocket = accept(server_fd, NULL, NULL);
+					int clientSocket = accept(server_fd, NULL, NULL);
 					if (clientSocket == -1)
-						throw SocketErrorException();
-					FdOutBuf		buf(clientSocket);
-					std::ostream	clientStream(&buf);
+							break ;
+					//Inutile pour le moment donc commente
+					//FdOutBuf		buf(clientSocket);
+					//std::ostream	clientStream(&buf);
 
 					std::cout << "User try to connect..." << std::endl;
 
@@ -305,6 +304,7 @@ void Server::start(void){
 					if (n <= 0) {
 						std::cout << "User disconnected" << std::endl;
 						destroyOneClient(fds, i);
+						std::cout << fds.size() << std::endl;
 						std::cout << *this << std::endl;
 						continue ;
 					}
@@ -336,22 +336,20 @@ void Server::start(void){
 							}
 						}
 					}
-
 				}
 			}
 		}
 	}
-	close(server_fd);
 }
 
 std::vector<Client*>::iterator Server::isAvailable(Client& client) {
 	std::vector<Client*>::iterator	it = this->_clientList.begin();
 	std::vector<Client*>::iterator	end = this->_clientList.end();
 	while(it != end) {
-		if (*it != &client && (static_cast<Client*>(*it)->getNickname() == client.getNickname() || static_cast<Client*>(*it)->getUsername() == client.getUsername()))
+		if (*it != &client && (static_cast<Client*>(*it)->getNickname() == client.getNickname() ||
+				static_cast<Client*>(*it)->getUsername() == client.getUsername()))
 			throwRFCException(ERR_ALREADYREGISTRED);
 		it++;
 	}
 	return (end);
 }
-

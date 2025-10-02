@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 15:34:55 by arthur            #+#    #+#             */
-/*   Updated: 2025/10/01 18:25:44 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/02 12:32:42 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 #include "Server/Server.hpp"
 #include "Errors/Exception.hpp"
 
-Client::Client(int fd) : _uid(fd), _isRegistered(false){
+Client::Client(int fd) : _uid(fd), _isRegistered(false), _welcomeSent(false) {
 	std::cout << "New client connected with fd: " << fd << std::endl;
 }
 
