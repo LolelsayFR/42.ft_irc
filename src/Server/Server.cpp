@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/02 09:56:04 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/02 10:25:48 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -164,7 +164,7 @@ int Server::findChannel(std::string name) {
 	return (-1);
 }
 
-void	Server::destroyOneClient(std::vector<struct pollfd> &fds ,int i)
+void	Server::destroyOneClient(std::vector<struct pollfd> &fds , int i)
 {
 	Client* target = findClientByFd(_clientList, fds[i].fd);
 	for (size_t j = 0; j < _clientList.size(); j++) {
@@ -176,6 +176,15 @@ void	Server::destroyOneClient(std::vector<struct pollfd> &fds ,int i)
 	delete target;
 	close(fds[i].fd);
 	fds.erase(fds.begin() + i);
+}
+
+void	addNewSocket(std::vector<struct pollfd> &fds , int server_fd)
+{
+	pollfd server_poll;
+	server_poll.fd = server_fd;
+	server_poll.events = POLLIN;
+	server_poll.revents = 0;
+	fds.push_back(server_poll);
 }
 
 void Server::parseMessage(Client &client, const std::string &msg) {
@@ -230,13 +239,6 @@ void Server::start(void){
 
 	std::cout << *this << std::endl;
 
-	//Uncomment for basic test
-	//makeChannel("test");
-	//makeChannel("test2");
-	//Client test1(1);
-	//Client test2(2);
-	
-
 	// specifying the serv address
 	sockaddr_in serverAddress;
 	serverAddress.sin_family = AF_INET;
@@ -248,23 +250,28 @@ void Server::start(void){
 	if (server_fd == -1)
 		throw SocketErrorException();
 	int opt = 1;
-	if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt)) == -1)
+	if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt)) == -1) {
+		close(server_fd);
 		throw SetOptionSocketErrorException();
+	}
+
 	// binding socket.
-	if (bind(server_fd, (struct sockaddr*)&serverAddress,
-		sizeof(serverAddress)) == -1)
-			throw PortErrorException();
+	if (bind(server_fd, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == -1) {
+		close(server_fd);
+		throw PortErrorException();
+	}
 
 	std::vector<struct pollfd> fds;
 
 	// Ajouter le socket serveur
-	pollfd server_poll;
-	server_poll.fd = server_fd;
-	server_poll.events = POLLIN;
-	fds.push_back(server_poll);
+	addNewSocket(fds, server_fd);
 
 	// listening to the assigned socket
-	listen(server_fd, 5);
+	if (listen(server_fd, 5) == -1) {
+		close(server_fd);
+		fds[0].erase();
+		throw ListeningErrorException();
+	}
 
 	std::cout << "Server is on" << std::endl;
 
@@ -285,11 +292,7 @@ void Server::start(void){
 
 					std::cout << "User try to connect..." << std::endl;
 
-					pollfd client_poll;
-					client_poll.fd = clientSocket;
-					client_poll.events = POLLIN;
-					client_poll.revents = 0;
-					fds.push_back(client_poll);
+					addNewSocket(fds, clientSocket);
 					_clientList.push_back(new Client(clientSocket));
 				} else {
 					// Données d'un client existant
