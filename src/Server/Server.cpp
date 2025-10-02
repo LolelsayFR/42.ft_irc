@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/01 19:28:58 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/02 09:56:04 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -164,6 +164,19 @@ int Server::findChannel(std::string name) {
 	return (-1);
 }
 
+void	Server::destroyOneClient(std::vector<struct pollfd> &fds ,int i)
+{
+	Client* target = findClientByFd(_clientList, fds[i].fd);
+	for (size_t j = 0; j < _clientList.size(); j++) {
+		if (_clientList[j] == target) {
+			_clientList.erase(_clientList.begin() + j);\
+				break;
+		}
+	}
+	delete target;
+	close(fds[i].fd);
+	fds.erase(fds.begin() + i);
+}
 
 void Server::parseMessage(Client &client, const std::string &msg) {
 	std::istringstream iss(msg);
@@ -287,63 +300,34 @@ void Server::start(void){
 					}
 					if (n <= 0) {
 						std::cout << "User disconnected" << std::endl;
-						close(fds[i].fd);
-						Client* target = findClientByFd(_clientList, fds[i].fd);
-						for (size_t j = 0; j < _clientList.size(); j++) {
-							if (_clientList[j] == target) {
-								_clientList.erase(_clientList.begin() + j);
-									break;
-							}
-						}
-						delete target;
-						fds.erase(fds.begin() + i);
-						continue;
+						destroyOneClient(fds, i);
+						std::cout << *this << std::endl;
+						continue ;
 					}
 					// Traitement des donnees
 					Client *client = findClientByFd(_clientList, fds[i].fd);
-					if (client)
-					{
-						client->appendBuffer(buffer, n);
+					if (client) {
 
-						while (client->hasMessage())
-						{
+						client->appendBuffer(buffer, n);
+						while (client->hasMessage()) {
 							std::cout << "Message received from client: ";
 							std::string msg = client->popMessage();
 							try {
 								parseMessage(*client, msg);
 								Server::isAvailable(*client);
 								client->checkRegistration();
-								if (client->isRegistered())
-								{
+								if (client->isRegistered()) {
 									welcomeUser(client);
 								}
 							}
 							catch (RFCException &e) {
-								Client* target = findClientByFd(_clientList, fds[i].fd);
-								for (size_t j = 0; j < _clientList.size(); j++) {
-									if (_clientList[j] == target) {
-										_clientList.erase(_clientList.begin() + j);
-											break;
-									}
-								}
-								delete target;
+								destroyOneClient(fds, i);
 								std::cerr << e.what() << std::endl;
-								close(fds[i].fd);
-								fds.erase(fds.begin() + i);
-								break;
+								break ;
 							}
 							catch (ClientPasswordException & e) {
-								Client* target = findClientByFd(_clientList, fds[i].fd);
-								for (size_t j = 0; j < _clientList.size(); j++) {
-									if (_clientList[j] == target) {
-										_clientList.erase(_clientList.begin() + j);
-										break;
-									}
-								}
-								delete target;
+								destroyOneClient(fds, i);
 								std::cerr << e.what() << std::endl;
-								close(fds[i].fd);
-								fds.erase(fds.begin() + i);
 								break ;
 							}
 						}
