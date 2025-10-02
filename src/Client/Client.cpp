@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 15:34:55 by arthur            #+#    #+#             */
-/*   Updated: 2025/10/02 13:44:40 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/02 16:31:15 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,4 +98,17 @@ void Client::receptMessage(Client& sender, std::string& msg) {
 	std::string myMsg = ":" + sender.getNickname() + " PRIVMSG " + this->getNickname() + " :" + msg + "\r\n";
 	send(this->getUid(), myMsg.c_str(), myMsg.size(), MSG_NOSIGNAL);
 }
+
+//PART (leave) handler
+void Client::leaveChannel(std::string& msg, Channel& channel) {
+	std::string myMsg = ":" + this->getNickname() + " PART " + channel.getName() + " :" + msg + "\r\n";
+	send(this->getUid(), myMsg.c_str(), myMsg.size(), MSG_NOSIGNAL);
+}
+
+//PART (leave) handler
+void Client::leaveChannel(Channel& channel) {
+	std::string myMsg = ":" + this->getNickname() + " PART " + channel.getName() + "\r\n";
+	send(this->getUid(), myMsg.c_str(), myMsg.size(), MSG_NOSIGNAL);
+}
+
 

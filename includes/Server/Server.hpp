@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:52:45 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/02 11:46:15 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/02 15:29:47 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,12 +25,9 @@ private:
 	const std::string		_password;
 	std::vector<Client*>	_clientList;
 	std::vector<Channel*>	_channelList;
-    //sockaddr_in			_serverAddress;
 public:
-	//All constructor and destructor
 	Server(int port, std::string password);
 	~Server(void);
-	//All other member functions
 	const std::vector<Channel*>&	getChannelList(void) const;
 	const std::vector<Client*>&	getClientList(void) const;
 	int getPort(void) const;
@@ -47,6 +44,8 @@ public:
 	void parseMessage(Client &client, const std::string &msg);
 	std::vector<Client*>::iterator isAvailable(Client& client);
 	void destroyOneClient(std::vector<struct pollfd> &fds, int i);
+
+	void clientLeaveChannel(Client& client, const std::string& name);
 };
 
 std::ostream& operator<<(std::ostream& o, Server& s);
