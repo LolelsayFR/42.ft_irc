@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 09:52:28 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/02 15:50:52 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/02 15:55:14 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ void	sigintHandler(int signal) {
 		serverPtr->destroyOneClient(serverPtr->getFds(), i);
 	}
 	std::cout << "Server has been stopped" << std::endl;
+	(void)signal;
 }
 
 int main(int argc, char const *argv[])
@@ -50,5 +51,4 @@ int main(int argc, char const *argv[])
 	catch (ParsingException& e){
 		std::cout << e.what() << std::endl;
 	}
-	return (0);
 }
