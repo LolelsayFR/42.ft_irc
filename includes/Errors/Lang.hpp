@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:08:58 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/01 18:11:27 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/02 10:42:49 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,5 +24,6 @@
 # define E_ERR_WRONGPASSWORD  "🛑 Error : Wrong password send to connect to server."
 # define E_SOCKETERROR        "🛑 Error : Socket creation error."
 # define E_SETSOCKETOPTERROR  "🛑 Error : Socket setting option error."
+# define E_LISTENING_ERROR    "🛑 Error : Server socket listening error."
 
 #endif // LANG_HPP

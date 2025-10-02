@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:35:21 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/01 18:14:24 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/02 10:43:24 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,4 +57,8 @@ const char* SocketErrorException::what(void) const throw () {
 
 const char *SetOptionSocketErrorException::what(void) const throw() {
 	return(E_SETSOCKETOPTERROR);
+}
+
+const char* ListeningErrorException::what(void) const throw () {
+	return (E_LISTENING_ERROR);
 }

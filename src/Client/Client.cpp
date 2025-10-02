@@ -19,7 +19,7 @@
 # define WHI 			"\e[1;38;5;0;107m "
 # define RES			" \e[0m"
 
-Client::Client(int fd) : _uid(fd), _isRegistered(false){
+Client::Client(int fd) : _uid(fd), _isRegistered(false), _welcomeSent(false) {
 	std::cout << "New client connected with fd: " << fd << std::endl;
 }
 
@@ -43,7 +43,7 @@ void Client::setNickname(std::string nickname){
 	this->_nickname = nickname;
 }
 
-int Client::getFd(void) const {
+int Client::getUid(void) const {
 	return (this->_uid);
 }
 
@@ -74,7 +74,7 @@ void Client::checkRegistration() {
 
 Client* findClientByFd(std::vector<Client*> &clients, int fd) {
 	for (std::vector<Client*>::iterator it = clients.begin(); it != clients.end(); ++it) {
-		if ((*it)->getFd() == fd)
+		if ((*it)->getUid() == fd)
 			return *it;
 	}
 	return NULL;

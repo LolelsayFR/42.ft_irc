@@ -19,37 +19,33 @@ class Channel;
 
 class Client {
 private :
-	const int			_uid;
-	std::string			_username;
-	std::string			_nickname;
-	std::string			_buffer;
-	bool				_isRegistered;
-	bool				_welcomeSent;
-	//std::ostream		_clientStream;
-	//std::vector<Channel&> <--- All channel joined;
+	const int		_uid;
+	bool			_isRegistered;
+	bool			_welcomeSent;
+	std::string		_username;
+	std::string		_nickname;
+	std::string		_buffer;
 public :
 	Client(int fd);
 	~Client(void);
-	// const int getUid(void)const;
+
+	int getUid(void) const;
+	bool hasMessage() const;
+	bool isRegistered(void) const;
+	bool getWelcomeSent(void) const;
 	std::string getUsername(void) const;
 	std::string getNickname(void) const;
+
+	void checkRegistration();
+	void setWelcomeSent(bool val);
 	void setNickname(std::string nickname);
 	void setUsername(std::string username);
-	int getFd(void) const;
 	void appendBuffer(const char* data, int len);
-	bool hasMessage() const;
-	std::string popMessage();
-	bool isRegistered(void) const;
-	void checkRegistration();
-	bool getWelcomeSent(void) const;
-	void setWelcomeSent(bool val);
 
 	void receptMessage(Channel& channel, Client& sender, std::string& msg);
 	void receptMessage(Client& sender, std::string& msg);
-	// std::string getNickname(void)const;
-	// void setNickname(std::string nickname);
-	//Client Command
-	//void join(std::string channel);
+
+	std::string popMessage();
 };
 
 Client* findClientByFd(std::vector<Client*> &clients, int fd);
