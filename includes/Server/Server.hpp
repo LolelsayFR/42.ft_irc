@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:52:45 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/02 11:46:15 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/02 14:15:32 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,31 +25,36 @@ private:
 	const std::string		_password;
 	std::vector<Client*>	_clientList;
 	std::vector<Channel*>	_channelList;
-    //sockaddr_in			_serverAddress;
 public:
-	//All constructor and destructor
 	Server(int port, std::string password);
 	~Server(void);
-	//All other member functions
-	const std::vector<Channel*>&	getChannelList(void) const;
-	const std::vector<Client*>&	getClientList(void) const;
+
 	int getPort(void) const;
 	std::string getPassword(void) const;
+	const std::vector<Client*>& getClientList(void) const;
+	const std::vector<Channel*>&	getChannelList(void) const;
+
 	void start(void);
+	void parseMessage(Client &client, const std::string &msg);
+
 	Channel* makeChannel(std::string name);
-	void linkClientToChannel(Client& client, std::string& name);
-	void privMsgSend(Client& client, const std::string& name);
+
 	int findClient(Client& client);
 	int findClient(std::string name);
 	int findClientByNick(std::string nick);
+ 
 	int findChannel(Channel& channel);
 	int findChannel(std::string name);
-	void parseMessage(Client &client, const std::string &msg);
+
+	void makeChannel(std::string name);
+
+	void privMsgSend(Client& client, const std::string& name);
 	std::vector<Client*>::iterator isAvailable(Client& client);
+  void linkClientToChannel(Client& client, std::string& name);
 	void destroyOneClient(std::vector<struct pollfd> &fds, int i);
 };
 
 std::ostream& operator<<(std::ostream& o, Server& s);
 Client* findClientByFd(std::vector<Client*> &clients, int fd);
 
-#endif // SERVER_HPP
+#endif

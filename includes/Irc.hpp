@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 14:44:45 by arthur            #+#    #+#             */
-/*   Updated: 2025/10/01 16:57:54 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/02 14:06:23 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,6 @@
 /* ************************************************************************** */
 
 # include "Errors/Lang.hpp"
-# include "Server/FdOutBuf.hpp"
 //# include "Errors/Exception.hpp"
 //# include "Server/Server.hpp"
 // # include "Clients/Client.hpp"
