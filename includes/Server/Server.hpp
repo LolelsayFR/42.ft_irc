@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:52:45 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/02 15:06:24 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/02 15:42:04 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,12 +25,14 @@ private:
 	const std::string		_password;
 	std::vector<Client*>	_clientList;
 	std::vector<Channel*>	_channelList;
+	std::vector<struct pollfd>	_fds;
 public:
 	Server(int port, std::string password);
 	~Server(void);
 
 	int getPort(void) const;
 	std::string getPassword(void) const;
+	std::vector<struct pollfd>& getFds(void);
 	const std::vector<Client*>& getClientList(void) const;
 	const std::vector<Channel*>&	getChannelList(void) const;
 
