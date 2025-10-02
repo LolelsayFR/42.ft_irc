@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/02 11:38:06 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/02 12:35:47 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -169,7 +169,7 @@ void	Server::destroyOneClient(std::vector<struct pollfd> &fds , int i)
 	Client* target = findClientByFd(_clientList, fds[i].fd);
 	for (size_t j = 0; j < _clientList.size(); j++) {
 		if (_clientList[j] == target) {
-			_clientList.erase(_clientList.begin() + j);\
+			_clientList.erase(_clientList.begin() + j);
 				break;
 		}
 	}
@@ -178,10 +178,10 @@ void	Server::destroyOneClient(std::vector<struct pollfd> &fds , int i)
 	fds.erase(fds.begin() + i);
 }
 
-void	addNewSocket(std::vector<struct pollfd> &fds , int server_fd)
+void	addNewSocket(std::vector<struct pollfd> &fds , int socketFD)
 {
 	pollfd server_poll;
-	server_poll.fd = server_fd;
+	server_poll.fd = socketFD;
 	server_poll.events = POLLIN;
 	server_poll.revents = 0;
 	fds.push_back(server_poll);
@@ -225,8 +225,7 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 		if (!realname.empty() && realname[0] == ':')
 			realname.erase(0, 1);
 		client.setUsername(username);
-		std::cout << "Username set to " << username
-				  << " for fd " << client.getFd() << std::endl;
+		std::cout << "Username set to " << username << " for fd " << client.getFd() << std::endl;
 	}
 	else {
 		std::cout << "Unknown command: " << command << std::endl;
@@ -305,6 +304,7 @@ void Server::start(void){
 					if (n <= 0) {
 						std::cout << "User disconnected" << std::endl;
 						destroyOneClient(fds, i);
+						std::cout << fds.size() << std::endl;
 						std::cout << *this << std::endl;
 						continue ;
 					}
