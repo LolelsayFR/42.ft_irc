@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 09:52:28 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/02 15:44:15 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/02 15:55:14 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,11 +25,11 @@ bool	isOnlyDigit(std::string str) {
 }
 
 void	sigintHandler(int signal) {
-	std::cout << " has been called with signal " << signal << std::endl;
 	for (int i = serverPtr->getClientList().size(); i > 0; i--) {
 		serverPtr->destroyOneClient(serverPtr->getFds(), i);
 	}
 	std::cout << "Server has been stopped" << std::endl;
+	(void)signal;
 }
 
 int main(int argc, char const *argv[])
@@ -51,5 +51,4 @@ int main(int argc, char const *argv[])
 	catch (ParsingException& e){
 		std::cout << e.what() << std::endl;
 	}
-	return (0);
 }
