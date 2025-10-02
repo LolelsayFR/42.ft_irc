@@ -80,7 +80,10 @@ std::string Server::getPassword(void) const {
 	return (this->_password);
 }
 
-
+//Client pollfds list return
+std::vector<struct pollfd>& Server::getFds(void) {
+	return (this->_fds);
+}
 //Channel JoinList getter
 const std::vector<Client*>&	Server::getClientList(void) const {
 	return (this->_clientList);
@@ -348,57 +351,49 @@ void Server::start(void){
 		throw PortErrorException();
 	}
 
-	std::vector<struct pollfd> fds;
-
 	// Ajouter le socket serveur
-	addNewSocket(fds, server_fd);
+	addNewSocket(_fds, server_fd);
 
 	// listening to the assigned socket
 	if (listen(server_fd, 5) == -1) {
 		close(server_fd);
-		fds.erase(fds.begin());
+		_fds.erase(_fds.begin());
 		throw ListeningErrorException();
 	}
 
 	std::cout << "Server is on" << std::endl;
 
 	while (true) {
-		int ret = poll(fds.data(), fds.size(), -1); // -1 = attente infinie
-
+		int ret = poll(_fds.data(), _fds.size(), -1); // -1 = attente infinie
 		if (ret < 0)
 			break;
 
-		for (size_t i = 0; i < fds.size(); i++) {
-			if (fds[i].revents != 0) {
-				if (fds[i].fd == server_fd) {
+		for (size_t i = 0; i < _fds.size(); i++) {
+			if (_fds[i].revents != 0) {
+				if (_fds[i].fd == server_fd) {
 					// Nouvelle connexion
 					int clientSocket = accept(server_fd, NULL, NULL);
 					if (clientSocket == -1)
 							break ;
-					//Inutile pour le moment donc commente
-					//FdOutBuf		buf(clientSocket);
-					//std::ostream	clientStream(&buf);
 
 					std::cout << "User try to connect..." << std::endl;
-
-					addNewSocket(fds, clientSocket);
+					addNewSocket(_fds, clientSocket);
 					_clientList.push_back(new Client(clientSocket));
 				} else {
 					// Données d'un client existant
-					int n = recv(fds[i].fd, buffer, 1024, 0);
+					int n = recv(_fds[i].fd, buffer, 1024, 0);
 					if (n > 0) {
 					    std::string msg(buffer, n);
 					    std::cout << "Received: " << msg << std::endl;
 					}
 					if (n <= 0) {
 						std::cout << "User disconnected" << std::endl;
-						destroyOneClient(fds, i);
-						std::cout << fds.size() << std::endl;
+						destroyOneClient(_fds, i);
 						std::cout << *this << std::endl;
 						continue ;
 					}
 					// Traitement des donnees
-					Client *client = findClientByFd(_clientList, fds[i].fd);
+					Client *client = findClientByFd(_clientList, _fds[i].fd);
 					if (client) {
 
 						client->appendBuffer(buffer, n);
@@ -414,12 +409,12 @@ void Server::start(void){
 								}
 							}
 							catch (RFCException &e) {
-								destroyOneClient(fds, i);
+								destroyOneClient(_fds, i);
 								std::cerr << e.what() << std::endl;
 								break ;
 							}
 							catch (ClientPasswordException & e) {
-								destroyOneClient(fds, i);
+								destroyOneClient(_fds, i);
 								std::cerr << e.what() << std::endl;
 								break ;
 							}

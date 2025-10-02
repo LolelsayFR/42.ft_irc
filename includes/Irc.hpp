@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 14:44:45 by arthur            #+#    #+#             */
-/*   Updated: 2025/10/01 16:57:54 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/02 15:11:46 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,11 +16,12 @@
 /* Include extern header */
 /* ************************************************************************** */
 
-# include <iostream>
 # include <netinet/in.h>
 # include <poll.h>
 # include <unistd.h>
 # include <sys/socket.h>
+# include <signal.h>
+# include <iostream>
 # include <vector>
 # include <cstring>
 # include <cstdlib>
@@ -33,7 +34,6 @@
 /* ************************************************************************** */
 
 # include "Errors/Lang.hpp"
-# include "Server/FdOutBuf.hpp"
 //# include "Errors/Exception.hpp"
 //# include "Server/Server.hpp"
 // # include "Clients/Client.hpp"

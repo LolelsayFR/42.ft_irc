@@ -25,24 +25,32 @@ private:
 	const std::string		_password;
 	std::vector<Client*>	_clientList;
 	std::vector<Channel*>	_channelList;
+	std::vector<struct pollfd>	_fds;
 public:
 	Server(int port, std::string password);
 	~Server(void);
-	const std::vector<Channel*>&	getChannelList(void) const;
-	const std::vector<Client*>&	getClientList(void) const;
+
 	int getPort(void) const;
 	std::string getPassword(void) const;
+	std::vector<struct pollfd>& getFds(void);
+	const std::vector<Client*>& getClientList(void) const;
+	const std::vector<Channel*>&	getChannelList(void) const;
+
 	void start(void);
+	void parseMessage(Client &client, const std::string &msg);
+
 	Channel* makeChannel(std::string name);
-	void linkClientToChannel(Client& client, std::string& name);
-	void privMsgSend(Client& client, const std::string& name);
+
 	int findClient(Client& client);
 	int findClient(std::string name);
 	int findClientByNick(std::string nick);
+ 
 	int findChannel(Channel& channel);
 	int findChannel(std::string name);
-	void parseMessage(Client &client, const std::string &msg);
+
+	void privMsgSend(Client& client, const std::string& name);
 	std::vector<Client*>::iterator isAvailable(Client& client);
+	void linkClientToChannel(Client& client, std::string& name);
 	void destroyOneClient(std::vector<struct pollfd> &fds, int i);
 
 	void clientLeaveChannel(Client& client, const std::string& name);
@@ -51,4 +59,4 @@ public:
 std::ostream& operator<<(std::ostream& o, Server& s);
 Client* findClientByFd(std::vector<Client*> &clients, int fd);
 
-#endif // SERVER_HPP
+#endif
