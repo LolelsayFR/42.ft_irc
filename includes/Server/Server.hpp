@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:52:45 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/02 09:18:17 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/02 14:11:00 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,23 +25,26 @@ private:
 	const std::string		_password;
 	std::vector<Client*>	_clientList;
 	std::vector<Channel*>	_channelList;
-    //sockaddr_in			_serverAddress;
 public:
-	//All constructor and destructor
 	Server(int port, std::string password);
 	~Server(void);
-	//All other member functions
-	const std::vector<Channel*>&	getChannelList(void) const;
-	const std::vector<Client*>&	getClientList(void) const;
+
 	int getPort(void) const;
 	std::string getPassword(void) const;
+	const std::vector<Channel*>&	getChannelList(void) const;
+	const std::vector<Client*>&	getClientList(void) const;
+
 	void start(void);
-	void makeChannel(std::string name);
+	void parseMessage(Client &client, const std::string &msg);
+
 	int findClient(Client& client);
 	int findClient(std::string name);
+
 	int findChannel(Channel& channel);
 	int findChannel(std::string name);
-	void parseMessage(Client &client, const std::string &msg);
+
+	void makeChannel(std::string name);
+
 	std::vector<Client*>::iterator isAvailable(Client& client);
 	void destroyOneClient(std::vector<struct pollfd> &fds, int i);
 };
