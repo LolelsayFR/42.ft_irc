@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
+/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 14:43:51 by arthur            #+#    #+#             */
-/*   Updated: 2025/10/02 12:55:14 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/02 11:57:39 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@
 #include "Server/Server.hpp"
 
 class Server;
+class Channel;
+
 class Client {
 private :
 	const int		_uid;
@@ -39,6 +41,9 @@ public :
 	void setNickname(std::string nickname);
 	void setUsername(std::string username);
 	void appendBuffer(const char* data, int len);
+
+	void receptMessage(Channel& channel, Client& sender, std::string& msg);
+	void receptMessage(Client& sender, std::string& msg);
 
 	std::string popMessage();
 };

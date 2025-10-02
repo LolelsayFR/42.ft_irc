@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/01 18:22:02 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/02 12:52:22 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ Channel::Channel(std::string name) : _name(name) {
 
 // Default destructor
 Channel::~Channel(void) {
-		if (DEBUG_PRINT)
+	if (DEBUG_PRINT)
 		std::cout << WHI"Channel" << RES << " destructor called : " << _name << std::endl;	
 }
 
@@ -149,6 +149,16 @@ void Channel::setPassword(std::string pass) {
 /* All members functions */
 /* ************************************************************************** */
 
+
+void Channel::Broadcast(Client& sender, std::string msg){
+	std::vector<Client*>::iterator	it = this->_joinedList.begin();
+	std::vector<Client*>::iterator	end = this->_joinedList.end();
+	for(int i = 0; it != end; i++) {
+		if (*it != &sender)
+			static_cast<Client*>(*it)->receptMessage(*this, sender, msg);
+		it++;
+	}
+}
 
 //Channel command to join
 void Channel::Join(Client& client) {

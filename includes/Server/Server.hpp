@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:52:45 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/02 09:18:17 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/02 11:46:15 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,9 +36,12 @@ public:
 	int getPort(void) const;
 	std::string getPassword(void) const;
 	void start(void);
-	void makeChannel(std::string name);
+	Channel* makeChannel(std::string name);
+	void linkClientToChannel(Client& client, std::string& name);
+	void privMsgSend(Client& client, const std::string& name);
 	int findClient(Client& client);
 	int findClient(std::string name);
+	int findClientByNick(std::string nick);
 	int findChannel(Channel& channel);
 	int findChannel(std::string name);
 	void parseMessage(Client &client, const std::string &msg);

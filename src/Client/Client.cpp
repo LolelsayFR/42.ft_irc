@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
+/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 15:34:55 by arthur            #+#    #+#             */
-/*   Updated: 2025/10/02 12:48:17 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/02 12:53:57 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,13 +14,17 @@
 #include "Client/Client.hpp"
 #include "Server/Server.hpp"
 #include "Errors/Exception.hpp"
+#include "Channel/Channel.hpp"
+
+# define WHI 			"\e[1;38;5;0;107m "
+# define RES			" \e[0m"
 
 Client::Client(int fd) : _uid(fd), _isRegistered(false), _welcomeSent(false) {
 	std::cout << "New client connected with fd: " << fd << std::endl;
 }
 
 Client::~Client(void) {
-	std::cout << "Client with fd: " << this->_uid << " disconnected." << std::endl;
+	std::cout << "Client with fd/id: " << this->_uid << " disconnected." << std::endl;
 }
 
 std::string Client::getUsername(void)const{
@@ -82,3 +86,16 @@ bool Client::getWelcomeSent(void) const {
 void Client::setWelcomeSent(bool val) {
 	this->_welcomeSent = val;
 }
+
+//PRIVMSG handler channel
+void Client::receptMessage(Channel& channel, Client& sender, std::string& msg) {
+	std::string myMsg = ":" + sender.getNickname() + " PRIVMSG " + "#" + channel.getName() + " :" + msg + "\r\n";
+	send(this->getFd(), myMsg.c_str(), myMsg.size(), MSG_NOSIGNAL);
+}
+
+//PRIVMSG handler
+void Client::receptMessage(Client& sender, std::string& msg) {
+	std::string myMsg = ":" + sender.getNickname() + " PRIVMSG " + this->getNickname() + " :" + msg + "\r\n";
+	send(this->getFd(), myMsg.c_str(), myMsg.size(), MSG_NOSIGNAL);
+}
+

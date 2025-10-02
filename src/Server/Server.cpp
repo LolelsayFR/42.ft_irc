@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/02 12:47:55 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/02 12:51:45 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ Server::~Server(void) {
 //Ostream insertion operator
 std::ostream& operator<<(std::ostream& o, Server& s) {
 	Client* ptr;
-	o << "/* Server View ********************************************************* */" << std::endl;
+	o << "\n/* Server View ********************************************************* */" << std::endl;
 	o << "/\tPort : " << s.getPort() << "\n/\tPassword : " << s.getPassword() << std::endl;
 	{
 		std::vector<Client*> list = s.getClientList();
@@ -92,10 +92,13 @@ const std::vector<Channel*>&	Server::getChannelList(void) const {
 }
 
 //Create new channel
-void Server::makeChannel(std::string name) {
+Channel* Server::makeChannel(std::string name) {
 	int channelPos = this->findChannel(name);
 	if (channelPos == -1)
-		this->_channelList.push_back(new Channel(name));		
+		this->_channelList.push_back(new Channel(name));
+	else
+		return (this->_channelList[channelPos]);
+	return (this->_channelList.back());
 }
 
 
@@ -135,6 +138,19 @@ int Server::findClient(std::string name) {
 	for(int i = 0; it != end; i++) {
 		if (static_cast<Client*>(*it)->getUsername() == name)
 			return (i);
+		it++;
+	}
+	return (-1);
+}
+
+//Channel id in join vector list by nick
+int Server::findClientByNick(std::string nickname) {
+	std::vector<Client*>::iterator	it = this->_clientList.begin();
+	std::vector<Client*>::iterator	end = this->_clientList.end();
+	for(int i = 0; it != end; i++) {
+		if (static_cast<Client*>(*it)->getNickname() == nickname) {
+			return (i);
+		}
 		it++;
 	}
 	return (-1);
@@ -201,7 +217,7 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 		send(client.getUid(), pongResponse.c_str(), pongResponse.size(), MSG_NOSIGNAL);
 		std::cout << "Responded to PING with PONG" << std::endl;
 	}
-	if (command == "PASS") {
+	else if (command == "PASS") {
 		std::string pass;
 		iss >> pass;
 		if (pass.empty())
@@ -227,10 +243,43 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 		client.setUsername(username);
 		std::cout << "Username set to " << username << " for fd " << client.getUid() << std::endl;
 	}
+	else if (command == "JOIN") {
+		std::string arg;
+		iss >> arg;
+		this->linkClientToChannel(client, arg);
+	}
+	else if (command == "PRIVMSG") {
+		this->privMsgSend(client, msg);
+	}
 	else {
-		std::cout << "Unknown command: " << command << std::endl;
+		std::cout << "Unknown command: " << command << std::endl << *this;
 	}
 }
+
+void Server::linkClientToChannel(Client& client, std::string& arg) {
+	makeChannel(arg.c_str() + 1 )->Join(client);
+}
+
+void Server::privMsgSend(Client& client, const std::string& arg) {
+	int separatorPos = arg.find(":");
+	std::string	msg(arg.substr(separatorPos + 1)), dest(arg.substr(8, separatorPos - 9));
+	if (dest[0] == '#') {
+		dest = dest.c_str() + 1;
+		int Pos = this->findChannel(dest);
+		if (Pos == -1)
+			;//Throw error cant find any channel
+		else
+			this->_channelList[Pos]->Broadcast(client, msg);
+	}
+	else {
+		int Pos = this->findClientByNick(dest);
+		if (Pos == -1)
+			;//Throw error Cant find any user
+		else
+			this->_clientList[Pos]->receptMessage(client, msg);
+	}
+}
+
 
 void Server::start(void){
 	char buffer[4096];
