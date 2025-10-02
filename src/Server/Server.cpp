@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/02 10:52:43 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/02 11:38:06 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -249,7 +249,7 @@ void Server::start(void){
 	if (server_fd == -1)
 		throw SocketErrorException();
 	int opt = 1;
-	if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt)) == -1) {
+	if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1) {
 		close(server_fd);
 		throw SetOptionSocketErrorException();
 	}
@@ -286,9 +286,10 @@ void Server::start(void){
 					// Nouvelle connexion
 					int clientSocket = accept(server_fd, NULL, NULL);
 					if (clientSocket == -1)
-						throw SocketErrorException();
-					FdOutBuf		buf(clientSocket);
-					std::ostream	clientStream(&buf);
+							break ;
+					//Inutile pour le moment donc commente
+					//FdOutBuf		buf(clientSocket);
+					//std::ostream	clientStream(&buf);
 
 					std::cout << "User try to connect..." << std::endl;
 
