@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:52:45 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/02 14:11:00 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/02 14:15:32 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,8 +31,8 @@ public:
 
 	int getPort(void) const;
 	std::string getPassword(void) const;
+	const std::vector<Client*>& getClientList(void) const;
 	const std::vector<Channel*>&	getChannelList(void) const;
-	const std::vector<Client*>&	getClientList(void) const;
 
 	void start(void);
 	void parseMessage(Client &client, const std::string &msg);
@@ -52,4 +52,4 @@ public:
 std::ostream& operator<<(std::ostream& o, Server& s);
 Client* findClientByFd(std::vector<Client*> &clients, int fd);
 
-#endif // SERVER_HPP
+#endif
