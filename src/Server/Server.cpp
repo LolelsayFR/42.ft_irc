@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/02 12:47:55 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/02 14:30:09 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -275,7 +275,6 @@ void Server::start(void){
 
 	while (true) {
 		int ret = poll(fds.data(), fds.size(), -1); // -1 = attente infinie
-
 		if (ret < 0)
 			break;
 
@@ -286,12 +285,8 @@ void Server::start(void){
 					int clientSocket = accept(server_fd, NULL, NULL);
 					if (clientSocket == -1)
 							break ;
-					//Inutile pour le moment donc commente
-					//FdOutBuf		buf(clientSocket);
-					//std::ostream	clientStream(&buf);
 
 					std::cout << "User try to connect..." << std::endl;
-
 					addNewSocket(fds, clientSocket);
 					_clientList.push_back(new Client(clientSocket));
 				} else {
@@ -304,7 +299,6 @@ void Server::start(void){
 					if (n <= 0) {
 						std::cout << "User disconnected" << std::endl;
 						destroyOneClient(fds, i);
-						std::cout << fds.size() << std::endl;
 						std::cout << *this << std::endl;
 						continue ;
 					}
