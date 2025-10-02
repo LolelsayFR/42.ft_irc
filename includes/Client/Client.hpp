@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 14:43:51 by arthur            #+#    #+#             */
-/*   Updated: 2025/10/01 18:25:32 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/02 12:43:42 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,12 +23,10 @@ private :
 	std::string			_buffer;
 	bool				_isRegistered;
 	bool				_welcomeSent;
-	//std::ostream		_clientStream;
-	//std::vector<Channel&> <--- All channel joined;
 public :
 	Client(int fd);
 	~Client(void);
-	// const int getUid(void)const;
+
 	std::string getUsername(void) const;
 	std::string getNickname(void) const;
 	void setNickname(std::string nickname);
@@ -41,12 +39,6 @@ public :
 	void checkRegistration();
 	bool getWelcomeSent(void) const;
 	void setWelcomeSent(bool val);
-
-
-	// std::string getNickname(void)const;
-	// void setNickname(std::string nickname);
-	//Client Command
-	//void join(std::string channel);
 };
 
 Client* findClientByFd(std::vector<Client*> &clients, int fd);
