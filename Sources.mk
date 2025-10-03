@@ -10,6 +10,6 @@
 #                                                                              #
 # **************************************************************************** #
 
-SRC_MAIN := ./src/main.cpp ./src/Client/Client.cpp ./src/Channel/Channel.cpp ./src/Errors/Exception.cpp ./src/Server/Server.cpp 
+SRC_MAIN := ./src/Errors/Exception.cpp ./src/Server/Server.cpp ./src/main.cpp ./src/Client/Client.cpp ./src/Channel/Channel.cpp 
 
 SRC_FILES := $(SRC_MAIN)

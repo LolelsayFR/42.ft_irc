@@ -6,15 +6,13 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 09:52:28 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/02 15:55:14 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/02 18:29:33 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Irc.hpp"
 #include "Server/Server.hpp"
 #include "Errors/Exception.hpp"
-
-Server *serverPtr;
 
 bool	isOnlyDigit(std::string str) {
     for (int i = 0; str[i] != '\0'; i++) {
@@ -25,11 +23,8 @@ bool	isOnlyDigit(std::string str) {
 }
 
 void	sigintHandler(int signal) {
-	for (int i = serverPtr->getClientList().size(); i > 0; i--) {
-		serverPtr->destroyOneClient(serverPtr->getFds(), i);
-	}
-	std::cout << "Server has been stopped" << std::endl;
-	(void)signal;
+	if (signal == SIGINT)
+		std::cout << "\n🛑 Server has been stopped by CTRL+C" << std::endl;
 }
 
 int main(int argc, char const *argv[])
@@ -44,7 +39,6 @@ int main(int argc, char const *argv[])
 		if (password.empty())
 			throw(PasswordErrorException());
 		Server server(port, password);
-		serverPtr = &server;
 		signal(SIGINT, sigintHandler);
 		server.start();
 	}

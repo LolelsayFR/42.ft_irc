@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/02 16:25:06 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/02 18:28:49 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,17 @@ Server::Server(int port, std::string password) : _port(port), _password(password
 
 // Default destructor
 Server::~Server(void) {
+	for (int i = this->_clientList.size(); i > 0; i--) {
+		this->destroyOneClient(this->getFds(), i);
+	}
+	std::vector<Channel*>::iterator	it = this->_channelList.begin();
+	std::vector<Channel*>::iterator	end = this->_channelList.end();
+	for(int i = 0; it != end; i++) {
+		delete	static_cast<Channel*>(*it);
+		it++;
+	}
+	this->_channelList.clear();
+	this->_channelList.clear();
 }
 
 
@@ -230,10 +241,10 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 	{
 		std::string server;
 		iss >> server;
-		std::cout << "Received PING from " << server << std::endl;
+		//std::cout << "Received PING from " << server << std::endl;
 		std::string pongResponse = "PONG :" + server + "\r\n";
 		send(client.getUid(), pongResponse.c_str(), pongResponse.size(), MSG_NOSIGNAL);
-		std::cout << "Responded to PING with PONG" << std::endl;
+		//std::cout << "Responded to PING with PONG" << std::endl;
 	}
 	else if (command == "PASS") {
 		std::string pass;
@@ -278,24 +289,32 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 }
 
 void Server::linkClientToChannel(Client& client, std::string& arg) {
-	makeChannel(arg.c_str() + 1 )->Join(client);
+	std::string name;
+	int pos = arg.rfind(",");
+	while (pos > 0 && pos < (int)arg.length()) {
+		name = arg.substr(pos + 1, arg.length() - pos);
+		arg.erase(pos, arg.length() - pos);
+		pos = arg.rfind(",");
+		makeChannel(name)->Join(client);
+	}
+	name = arg.substr(pos + 1, arg.length() - pos);
+	makeChannel(name)->Join(client);
 }
 
 void Server::privMsgSend(Client& client, const std::string& arg) {
 	int separatorPos = arg.find(":");
 	std::string	msg(arg.substr(separatorPos + 1)), dest(arg.substr(8, separatorPos - 9));
-	if (dest[0] == '#') {
-		dest = dest.c_str() + 1;
+	if (dest[0] == '#' || dest[0] == '&' || dest[0] == '+' || dest[0] == '!') {
 		int Pos = this->findChannel(dest);
 		if (Pos == -1)
-			;//Throw error cant find any channel
+			;//Throw error cant find any channel :<serveur> 401 <nick> <nickname> :No such nick/channel
 		else
 			this->_channelList[Pos]->Broadcast(client, msg);
 	}
 	else {
 		int Pos = this->findClientByNick(dest);
 		if (Pos == -1)
-			;//Throw error Cant find any user
+			;//Throw error Cant find any user :<serveur> 401 <nick> <nickname> :No such nick/channel
 		else
 			this->_clientList[Pos]->receptMessage(client, msg);
 	}
@@ -308,11 +327,9 @@ void Server::clientLeaveChannel(Client& client, const std::string& arg) {
 		dest = std::string(arg.substr(5, separatorPos - 6));
 	else
 		dest = std::string(arg.substr(5));
-	std::cout << "&&&&&&&&&&&&&&&&&" << std::endl;
-	dest = dest.c_str() + 1;
 	int Pos = this->findChannel(dest);
 	if (Pos == -1)
-		;//Throw error cant find any channel
+		;//Throw error cant find any channel :<serveur> 442 <nick> <channel> :You're not on that channel
 	else { 
 		this->_channelList[Pos]->Kick(client);
 		if (separatorPos > 0 && separatorPos < (int)arg.length()) {
