@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/02 18:28:49 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/03 11:33:16 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -307,14 +307,14 @@ void Server::privMsgSend(Client& client, const std::string& arg) {
 	if (dest[0] == '#' || dest[0] == '&' || dest[0] == '+' || dest[0] == '!') {
 		int Pos = this->findChannel(dest);
 		if (Pos == -1)
-			;//Throw error cant find any channel :<serveur> 401 <nick> <nickname> :No such nick/channel
+			return ;//Throw error cant find any channel :<serveur> 401 <nick> <nickname> :No such nick/channel
 		else
-			this->_channelList[Pos]->Broadcast(client, msg);
+			this->_channelList[Pos]->Broadcast(client, msg, BRCST_PRVMSG);
 	}
 	else {
 		int Pos = this->findClientByNick(dest);
 		if (Pos == -1)
-			;//Throw error Cant find any user :<serveur> 401 <nick> <nickname> :No such nick/channel
+			return ;//Throw error Cant find any user :<serveur> 401 <nick> <nickname> :No such nick/channel
 		else
 			this->_clientList[Pos]->receptMessage(client, msg);
 	}
@@ -329,15 +329,17 @@ void Server::clientLeaveChannel(Client& client, const std::string& arg) {
 		dest = std::string(arg.substr(5));
 	int Pos = this->findChannel(dest);
 	if (Pos == -1)
-		;//Throw error cant find any channel :<serveur> 442 <nick> <channel> :You're not on that channel
+		return ;//Throw error cant find any channel :<serveur> 442 <nick> <channel> :You're not on that channel
 	else { 
-		this->_channelList[Pos]->Kick(client);
+		if (this->_channelList[Pos]->findClientJoin(client) == -1)
+			return ; // throw apropriate exception
 		if (separatorPos > 0 && separatorPos < (int)arg.length()) {
 			std::string	msg(arg.substr(separatorPos + 1));
-			client.leaveChannel(msg, *this->_channelList[Pos]);
+			this->_channelList[Pos]->Broadcast(client, msg, BRCST_LEAVE_MSG);
 		}
 		else
-			client.leaveChannel(*this->_channelList[Pos]);
+			this->_channelList[Pos]->Broadcast(client, "", BRCST_LEAVE);
+		this->_channelList[Pos]->Kick(client);
 	}
 }
 

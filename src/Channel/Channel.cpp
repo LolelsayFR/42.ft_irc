@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/02 17:40:35 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/03 12:26:19 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -145,7 +145,7 @@ void Channel::setPassword(std::string pass) {
 /* ************************************************************************** */
 
 
-void Channel::Broadcast(Client& sender, std::string msg) {
+void Channel::Broadcast(Client& sender, std::string msg, broadcast type) {
 	if (this->findClientJoin(sender) == -1){
 		//throw :<serveur> 442 <nick> <channel> :You're not on that channel
 		return ;
@@ -153,20 +153,34 @@ void Channel::Broadcast(Client& sender, std::string msg) {
 	std::vector<Client*>::iterator	it = this->_joinedList.begin();
 	std::vector<Client*>::iterator	end = this->_joinedList.end();
 	for(int i = 0; it != end; i++) {
-		if (*it != &sender)
+		if (*it != &sender && type == BRCST_PRVMSG)
 			static_cast<Client*>(*it)->receptMessage(*this, sender, msg);
+		else if (type == BRCST_LEAVE)
+			static_cast<Client*>(*it)->leaveChannel(sender, *this);
+		else if (type == BRCST_LEAVE_MSG)
+			static_cast<Client*>(*it)->leaveChannel(sender, msg, *this);
+		else if (type == BRCST_JOIN) {
+			std::string myMsg = ":" + sender.getNickname() + " JOIN " + this->getName() + "\r\n";
+			myMsg += ":" + sender.getNickname() + " JOIN " + this->getName() + "\r\n";
+			send(static_cast<Client*>(*it)->getUid(), myMsg.c_str(), myMsg.length(), MSG_NOSIGNAL);
+		}
 		it++;
 	}
 }
 
 //Channel command to join
+//:Alice JOIN #general
+//:irc.example.com 353 Alice = #general :Alice Bob
+//:irc.example.com 366 Alice #general :End of /NAMES list.
 void Channel::Join(Client& client) {
 	int clientPos = this->findClientJoin(client);
 	if (this->_joinedList.empty()) {
 		this->_opList.push_back(&client);
 	}	
-	if (clientPos == -1)
+	if (clientPos == -1) {
 		this->_joinedList.push_back(&client);
+		this->Broadcast(client, "", BRCST_JOIN);
+	}
 }
 
 //Channel command to kick
