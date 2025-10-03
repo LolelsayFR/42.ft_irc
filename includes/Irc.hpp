@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 14:44:45 by arthur            #+#    #+#             */
-/*   Updated: 2025/10/02 15:11:46 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/03 12:43:42 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,19 +28,14 @@
 # include <streambuf>
 # include <sstream>
 # include <iomanip>
+#include <netdb.h>
+#include <arpa/inet.h>
 
 /* ************************************************************************** */
-/* Includes headers */
+/* Includes intern headers */
 /* ************************************************************************** */
 
 # include "Errors/Lang.hpp"
-//# include "Errors/Exception.hpp"
-//# include "Server/Server.hpp"
-// # include "Clients/Client.hpp"
-
-/* ************************************************************************** */
-/* Other functions */
-/* ************************************************************************** */
 
 /* ************************************************************************** */
 /* End of file */

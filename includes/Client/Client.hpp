@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 14:43:51 by arthur            #+#    #+#             */
-/*   Updated: 2025/10/02 16:10:32 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/03 11:09:11 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,8 +45,8 @@ public :
 	void receptMessage(Channel& channel, Client& sender, std::string& msg);
 	void receptMessage(Client& sender, std::string& msg);
 
-	void leaveChannel(std::string& msg, Channel& channel);
-	void leaveChannel(Channel& channel);
+	void leaveChannel(Client& sender, std::string& msg, Channel& channel);
+	void leaveChannel(Client& sender, Channel& channel);
 
 	std::string popMessage();
 };

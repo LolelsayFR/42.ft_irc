@@ -6,13 +6,14 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/02 17:40:35 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/03 14:28:26 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Irc.hpp"
 #include "Channel/Channel.hpp"
 #include "Client/Client.hpp"
+#include "Server/Server.hpp"
 #include "Errors/Exception.hpp"
 
 /* ************************************************************************** */
@@ -22,6 +23,8 @@
 // Assignation constructor
 Channel::Channel(std::string name) : _name(name) {
 	this->_topic = "";
+	if (name == "#yo")
+		_topic = "sakhjdfkjASHDKJHSAKJd";
 	this->_password = "";
 	this->_needInvite = false;
 	this->_needPassword = false;
@@ -145,7 +148,7 @@ void Channel::setPassword(std::string pass) {
 /* ************************************************************************** */
 
 
-void Channel::Broadcast(Client& sender, std::string msg) {
+void Channel::Broadcast(Client& sender, std::string msg, broadcast type) {
 	if (this->findClientJoin(sender) == -1){
 		//throw :<serveur> 442 <nick> <channel> :You're not on that channel
 		return ;
@@ -153,8 +156,16 @@ void Channel::Broadcast(Client& sender, std::string msg) {
 	std::vector<Client*>::iterator	it = this->_joinedList.begin();
 	std::vector<Client*>::iterator	end = this->_joinedList.end();
 	for(int i = 0; it != end; i++) {
-		if (*it != &sender)
+		if (*it != &sender && type == BRCST_PRVMSG)
 			static_cast<Client*>(*it)->receptMessage(*this, sender, msg);
+		else if (type == BRCST_LEAVE)
+			static_cast<Client*>(*it)->leaveChannel(sender, *this);
+		else if (type == BRCST_LEAVE_MSG)
+			static_cast<Client*>(*it)->leaveChannel(sender, msg, *this);
+		else if (type == BRCST_JOIN) {
+			std::string myMsg = ":" + sender.getNickname() + " JOIN " + this->getName() + "\r\n";
+			send(static_cast<Client*>(*it)->getUid(), myMsg.c_str(), myMsg.length(), MSG_NOSIGNAL);
+		}
 		it++;
 	}
 }
@@ -165,8 +176,27 @@ void Channel::Join(Client& client) {
 	if (this->_joinedList.empty()) {
 		this->_opList.push_back(&client);
 	}	
-	if (clientPos == -1)
+	if (clientPos == -1) {
 		this->_joinedList.push_back(&client);
+		this->Broadcast(client, "", BRCST_JOIN);
+		std::string myMsg = ":" + SERVERNAME + " 331 " + client.getNickname() + " " + this->getName() + " :No topic is set\r\n";
+		if (!this->_topic.empty())
+    		myMsg = ":" + SERVERNAME + " 332 " + client.getNickname() + " " + this->getName() + " :" + this->_topic + "\r\n";
+		myMsg += ":" + SERVERNAME + " 353 " + client.getNickname() + " = " + this->getName() + " :";
+		{
+		    std::vector<Client*>::iterator it = this->_inviteList.begin();
+		    std::vector<Client*>::iterator end = this->_inviteList.end();
+			myMsg += client.getNickname() + " ";
+		    for (; it != end; ++it) {
+		        myMsg += static_cast<Client*>(*it)->getNickname() + " ";
+		    }
+		    if (!this->_inviteList.empty())
+		        myMsg.erase(myMsg.size() - 1);
+		    myMsg += "\r\n";
+		}
+		myMsg += ":" + SERVERNAME + " 366 " + client.getNickname() + " " + this->getName() + " :End of /NAMES list.\r\n";	
+		send(client.getUid(), myMsg.c_str(), myMsg.length(), MSG_NOSIGNAL);
+	}
 }
 
 //Channel command to kick

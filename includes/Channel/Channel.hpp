@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 17:46:54 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/02 15:11:15 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/03 12:19:05 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,15 @@
 # include "Irc.hpp"
 
 class Client;
+
+enum broadcast
+{
+	BRCST_PRVMSG,
+	BRCST_LEAVE,
+	BRCST_LEAVE_MSG,
+	BRCST_KICK,
+	BRCST_JOIN
+};
 
 class Channel {
 private:
@@ -40,7 +49,7 @@ public:
 	const std::vector<Client*>&     getOpList(void) const;
 	const std::vector<Client*>&	getInviteList(void) const;
 
-  void Broadcast(Client& sender, std::string msg);
+	void Broadcast(Client& sender, std::string msg, broadcast type);
  
 	void setPassword(std::string pass);
 	void Op(Client& client);
@@ -52,7 +61,7 @@ public:
 	void Topic(std::string topic);
 	void Mode(std::string option);
 
-  int findClientOp(Client& client);
+	int findClientOp(Client& client);
 	int findClientJoin(Client& client);
 	int findClientInvite(Client& client);
 };
