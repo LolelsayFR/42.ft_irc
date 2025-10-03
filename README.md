@@ -38,3 +38,44 @@ ft_irc est une implémentation du protocole IRC développée dans le cadre du cu
 ---
 
 Pour toute question ou problème, pleurez.
+
+# ft_irc - Documentation
+
+## Introduction
+ft_irc is an implementation of the IRC protocol developed as part of the 42 curriculum. The goal of this project is to deepen skills in network programming, process management, and software design.
+
+## Main Features
+- Basic IRC server compliant with standard RFCs
+- Management of multiple simultaneous clients
+- Support for essential IRC commands (JOIN, PART, PRIVMSG, QUIT, etc.)
+- Channel system
+- Simple authentication
+- Error handling and client disconnections
+
+## Installation
+1. **Clone the repository**
+   ```bash
+   git clone <repo_url>
+   ```
+2. **Compile the project**
+   ```bash
+   make
+   ```
+3. **Run the server**
+   ```bash
+   ./ircserv <port> <password>
+   ```
+
+## Usage
+- Connect to the server using the reference IRC client Irssi
+- Join a channel with `/join #channel`
+- Send private messages with `/msg <user> <message>`
+- Quit the server with `/quit`
+
+## Resources
+- [RFC 1459](https://tools.ietf.org/html/rfc1459) - IRC Specification
+- [RFC 2812](https://tools.ietf.org/html/rfc2812) - Protocol Update
+
+    ---
+
+For any question or issue, cry.
