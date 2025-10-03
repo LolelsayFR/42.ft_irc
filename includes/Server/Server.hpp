@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:52:45 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/03 13:19:16 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/03 14:10:32 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@
 #include "Irc.hpp"
 #include "Client/Client.hpp"
 #include "Channel/Channel.hpp"
+
+#define SERVERNAME std::string("IRCDebout")
 
 class Client;
 
