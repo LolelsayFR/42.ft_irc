@@ -1,7 +1,8 @@
-# ft_irc - Documentation
+# ft_irc - Documentation 🇫🇷
 
 ## Introduction
-ft_irc est une implémentation du protocole IRC développée dans le cadre du cursus 42. Ce projet a pour objectif d'approfondir les compétences en programmation réseau, gestion de processus, et conception logicielle.
+ft_irc est une implémentation du protocole IRC développée dans le cadre du cursus 42.
+Ce projet a pour objectif d'approfondir les compétences en programmation réseau, gestion de processus, et conception logicielle.
 
 ## Fonctionnalités principales
 - Serveur IRC basique respectant les RFC standards
@@ -39,10 +40,13 @@ ft_irc est une implémentation du protocole IRC développée dans le cadre du cu
 
 Pour toute question ou problème, pleurez.
 
-# ft_irc - Documentation
+___________________________________________________________________________________________________________________________________
+
+# ft_irc - Documentation 🇬🇧
 
 ## Introduction
-ft_irc is an implementation of the IRC protocol developed as part of the 42 curriculum. The goal of this project is to deepen skills in network programming, process management, and software design.
+ft_irc is an implementation of the IRC protocol developed as part of the 42 curriculum.
+The goal of this project is to deepen skills in network programming, process management, and software design.
 
 ## Main Features
 - Basic IRC server compliant with standard RFCs
