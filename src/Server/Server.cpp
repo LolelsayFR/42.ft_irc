@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/03 11:33:16 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/03 13:20:35 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,9 @@
 /* ************************************************************************** */
 
 // Assignation constructor
-Server::Server(int port, std::string password) : _port(port), _password(password) {}
+Server::Server(int port, std::string password) : _port(port), _password(password) {
+    this->_hostName = "PlaceHolder";
+}
 
 // Default destructor
 Server::~Server(void) {
@@ -47,7 +49,9 @@ Server::~Server(void) {
 std::ostream& operator<<(std::ostream& o, Server& s) {
 	Client* ptr;
 	o << "\n/* Server View ********************************************************* */" << std::endl;
-	o << "/\tPort : " << s.getPort() << "\n/\tPassword : " << s.getPassword() << std::endl;
+	o 	<< "/\tPort : " << s.getPort() 
+		<< "\n/\tPassword : " << s.getPassword()
+		<< "\n/\tHost : " << s.getHost() << std::endl;
 	{
 		std::vector<Client*> list = s.getClientList();
 		std::vector<Client*>::iterator	it = list.begin();
@@ -91,6 +95,10 @@ std::string Server::getPassword(void) const {
 	return (this->_password);
 }
 
+std::string Server::getHost(void) const {
+	return (this->_hostName);
+}
+
 //Client pollfds list return
 std::vector<struct pollfd>& Server::getFds(void) {
 	return (this->_fds);
@@ -117,18 +125,15 @@ Channel* Server::makeChannel(std::string name) {
 
 
 //Client id in join vector list by ref
-void welcomeUser(Client *client)
+void Server::welcomeUser(Client *client)
 {
 	if (!client->getWelcomeSent())
 	{
 		std::string welcomeMsg = ": ""001 " + client->getNickname() + " :Welcome to the IRC Network, " + client->getNickname() + "\r\n";
-		std::string infoMsg = ": ""002 " + client->getNickname() + " :Your host is localhost, running version 1.0\r\n";
-		std::string yourHostMsg = ": ""003 " + client->getNickname() + " :This server was created today\r\n";
-		std::string myInfoMsg = ": ""004 " + client->getNickname() + " localhost 1.0 o o\r\n";
+		welcomeMsg += ": ""002 " + client->getNickname() + " :Your host is " + this->_hostName + ", running version 1.0\r\n";
+		welcomeMsg += ": ""003 " + client->getNickname() + " :This server was created today\r\n";
+		welcomeMsg += ": ""004 " + client->getNickname() + " " + this->_hostName + " 1.0 o o\r\n";
 		send(client->getUid(), welcomeMsg.c_str(), welcomeMsg.size(), MSG_NOSIGNAL);
-		send(client->getUid(), infoMsg.c_str(), infoMsg.size(), MSG_NOSIGNAL);
-		send(client->getUid(), yourHostMsg.c_str(), yourHostMsg.size(), MSG_NOSIGNAL);
-		send(client->getUid(), myInfoMsg.c_str(), myInfoMsg.size(), MSG_NOSIGNAL);
 		client->setWelcomeSent(true);
 	}
 }

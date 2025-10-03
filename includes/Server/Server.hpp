@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:52:45 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/02 15:29:47 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/03 13:19:16 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ class Server {
 private:
 	const int				_port;
 	const std::string		_password;
+	std::string				_hostName;
 	std::vector<Client*>	_clientList;
 	std::vector<Channel*>	_channelList;
 	std::vector<struct pollfd>	_fds;
@@ -32,6 +33,7 @@ public:
 
 	int getPort(void) const;
 	std::string getPassword(void) const;
+	std::string getHost(void) const;
 	std::vector<struct pollfd>& getFds(void);
 	const std::vector<Client*>& getClientList(void) const;
 	const std::vector<Channel*>&	getChannelList(void) const;
@@ -40,6 +42,8 @@ public:
 	void parseMessage(Client &client, const std::string &msg);
 
 	Channel* makeChannel(std::string name);
+
+	void welcomeUser(Client *client);
 
 	int findClient(Client& client);
 	int findClient(std::string name);
