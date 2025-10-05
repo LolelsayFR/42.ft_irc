@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:08:58 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/02 10:42:49 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/05 16:08:56 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,5 +25,6 @@
 # define E_SOCKETERROR        "🛑 Error : Socket creation error."
 # define E_SETSOCKETOPTERROR  "🛑 Error : Socket setting option error."
 # define E_LISTENING_ERROR    "🛑 Error : Server socket listening error."
+# define E_NOSUCHNICK        "🛑 Error : No such nick/channel."
 
 #endif // LANG_HPP

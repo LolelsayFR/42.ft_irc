@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:10:41 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/02 10:43:34 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/05 16:09:11 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 enum Exceptions
 {
 	ERR_ALREADYREGISTRED = 461,
+	ERR_NOSUCHNICK = 401
 };
 
 class ParsingException : public std::exception
@@ -45,6 +46,11 @@ class RFCException : public std::exception
 };
 
 class AlreadyRegisteredException : public RFCException
+{
+	const char* what(void) const throw();
+};
+
+class NosuchNickException : public RFCException
 {
 	const char* what(void) const throw();
 };

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
+/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/03 14:03:43 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/05 16:27:43 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ Server::~Server(void) {
 std::ostream& operator<<(std::ostream& o, Server& s) {
 	Client* ptr;
 	o << "\n/* Server View ********************************************************* */" << std::endl;
-	o 	<< "/\tPort : " << s.getPort() 
+	o 	<< "/\tPort : " << s.getPort()
 		<< "\n/\tPassword : " << s.getPassword()
 		<< "\n/\tHost : " << s.getHost() << std::endl;
 	{
@@ -63,8 +63,8 @@ std::ostream& operator<<(std::ostream& o, Server& s) {
 			o 	<< "| n°" << std::setw(5) << i
 				<< " | Username = " <<  std::setw(10) << ptr->getUsername()
 				<< " | Nickname = " <<  std::setw(10) << ptr->getNickname()
-				<< " |"  << std::endl;	
-			}	
+				<< " |"  << std::endl;
+			}
 		}
 		if (list.empty())
 			o << "/\tEmpty.." << std::endl;
@@ -312,14 +312,14 @@ void Server::privMsgSend(Client& client, const std::string& arg) {
 	if (dest[0] == '#' || dest[0] == '&' || dest[0] == '+' || dest[0] == '!') {
 		int Pos = this->findChannel(dest);
 		if (Pos == -1)
-			return ;//Throw error cant find any channel :<serveur> 401 <nick> <nickname> :No such nick/channel
+			throwRFCException(ERR_NOSUCHNICK); //Throw error cant find any channel :<serveur> 401 <nick> <nickname> :No such nick/channel
 		else
 			this->_channelList[Pos]->Broadcast(client, msg, BRCST_PRVMSG);
 	}
 	else {
 		int Pos = this->findClientByNick(dest);
 		if (Pos == -1)
-			return ;//Throw error Cant find any user :<serveur> 401 <nick> <nickname> :No such nick/channel
+			throwRFCException(ERR_NOSUCHNICK); //Throw error Cant find any user :<serveur> 401 <nick> <nickname> :No such nick/channel
 		else
 			this->_clientList[Pos]->receptMessage(client, msg);
 	}
@@ -335,7 +335,7 @@ void Server::clientLeaveChannel(Client& client, const std::string& arg) {
 	int Pos = this->findChannel(dest);
 	if (Pos == -1)
 		return ;//Throw error cant find any channel :<serveur> 442 <nick> <channel> :You're not on that channel
-	else { 
+	else {
 		if (this->_channelList[Pos]->findClientJoin(client) == -1)
 			return ; // throw apropriate exception
 		if (separatorPos > 0 && separatorPos < (int)arg.length()) {
@@ -433,7 +433,8 @@ void Server::start(void){
 								}
 							}
 							catch (RFCException &e) {
-								destroyOneClient(_fds, i);
+								std::cout << "RFC Exception: " << e.what() << std::endl;
+								send(client->getUid(), e.what(), strlen(e.what()), MSG_NOSIGNAL);
 								std::cerr << e.what() << std::endl;
 								break ;
 							}

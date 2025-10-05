@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:35:21 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/02 10:43:24 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/05 16:08:44 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,11 +37,17 @@ const char* AlreadyRegisteredException::what(void) const throw() {
 	return (E_ALREADY_REGISTERED);
 }
 
+const char* NosuchNickException::what(void) const throw() {
+	return (E_NOSUCHNICK);
+}
+
 std::exception throwRFCException(enum Exceptions exception) {
 	switch (exception)
 	{
 		case ERR_ALREADYREGISTRED:
 			throw AlreadyRegisteredException();
+		case ERR_NOSUCHNICK:
+			throw NosuchNickException();
 		default :
 			throw RFCException();
 	}
