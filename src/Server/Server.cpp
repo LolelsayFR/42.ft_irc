@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/05 19:49:57 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/05 20:36:22 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -319,7 +319,11 @@ void Server::privMsgSend(Client& client, const std::string& arg) {
 	else {
 		int Pos = this->findClientByNick(dest);
 		if (Pos == -1)
-			throwRFCException(ERR_NOSUCHNICK, dest); //Throw error Cant find any user :<serveur> 401 <nick> <nickname> :No such nick/channel
+		{
+			std::cout << "TEST" << std::endl;
+			//throwRFCException(ERR_NOSUCHNICK, dest); //Throw error Cant find any user :<serveur> 401 <nick> <nickname> :No such nick/channel
+			return ;
+		}
 		else
 			this->_clientList[Pos]->receptMessage(client, msg);
 	}
@@ -334,7 +338,11 @@ void Server::clientLeaveChannel(Client& client, const std::string& arg) {
 		dest = std::string(arg.substr(5));
 	int Pos = this->findChannel(dest);
 	if (Pos == -1)
-		return ;//Throw error cant find any channel :<serveur> 442 <nick> <channel> :You're not on that channel
+	{
+		std::cout << "TEST" << std::endl;
+		return ;
+		//throwRFCException(ERR_NOTONCHANNEL, dest); //Throw error cant find any channel :<serveur> 401 <nick> <nickname> :No such nick/channel
+	}
 	else {
 		if (this->_channelList[Pos]->findClientJoin(client) == -1)
 			return ; // throw apropriate exception
@@ -345,9 +353,9 @@ void Server::clientLeaveChannel(Client& client, const std::string& arg) {
 		else
 			this->_channelList[Pos]->Broadcast(client, "", BRCST_LEAVE);
 		this->_channelList[Pos]->Kick(client);
+
 	}
 }
-
 void Server::start(void){
 	char buffer[4096];
 

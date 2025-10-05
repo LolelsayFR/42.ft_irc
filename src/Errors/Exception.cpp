@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:35:21 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/05 19:47:52 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/05 20:04:47 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ const char* ArgsNumberErrorException::what(void) const throw() {
 	return (E_PARSING_ARGS_ERROR);
 }
 
+//RFC Exceptions
 AlreadyRegisteredException::AlreadyRegisteredException(const std::string& arg) : message(arg)
 {
 	this->fullMessage = this->message + E_ALREADY_REGISTERED;
@@ -47,6 +48,13 @@ NosuchNickException::NosuchNickException(const std::string& arg) : message(arg)
 
 NosuchNickException::~NosuchNickException() throw() {}
 
+NotOnChannelException::NotOnChannelException(const std::string& arg) : message(arg)
+{
+	this->fullMessage = this->message + E_NOTONCHANNEL;
+}
+
+NotOnChannelException::~NotOnChannelException() throw() {}
+
 const char* AlreadyRegisteredException::what() const throw() {
 	return (this->fullMessage.c_str());
 }
@@ -55,6 +63,12 @@ const char* NosuchNickException::what() const throw() {
 	return (this->fullMessage.c_str());
 }
 
+const char* NotOnChannelException::what(void) const throw() {
+	return (this->fullMessage.c_str());
+}
+
+
+
 void throwRFCException(enum Exceptions exception, std::string arg) {
 	switch (exception)
 	{
@@ -62,6 +76,8 @@ void throwRFCException(enum Exceptions exception, std::string arg) {
 			throw AlreadyRegisteredException(arg);
 		case ERR_NOSUCHNICK:
 			throw NosuchNickException(arg);
+		case ERR_NOTONCHANNEL:
+			throw NotOnChannelException(arg);
 		default :
 			throw RFCException();
 	}

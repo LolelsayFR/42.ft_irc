@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:10:41 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/05 19:40:46 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/05 20:12:08 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,8 @@
 enum Exceptions
 {
 	ERR_ALREADYREGISTRED = 461,
-	ERR_NOSUCHNICK = 401
+	ERR_NOSUCHNICK = 401,
+	ERR_NOTONCHANNEL = 442
 };
 
 class ParsingException : public std::exception
@@ -61,16 +62,28 @@ public:
 
 class NosuchNickException : public RFCException
 {
-private:
-    std::string message;
-	std::string fullMessage;
+	private:
+	    std::string message;
+		std::string fullMessage;
 
-public:
-    NosuchNickException(const std::string& arg);
-    virtual ~NosuchNickException() throw();// destructeur explicitement throw()
-    virtual const char* what() const throw();
+	public:
+	    NosuchNickException(const std::string& arg);
+	    virtual ~NosuchNickException() throw();// destructeur explicitement throw()
+	    virtual const char* what() const throw();
 };
 
+
+class NotOnChannelException : public RFCException
+{
+	private:
+		std::string message;
+		std::string fullMessage;
+
+	public:
+		NotOnChannelException(const std::string& arg);
+		virtual ~NotOnChannelException() throw();
+		virtual const char* what() const throw();
+};
 class ClientPasswordException : public std::exception
 {
 	public:

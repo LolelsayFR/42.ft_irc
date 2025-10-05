@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
+/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/03 14:28:26 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/05 20:41:20 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,9 +52,9 @@ std::ostream& operator<<(std::ostream& o, Channel& c) {
 		std::vector<Client*>::iterator	end = list.end();
 		o << "/\tChannel name : " << c.getName() << std::endl;
 		if (c.getNeedPassword())
-			o << "/\tNeed password : true, the pass is '" << c.getPassword() << "'" << std::endl; 
+			o << "/\tNeed password : true, the pass is '" << c.getPassword() << "'" << std::endl;
 		else
-			o << "/\tNeed password : false" << std::endl; 
+			o << "/\tNeed password : false" << std::endl;
 		o << "/\tChannel topic : " << c.getTopic() << std::endl;
 		o << "/* Client in channel *************************************************** */" << std::endl;
 		for (int i = 0; it != end; i++, it++) {
@@ -64,8 +64,8 @@ std::ostream& operator<<(std::ostream& o, Channel& c) {
 				<< " | Username = " <<  std::setw(10) << ptr->getUsername()
 				<< " | Nickname = " <<  std::setw(10) << ptr->getNickname()
 				<< " | Is op = " << ((c.findClientOp(*ptr) == -1) ? ("false") : ("true "))
-				<< " |"  << std::endl;	
-			}	
+				<< " |"  << std::endl;
+			}
 		}
 		if (list.empty())
 			o << "/\tEmpty.." << std::endl;
@@ -83,7 +83,7 @@ std::ostream& operator<<(std::ostream& o, Channel& c) {
 			o 	<< "| n°" << std::setw(5) << i
 				<< " | Username = " <<  std::setw(10) << ptr->getUsername()
 				<< " | Nickname = " <<  std::setw(10) << ptr->getNickname()
-				<< " |"  << std::endl;		
+				<< " |"  << std::endl;
 		}
 		if (list.empty())
 			o << "\tEmpty.." << std::endl;
@@ -150,8 +150,8 @@ void Channel::setPassword(std::string pass) {
 
 void Channel::Broadcast(Client& sender, std::string msg, broadcast type) {
 	if (this->findClientJoin(sender) == -1){
-		//throw :<serveur> 442 <nick> <channel> :You're not on that channel
 		return ;
+		//throwRFCException(ERR_NOTONCHANNEL, this->getName());
 	}
 	std::vector<Client*>::iterator	it = this->_joinedList.begin();
 	std::vector<Client*>::iterator	end = this->_joinedList.end();
@@ -175,7 +175,7 @@ void Channel::Join(Client& client) {
 	int clientPos = this->findClientJoin(client);
 	if (this->_joinedList.empty()) {
 		this->_opList.push_back(&client);
-	}	
+	}
 	if (clientPos == -1) {
 		this->_joinedList.push_back(&client);
 		this->Broadcast(client, "", BRCST_JOIN);
@@ -194,7 +194,7 @@ void Channel::Join(Client& client) {
 		        myMsg.erase(myMsg.size() - 1);
 		    myMsg += "\r\n";
 		}
-		myMsg += ":" + SERVERNAME + " 366 " + client.getNickname() + " " + this->getName() + " :End of /NAMES list.\r\n";	
+		myMsg += ":" + SERVERNAME + " 366 " + client.getNickname() + " " + this->getName() + " :End of /NAMES list.\r\n";
 		send(client.getUid(), myMsg.c_str(), myMsg.length(), MSG_NOSIGNAL);
 	}
 }
