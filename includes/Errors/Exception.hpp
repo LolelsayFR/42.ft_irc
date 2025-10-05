@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:10:41 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/05 16:09:11 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/05 19:40:46 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,16 +43,32 @@ class ArgsNumberErrorException : public ParsingException {
 
 class RFCException : public std::exception
 {
+public:
+    virtual ~RFCException() throw() {} // destructeur explicitement throw()
 };
 
 class AlreadyRegisteredException : public RFCException
 {
-	const char* what(void) const throw();
+private:
+    std::string message;
+	std::string fullMessage;
+
+public:
+    AlreadyRegisteredException(const std::string& arg);
+    virtual ~AlreadyRegisteredException() throw(); // destructeur explicitement throw()
+    virtual const char* what() const throw();
 };
 
 class NosuchNickException : public RFCException
 {
-	const char* what(void) const throw();
+private:
+    std::string message;
+	std::string fullMessage;
+
+public:
+    NosuchNickException(const std::string& arg);
+    virtual ~NosuchNickException() throw();// destructeur explicitement throw()
+    virtual const char* what() const throw();
 };
 
 class ClientPasswordException : public std::exception
@@ -79,6 +95,6 @@ class ListeningErrorException : public std::exception
 		const char* what(void) const throw();
 };
 
-std::exception throwRFCException(enum Exceptions exception);
+void throwRFCException(enum Exceptions exception, std::string arg);
 
 #endif // EXCEPTION_HPP

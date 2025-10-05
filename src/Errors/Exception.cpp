@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:35:21 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/05 16:08:44 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/05 19:47:52 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,21 +33,35 @@ const char* ArgsNumberErrorException::what(void) const throw() {
 	return (E_PARSING_ARGS_ERROR);
 }
 
-const char* AlreadyRegisteredException::what(void) const throw() {
-	return (E_ALREADY_REGISTERED);
+AlreadyRegisteredException::AlreadyRegisteredException(const std::string& arg) : message(arg)
+{
+	this->fullMessage = this->message + E_ALREADY_REGISTERED;
 }
 
-const char* NosuchNickException::what(void) const throw() {
-	return (E_NOSUCHNICK);
+AlreadyRegisteredException::~AlreadyRegisteredException() throw() {}
+
+NosuchNickException::NosuchNickException(const std::string& arg) : message(arg)
+{
+	this->fullMessage = this->message + E_NOSUCHNICK;
 }
 
-std::exception throwRFCException(enum Exceptions exception) {
+NosuchNickException::~NosuchNickException() throw() {}
+
+const char* AlreadyRegisteredException::what() const throw() {
+	return (this->fullMessage.c_str());
+}
+
+const char* NosuchNickException::what() const throw() {
+	return (this->fullMessage.c_str());
+}
+
+void throwRFCException(enum Exceptions exception, std::string arg) {
 	switch (exception)
 	{
 		case ERR_ALREADYREGISTRED:
-			throw AlreadyRegisteredException();
+			throw AlreadyRegisteredException(arg);
 		case ERR_NOSUCHNICK:
-			throw NosuchNickException();
+			throw NosuchNickException(arg);
 		default :
 			throw RFCException();
 	}

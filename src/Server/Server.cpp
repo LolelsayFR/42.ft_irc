@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/05 16:27:43 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/05 19:49:57 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -264,7 +264,7 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 		std::string nick;
 		iss >> nick;
 		if (nick.empty())
-			throwRFCException(ERR_ALREADYREGISTRED);
+			throwRFCException(ERR_ALREADYREGISTRED, nick);
 		client.setNickname(nick);
 		std::cout << "Nickname set to " << nick << " for fd " << client.getUid() << std::endl;
 	}
@@ -312,14 +312,14 @@ void Server::privMsgSend(Client& client, const std::string& arg) {
 	if (dest[0] == '#' || dest[0] == '&' || dest[0] == '+' || dest[0] == '!') {
 		int Pos = this->findChannel(dest);
 		if (Pos == -1)
-			throwRFCException(ERR_NOSUCHNICK); //Throw error cant find any channel :<serveur> 401 <nick> <nickname> :No such nick/channel
+			throwRFCException(ERR_NOSUCHNICK, dest); //Throw error cant find any channel :<serveur> 401 <nick> <nickname> :No such nick/channel
 		else
 			this->_channelList[Pos]->Broadcast(client, msg, BRCST_PRVMSG);
 	}
 	else {
 		int Pos = this->findClientByNick(dest);
 		if (Pos == -1)
-			throwRFCException(ERR_NOSUCHNICK); //Throw error Cant find any user :<serveur> 401 <nick> <nickname> :No such nick/channel
+			throwRFCException(ERR_NOSUCHNICK, dest); //Throw error Cant find any user :<serveur> 401 <nick> <nickname> :No such nick/channel
 		else
 			this->_clientList[Pos]->receptMessage(client, msg);
 	}
@@ -432,9 +432,16 @@ void Server::start(void){
 									welcomeUser(client);
 								}
 							}
+							catch (AlreadyRegisteredException &e) {
+								std::string errorMsg = ":" + this->_hostName + " " + e.what() + "\r\n";
+								send(client->getUid(), errorMsg.c_str(), errorMsg.length(), MSG_NOSIGNAL);
+								destroyOneClient(_fds, i);
+								std::cerr << e.what() << std::endl;
+								break ;
+							}
 							catch (RFCException &e) {
-								std::cout << "RFC Exception: " << e.what() << std::endl;
-								send(client->getUid(), e.what(), strlen(e.what()), MSG_NOSIGNAL);
+								std::string errorMsg = ":" + this->_hostName + " " + e.what() + "\r\n";
+								send(client->getUid(), errorMsg.c_str(), errorMsg.length(), MSG_NOSIGNAL);
 								std::cerr << e.what() << std::endl;
 								break ;
 							}
@@ -457,7 +464,7 @@ std::vector<Client*>::iterator Server::isAvailable(Client& client) {
 	while(it != end) {
 		if (*it != &client && (static_cast<Client*>(*it)->getNickname() == client.getNickname() ||
 				static_cast<Client*>(*it)->getUsername() == client.getUsername()))
-			throwRFCException(ERR_ALREADYREGISTRED);
+			throwRFCException(ERR_ALREADYREGISTRED, client.getNickname());
 		it++;
 	}
 	return (end);
