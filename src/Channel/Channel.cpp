@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/06 12:02:03 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/06 17:38:41 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ Channel::~Channel(void) {
 //Ostream insertion operator
 std::ostream& operator<<(std::ostream& o, Channel& c) {
 	Client* ptr;
-	o << "\n/* Channel View ******************************************************** */" << std::endl;
+	o << "\n/* Channel View */" << std::endl;
 	{
 		std::vector<Client*> list = c.getJoinList();
 		std::vector<Client*>::iterator	it = list.begin();
@@ -56,7 +56,7 @@ std::ostream& operator<<(std::ostream& o, Channel& c) {
 		else
 			o << "/\tNeed password : false" << std::endl;
 		o << "/\tChannel topic : " << c.getTopic() << std::endl;
-		o << "/* Client in channel *************************************************** */" << std::endl;
+		o << "/* Client in channel */" << std::endl;
 		for (int i = 0; it != end; i++, it++) {
 			ptr = *it;
 			{
@@ -69,7 +69,7 @@ std::ostream& operator<<(std::ostream& o, Channel& c) {
 		}
 		if (list.empty())
 			o << "/\tEmpty.." << std::endl;
-		o << "/* ********************************************************************* */" << std::endl;
+		o << "/* ** */" << std::endl;
 	}
 	if (!c.getNeedInvite())
 		return (o);
@@ -77,7 +77,7 @@ std::ostream& operator<<(std::ostream& o, Channel& c) {
 		std::vector<Client*> list = c.getInviteList();
 		std::vector<Client*>::iterator	it = list.begin();
 		std::vector<Client*>::iterator	end = list.end();
-		o << "/* Client invitation list from channel ********************************* */" << std::endl;
+		o << "/* Client invitation list from channel */" << std::endl;
 		for (int i = 0; it != end; i++, it++) {
 			ptr = *it;
 			o 	<< "| n°" << std::setw(5) << i
@@ -87,7 +87,7 @@ std::ostream& operator<<(std::ostream& o, Channel& c) {
 		}
 		if (list.empty())
 			o << "\tEmpty.." << std::endl;
-		o << "/* ********************************************************************* */" << std::endl;
+		o << "/* ** */" << std::endl;
 	}
 	return (o);
 }
