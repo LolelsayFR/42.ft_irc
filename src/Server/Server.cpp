@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
+/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/05 20:46:53 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/06 13:27:45 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,9 @@
 
 // Assignation constructor
 Server::Server(int port, std::string password) : _port(port), _password(password) {
-    this->_hostName = "PlaceHolder";
+	char hostname[256];
+	gethostname(hostname, sizeof(hostname));
+    this->_hostName = hostname;
 }
 
 // Default destructor
@@ -48,7 +50,7 @@ Server::~Server(void) {
 //Ostream insertion operator
 std::ostream& operator<<(std::ostream& o, Server& s) {
 	Client* ptr;
-	o << "\n/* Server View ********************************************************* */" << std::endl;
+	o << "\n/* Server View ******************************************************************************* */" << std::endl;
 	o 	<< "/\tPort : " << s.getPort()
 		<< "\n/\tPassword : " << s.getPassword()
 		<< "\n/\tHost : " << s.getHost() << std::endl;
@@ -56,19 +58,21 @@ std::ostream& operator<<(std::ostream& o, Server& s) {
 		std::vector<Client*> list = s.getClientList();
 		std::vector<Client*>::iterator	it = list.begin();
 		std::vector<Client*>::iterator	end = list.end();
-		o << "/* Client connected **************************************************** */" << std::endl;
+		o << "/* Client connected ************************************************************************** */" << std::endl;
 		for (int i = 0; it != end; i++, it++) {
 			ptr = *it;
 			{
-			o 	<< "| n°" << std::setw(5) << i
-				<< " | Username = " <<  std::setw(10) << ptr->getUsername()
-				<< " | Nickname = " <<  std::setw(10) << ptr->getNickname()
+			o 	<< "| n°" << std::setw(3) << i
+				<< " | U = " <<  std::setw(10) << ptr->getUsername()
+				<< " | N = " <<  std::setw(10) << ptr->getNickname()
+				<< " | R = " <<  std::setw(20) << ptr->getRealname()
+				<< " | H = " <<  std::setw(10) << ptr->getHostname()
 				<< " |"  << std::endl;
 			}
 		}
 		if (list.empty())
 			o << "/\tEmpty.." << std::endl;
-		o << "/* ********************************************************************* */" << std::endl;
+		o << "/* ******************************************************************************************* */" << std::endl;
 	}
 	{
 		std::vector<Channel*> list = s.getChannelList();
@@ -130,9 +134,9 @@ void Server::welcomeUser(Client *client)
 	if (!client->getWelcomeSent())
 	{
 		std::string welcomeMsg = ": ""001 " + client->getNickname() + " :Welcome to the IRC Network, " + client->getNickname() + "\r\n";
-		welcomeMsg += ": ""002 " + client->getNickname() + " :Your host is " + this->_hostName + ", running version 1.0\r\n";
-		welcomeMsg += ": ""003 " + client->getNickname() + " :This server was created today\r\n";
-		welcomeMsg += ": ""004 " + client->getNickname() + " " + this->_hostName + " 1.0 o o\r\n";
+		welcomeMsg += ": 002 " + client->getNickname() + " :Your host is " + this->_hostName + ", running version 1.0\r\n";
+		welcomeMsg += ": 003 " + client->getNickname() + " :This server was created today\r\n";
+		welcomeMsg += ": 004 " + client->getNickname() + " " + this->_hostName + " " + client->getHostname() + "\r\n";
 		send(client->getUid(), welcomeMsg.c_str(), welcomeMsg.size(), MSG_NOSIGNAL);
 		client->setWelcomeSent(true);
 	}
@@ -263,18 +267,20 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 	else if (command == "NICK") {
 		std::string nick;
 		iss >> nick;
-		if (nick.empty())
-			throwRFCException(ERR_ALREADYREGISTRED, nick);
-		client.setNickname(nick);
-		std::cout << "Nickname set to " << nick << " for fd " << client.getUid() << std::endl;
+		this->setClientNick(client, nick);
 	}
 	else if (command == "USER") {
-		std::string username, host, server, realname;
-		iss >> username >> host >> server;
+		std::string username, hostname, realname, nickname;
+		iss >> username >> nickname >> hostname;
 		std::getline(iss, realname);
-		if (!realname.empty() && realname[0] == ':')
-			realname.erase(0, 1);
+		if (this->findClient(username) != -1)
+			return ;
+			//EXCEPTION USERNAME ALREADY USE
+		if (client.getNickname().empty())
+			this->setClientNick(client, nickname);
 		client.setUsername(username);
+		client.setRealname(realname.c_str() + 2);
+		client.setHostname(hostname);
 		std::cout << "Username set to " << username << " for fd " << client.getUid() << std::endl;
 	}
 	else if (command == "JOIN") {
@@ -304,6 +310,21 @@ void Server::linkClientToChannel(Client& client, std::string& arg) {
 	}
 	name = arg.substr(pos + 1, arg.length() - pos);
 	makeChannel(name)->Join(client);
+}
+
+void Server::setClientNick(Client& client, std::string& nick) {
+
+		if (nick.empty())
+			throwRFCException(ERR_ALREADYREGISTRED, nick);
+		if (this->findClientByNick(nick) == -1) {
+			std::string myMsg = ":" + client.getNickname() + " NICK " + " :" + nick + "\r\n";
+			send(client.getUid(), myMsg.c_str(), myMsg.length(), MSG_NOSIGNAL);
+			client.setNickname(nick);
+		}
+		else
+			return ;
+			//EXCEPTION NICKNAME ALREADY USE
+		std::cout << "Nickname set to " << nick << " for fd " << client.getUid() << std::endl;
 }
 
 void Server::privMsgSend(Client& client, const std::string& arg) {
@@ -408,7 +429,6 @@ void Server::start(void){
 					int clientSocket = accept(server_fd, NULL, NULL);
 					if (clientSocket == -1)
 							break ;
-
 					std::cout << "User try to connect..." << std::endl;
 					addNewSocket(_fds, clientSocket);
 					_clientList.push_back(new Client(clientSocket));
