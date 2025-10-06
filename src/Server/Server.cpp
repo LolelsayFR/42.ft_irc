@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/06 13:27:45 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/06 14:45:39 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -270,14 +270,9 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 		this->setClientNick(client, nick);
 	}
 	else if (command == "USER") {
-		std::string username, hostname, realname, nickname;
-		iss >> username >> nickname >> hostname;
+		std::string username, hostname, servername, realname;
+		iss >> username >> hostname >> servername;
 		std::getline(iss, realname);
-		if (this->findClient(username) != -1)
-			return ;
-			//EXCEPTION USERNAME ALREADY USE
-		if (client.getNickname().empty())
-			this->setClientNick(client, nickname);
 		client.setUsername(username);
 		client.setRealname(realname.c_str() + 2);
 		client.setHostname(hostname);
@@ -323,7 +318,7 @@ void Server::setClientNick(Client& client, std::string& nick) {
 		}
 		else
 			return ;
-			//EXCEPTION NICKNAME ALREADY USE
+			//EXCEPTION NICKNAME ALREADY USE 
 		std::cout << "Nickname set to " << nick << " for fd " << client.getUid() << std::endl;
 }
 
@@ -492,7 +487,7 @@ std::vector<Client*>::iterator Server::isAvailable(Client& client) {
 	std::vector<Client*>::iterator	end = this->_clientList.end();
 	while(it != end) {
 		if (*it != &client && (static_cast<Client*>(*it)->getNickname() == client.getNickname() ||
-				static_cast<Client*>(*it)->getUsername() == client.getUsername()))
+				static_cast<Client*>(*it)->getNickname() == client.getNickname()))
 			throwRFCException(ERR_ALREADYREGISTRED, client.getNickname());
 		it++;
 	}
