@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
+/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/03 14:03:43 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/05 20:46:53 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ Server::~Server(void) {
 std::ostream& operator<<(std::ostream& o, Server& s) {
 	Client* ptr;
 	o << "\n/* Server View ********************************************************* */" << std::endl;
-	o 	<< "/\tPort : " << s.getPort() 
+	o 	<< "/\tPort : " << s.getPort()
 		<< "\n/\tPassword : " << s.getPassword()
 		<< "\n/\tHost : " << s.getHost() << std::endl;
 	{
@@ -63,8 +63,8 @@ std::ostream& operator<<(std::ostream& o, Server& s) {
 			o 	<< "| n°" << std::setw(5) << i
 				<< " | Username = " <<  std::setw(10) << ptr->getUsername()
 				<< " | Nickname = " <<  std::setw(10) << ptr->getNickname()
-				<< " |"  << std::endl;	
-			}	
+				<< " |"  << std::endl;
+			}
 		}
 		if (list.empty())
 			o << "/\tEmpty.." << std::endl;
@@ -264,7 +264,7 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 		std::string nick;
 		iss >> nick;
 		if (nick.empty())
-			throwRFCException(ERR_ALREADYREGISTRED);
+			throwRFCException(ERR_ALREADYREGISTRED, nick);
 		client.setNickname(nick);
 		std::cout << "Nickname set to " << nick << " for fd " << client.getUid() << std::endl;
 	}
@@ -312,14 +312,18 @@ void Server::privMsgSend(Client& client, const std::string& arg) {
 	if (dest[0] == '#' || dest[0] == '&' || dest[0] == '+' || dest[0] == '!') {
 		int Pos = this->findChannel(dest);
 		if (Pos == -1)
-			return ;//Throw error cant find any channel :<serveur> 401 <nick> <nickname> :No such nick/channel
+			throwRFCException(ERR_NOSUCHNICK, dest); //Throw error cant find any channel :<serveur> 401 <nick> <nickname> :No such nick/channel
 		else
 			this->_channelList[Pos]->Broadcast(client, msg, BRCST_PRVMSG);
 	}
 	else {
 		int Pos = this->findClientByNick(dest);
 		if (Pos == -1)
-			return ;//Throw error Cant find any user :<serveur> 401 <nick> <nickname> :No such nick/channel
+		{
+			std::cout << "TEST" << std::endl;
+			//throwRFCException(ERR_NOSUCHNICK, dest); //Throw error Cant find any user :<serveur> 401 <nick> <nickname> :No such nick/channel
+			return ;
+		}
 		else
 			this->_clientList[Pos]->receptMessage(client, msg);
 	}
@@ -334,10 +338,15 @@ void Server::clientLeaveChannel(Client& client, const std::string& arg) {
 		dest = std::string(arg.substr(5));
 	int Pos = this->findChannel(dest);
 	if (Pos == -1)
-		return ;//Throw error cant find any channel :<serveur> 442 <nick> <channel> :You're not on that channel
-	else { 
+	{
+		std::cout << "TEST" << std::endl;
+		return ;
+		//throwRFCException(ERR_NOTONCHANNEL, dest); //Throw error cant find any channel :<serveur> 401 <nick> <nickname> :No such nick/channel
+	}
+	else {
 		if (this->_channelList[Pos]->findClientJoin(client) == -1)
-			return ; // throw apropriate exception
+			//throwRFCException(ERR_NOTONCHANNEL, dest);
+			return ;
 		if (separatorPos > 0 && separatorPos < (int)arg.length()) {
 			std::string	msg(arg.substr(separatorPos + 1));
 			this->_channelList[Pos]->Broadcast(client, msg, BRCST_LEAVE_MSG);
@@ -345,9 +354,9 @@ void Server::clientLeaveChannel(Client& client, const std::string& arg) {
 		else
 			this->_channelList[Pos]->Broadcast(client, "", BRCST_LEAVE);
 		this->_channelList[Pos]->Kick(client);
+
 	}
 }
-
 void Server::start(void){
 	char buffer[4096];
 
@@ -432,8 +441,16 @@ void Server::start(void){
 									welcomeUser(client);
 								}
 							}
-							catch (RFCException &e) {
+							catch (AlreadyRegisteredException &e) {
+								std::string errorMsg = ":" + this->_hostName + " " + e.what() + "\r\n";
+								send(client->getUid(), errorMsg.c_str(), errorMsg.length(), MSG_NOSIGNAL);
 								destroyOneClient(_fds, i);
+								std::cerr << e.what() << std::endl;
+								break ;
+							}
+							catch (RFCException &e) {
+								std::string errorMsg = ":" + this->_hostName + " " + e.what() + "\r\n";
+								send(client->getUid(), errorMsg.c_str(), errorMsg.length(), MSG_NOSIGNAL);
 								std::cerr << e.what() << std::endl;
 								break ;
 							}
@@ -456,7 +473,7 @@ std::vector<Client*>::iterator Server::isAvailable(Client& client) {
 	while(it != end) {
 		if (*it != &client && (static_cast<Client*>(*it)->getNickname() == client.getNickname() ||
 				static_cast<Client*>(*it)->getUsername() == client.getUsername()))
-			throwRFCException(ERR_ALREADYREGISTRED);
+			throwRFCException(ERR_ALREADYREGISTRED, client.getNickname());
 		it++;
 	}
 	return (end);

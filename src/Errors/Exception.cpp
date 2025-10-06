@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:35:21 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/02 10:43:24 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/05 20:04:47 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,15 +33,51 @@ const char* ArgsNumberErrorException::what(void) const throw() {
 	return (E_PARSING_ARGS_ERROR);
 }
 
-const char* AlreadyRegisteredException::what(void) const throw() {
-	return (E_ALREADY_REGISTERED);
+//RFC Exceptions
+AlreadyRegisteredException::AlreadyRegisteredException(const std::string& arg) : message(arg)
+{
+	this->fullMessage = this->message + E_ALREADY_REGISTERED;
 }
 
-std::exception throwRFCException(enum Exceptions exception) {
+AlreadyRegisteredException::~AlreadyRegisteredException() throw() {}
+
+NosuchNickException::NosuchNickException(const std::string& arg) : message(arg)
+{
+	this->fullMessage = this->message + E_NOSUCHNICK;
+}
+
+NosuchNickException::~NosuchNickException() throw() {}
+
+NotOnChannelException::NotOnChannelException(const std::string& arg) : message(arg)
+{
+	this->fullMessage = this->message + E_NOTONCHANNEL;
+}
+
+NotOnChannelException::~NotOnChannelException() throw() {}
+
+const char* AlreadyRegisteredException::what() const throw() {
+	return (this->fullMessage.c_str());
+}
+
+const char* NosuchNickException::what() const throw() {
+	return (this->fullMessage.c_str());
+}
+
+const char* NotOnChannelException::what(void) const throw() {
+	return (this->fullMessage.c_str());
+}
+
+
+
+void throwRFCException(enum Exceptions exception, std::string arg) {
 	switch (exception)
 	{
 		case ERR_ALREADYREGISTRED:
-			throw AlreadyRegisteredException();
+			throw AlreadyRegisteredException(arg);
+		case ERR_NOSUCHNICK:
+			throw NosuchNickException(arg);
+		case ERR_NOTONCHANNEL:
+			throw NotOnChannelException(arg);
 		default :
 			throw RFCException();
 	}
