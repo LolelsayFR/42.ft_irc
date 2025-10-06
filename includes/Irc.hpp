@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 14:44:45 by arthur            #+#    #+#             */
-/*   Updated: 2025/10/03 12:43:42 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/06 11:10:28 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,8 +28,8 @@
 # include <streambuf>
 # include <sstream>
 # include <iomanip>
-#include <netdb.h>
-#include <arpa/inet.h>
+# include <netdb.h>
+# include <arpa/inet.h>
 
 /* ************************************************************************** */
 /* Includes intern headers */
