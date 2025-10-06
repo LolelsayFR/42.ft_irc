@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 15:34:55 by arthur            #+#    #+#             */
-/*   Updated: 2025/10/06 13:53:03 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/06 18:08:57 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,13 +68,13 @@ void Client::appendBuffer(const char* data, int len) {
 }
 
 bool Client::hasMessage() const {
-	return _buffer.find("\r\n") != std::string::npos;
+	return _buffer.find("\n") != std::string::npos;
 }
 
 std::string Client::popMessage() {
-	size_t pos = _buffer.find("\r\n");
+	size_t pos = _buffer.find("\n");
 	std::string msg = _buffer.substr(0, pos);
-	_buffer.erase(0, pos + 2);
+	_buffer.erase(0, pos + 1);
 	return msg;
 }
 

@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/06 14:45:39 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/06 18:04:53 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,9 @@ Server::~Server(void) {
 	for (int i = this->_clientList.size(); i > 0; i--) {
 		this->destroyOneClient(this->getFds(), i);
 	}
+	for (int i = this->_setupList.size(); i > 0; i--) {
+		this->destroyOneClient(this->getFds(), i);
+	}
 	std::vector<Channel*>::iterator	it = this->_channelList.begin();
 	std::vector<Channel*>::iterator	end = this->_channelList.end();
 	for(int i = 0; it != end; i++) {
@@ -39,7 +42,8 @@ Server::~Server(void) {
 		it++;
 	}
 	this->_channelList.clear();
-	this->_channelList.clear();
+	this->_clientList.clear();
+	this->_setupList.clear();
 }
 
 
@@ -50,7 +54,7 @@ Server::~Server(void) {
 //Ostream insertion operator
 std::ostream& operator<<(std::ostream& o, Server& s) {
 	Client* ptr;
-	o << "\n/* Server View ******************************************************************************* */" << std::endl;
+	o << "\n/* Server View * */" << std::endl;
 	o 	<< "/\tPort : " << s.getPort()
 		<< "\n/\tPassword : " << s.getPassword()
 		<< "\n/\tHost : " << s.getHost() << std::endl;
@@ -58,7 +62,7 @@ std::ostream& operator<<(std::ostream& o, Server& s) {
 		std::vector<Client*> list = s.getClientList();
 		std::vector<Client*>::iterator	it = list.begin();
 		std::vector<Client*>::iterator	end = list.end();
-		o << "/* Client connected ************************************************************************** */" << std::endl;
+		o << "/* Client connected * */" << std::endl;
 		for (int i = 0; it != end; i++, it++) {
 			ptr = *it;
 			{
@@ -72,7 +76,7 @@ std::ostream& operator<<(std::ostream& o, Server& s) {
 		}
 		if (list.empty())
 			o << "/\tEmpty.." << std::endl;
-		o << "/* ******************************************************************************************* */" << std::endl;
+		o << "/* ** */" << std::endl;
 	}
 	{
 		std::vector<Channel*> list = s.getChannelList();
@@ -139,6 +143,15 @@ void Server::welcomeUser(Client *client)
 		welcomeMsg += ": 004 " + client->getNickname() + " " + this->_hostName + " " + client->getHostname() + "\r\n";
 		send(client->getUid(), welcomeMsg.c_str(), welcomeMsg.size(), MSG_NOSIGNAL);
 		client->setWelcomeSent(true);
+		int setupPos = this->findClientSetup(client->getUid());
+		this->_setupList.erase(this->_setupList.begin() + setupPos);
+		this->_clientList.push_back(client);
+		std::cout << WHI << "USER SETUP OK" << RES << std::endl
+				<< " | U = " <<  std::setw(10) << client->getUsername()
+				<< " | N = " <<  std::setw(10) << client->getNickname()
+				<< " | R = " <<  std::setw(20) << client->getRealname()
+				<< " | H = " <<  std::setw(10) << client->getHostname()
+				<< " |"  << std::endl;
 	}
 }
 
@@ -172,6 +185,19 @@ int Server::findClientByNick(std::string nickname) {
 	std::vector<Client*>::iterator	end = this->_clientList.end();
 	for(int i = 0; it != end; i++) {
 		if (static_cast<Client*>(*it)->getNickname() == nickname) {
+			return (i);
+		}
+		it++;
+	}
+	return (-1);
+}
+
+//Channel id in join vector list by nick
+int Server::findClientSetup(int fd) {
+	std::vector<Client*>::iterator	it = this->_setupList.begin();
+	std::vector<Client*>::iterator	end = this->_setupList.end();
+	for(int i = 0; it != end; i++) {
+		if (static_cast<Client*>(*it)->getUid() == fd) {
 			return (i);
 		}
 		it++;
@@ -245,7 +271,6 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 	std::istringstream iss(msg);
 	std::string command;
 	iss >> command;
-
 	if (command == "PING")
 	{
 		std::string server;
@@ -373,6 +398,79 @@ void Server::clientLeaveChannel(Client& client, const std::string& arg) {
 
 	}
 }
+
+
+void Server::clientSetupHandler(int i, int n, char *buffer)
+{
+	if (this->findClientSetup(_fds[i].fd) != -1)
+	{
+		Client *client = findClientByFd(_setupList, _fds[i].fd);
+		client->appendBuffer(buffer, n);
+		while (client->hasMessage()) {
+			std::string msg = client->popMessage();
+			try {
+				parseMessage(*client, msg);
+			}
+			catch (AlreadyRegisteredException &e) {
+				std::string errorMsg = ":" + this->_hostName + " " + e.what() + "\r\n";
+				send(client->getUid(), errorMsg.c_str(), errorMsg.length(), MSG_NOSIGNAL);
+				destroyOneClient(_fds, i);
+				std::cerr << e.what() << std::endl;
+				break ;
+			}
+			catch (RFCException &e) {
+				std::string errorMsg = ":" + this->_hostName + " " + e.what() + "\r\n";
+				send(client->getUid(), errorMsg.c_str(), errorMsg.length(), MSG_NOSIGNAL);
+				std::cerr << e.what() << std::endl;
+				break ;
+			}
+			catch (ClientPasswordException & e) {
+				destroyOneClient(_fds, i);
+				std::cerr << e.what() << std::endl;
+				break ;
+			}
+		}
+		Server::isAvailable(*client);
+		client->checkRegistration();
+		if (client->isRegistered()) {
+			welcomeUser(client);
+		}
+	}
+}
+
+void Server::clientHandler(int i, int n, char *buffer)
+{
+	Client *client = findClientByFd(_clientList, _fds[i].fd);
+	if (client && this->findClientSetup(_fds[i].fd) == -1) {
+		client->appendBuffer(buffer, n);
+		while (client->hasMessage()) {
+			std::cout << "Message received from client: ";
+			std::string msg = client->popMessage();
+			try {
+				parseMessage(*client, msg);
+			}
+			catch (AlreadyRegisteredException &e) {
+				std::string errorMsg = ":" + this->_hostName + " " + e.what() + "\r\n";
+				send(client->getUid(), errorMsg.c_str(), errorMsg.length(), MSG_NOSIGNAL);
+				destroyOneClient(_fds, i);
+				std::cerr << e.what() << std::endl;
+				break ;
+			}
+			catch (RFCException &e) {
+				std::string errorMsg = ":" + this->_hostName + " " + e.what() + "\r\n";
+				send(client->getUid(), errorMsg.c_str(), errorMsg.length(), MSG_NOSIGNAL);
+				std::cerr << e.what() << std::endl;
+				break ;
+			}
+			catch (ClientPasswordException & e) {
+				destroyOneClient(_fds, i);
+				std::cerr << e.what() << std::endl;
+				break ;
+			}
+		}
+	}
+}
+
 void Server::start(void){
 	char buffer[4096];
 
@@ -426,7 +524,7 @@ void Server::start(void){
 							break ;
 					std::cout << "User try to connect..." << std::endl;
 					addNewSocket(_fds, clientSocket);
-					_clientList.push_back(new Client(clientSocket));
+					_setupList.push_back(new Client(clientSocket));
 				} else {
 					// Données d'un client existant
 					int n = recv(_fds[i].fd, buffer, 1024, 0);
@@ -441,41 +539,8 @@ void Server::start(void){
 						continue ;
 					}
 					// Traitement des donnees
-					Client *client = findClientByFd(_clientList, _fds[i].fd);
-					if (client) {
-
-						client->appendBuffer(buffer, n);
-						while (client->hasMessage()) {
-							std::cout << "Message received from client: ";
-							std::string msg = client->popMessage();
-							try {
-								parseMessage(*client, msg);
-								Server::isAvailable(*client);
-								client->checkRegistration();
-								if (client->isRegistered()) {
-									welcomeUser(client);
-								}
-							}
-							catch (AlreadyRegisteredException &e) {
-								std::string errorMsg = ":" + this->_hostName + " " + e.what() + "\r\n";
-								send(client->getUid(), errorMsg.c_str(), errorMsg.length(), MSG_NOSIGNAL);
-								destroyOneClient(_fds, i);
-								std::cerr << e.what() << std::endl;
-								break ;
-							}
-							catch (RFCException &e) {
-								std::string errorMsg = ":" + this->_hostName + " " + e.what() + "\r\n";
-								send(client->getUid(), errorMsg.c_str(), errorMsg.length(), MSG_NOSIGNAL);
-								std::cerr << e.what() << std::endl;
-								break ;
-							}
-							catch (ClientPasswordException & e) {
-								destroyOneClient(_fds, i);
-								std::cerr << e.what() << std::endl;
-								break ;
-							}
-						}
-					}
+					this->clientSetupHandler(i, n, buffer);
+					this->clientHandler(i, n, buffer);
 				}
 			}
 		}
