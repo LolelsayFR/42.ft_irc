@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 15:34:55 by arthur            #+#    #+#             */
-/*   Updated: 2025/10/06 12:55:50 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/06 13:53:03 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,7 +84,7 @@ bool Client::isRegistered() const
 }
 
 void Client::checkRegistration() {
-	if (!_nickname.empty() && !_username.empty())
+	if (!_nickname.empty() && !_username.empty() && !_hostname.empty() && !_realname.empty())
 		_isRegistered = true;
 }
 
