@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 15:34:55 by arthur            #+#    #+#             */
-/*   Updated: 2025/10/03 12:06:19 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/06 10:38:29 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,22 @@ std::string Client::getNickname(void)const{
 
 void Client::setNickname(std::string nickname){
 	this->_nickname = nickname;
+}
+
+std::string Client::getRealname(void)const{
+	return (this->_realname);
+}
+
+void Client::setRealname(std::string realname){
+	this->_realname = realname;
+}
+
+std::string Client::getHostname(void)const{
+	return (this->_hostname);
+}
+
+void Client::setHostname(std::string hostname){
+	this->_hostname = hostname;
 }
 
 int Client::getUid(void) const {
@@ -110,3 +126,4 @@ void Client::leaveChannel(Client& sender, Channel& channel) {
 	std::string myMsg = ":" + sender.getNickname() + " PART " + channel.getName() + "\r\n";
 	send(this->getUid(), myMsg.c_str(), myMsg.length(), MSG_NOSIGNAL);
 }
+

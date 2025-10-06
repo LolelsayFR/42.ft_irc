@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
+/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/05 20:46:53 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/06 10:49:53 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -275,6 +275,8 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 		if (!realname.empty() && realname[0] == ':')
 			realname.erase(0, 1);
 		client.setUsername(username);
+		client.setRealname(realname);
+		client.setHostname(host);
 		std::cout << "Username set to " << username << " for fd " << client.getUid() << std::endl;
 	}
 	else if (command == "JOIN") {
@@ -408,7 +410,6 @@ void Server::start(void){
 					int clientSocket = accept(server_fd, NULL, NULL);
 					if (clientSocket == -1)
 							break ;
-
 					std::cout << "User try to connect..." << std::endl;
 					addNewSocket(_fds, clientSocket);
 					_clientList.push_back(new Client(clientSocket));

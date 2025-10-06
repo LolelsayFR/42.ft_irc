@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 14:43:51 by arthur            #+#    #+#             */
-/*   Updated: 2025/10/03 11:09:11 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/06 10:39:17 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,8 @@ private :
 	bool			_welcomeSent;
 	std::string		_username;
 	std::string		_nickname;
+	std::string		_realname;
+	std::string		_hostname;
 	std::string		_buffer;
 public :
 	Client(int fd);
@@ -35,11 +37,15 @@ public :
 	bool getWelcomeSent(void) const;
 	std::string getUsername(void) const;
 	std::string getNickname(void) const;
+	std::string getRealname(void) const;
+	std::string getHostname(void) const;
 
 	void checkRegistration();
 	void setWelcomeSent(bool val);
 	void setNickname(std::string nickname);
 	void setUsername(std::string username);
+	void setRealname(std::string realname);
+	void setHostname(std::string hostname);
 	void appendBuffer(const char* data, int len);
 
 	void receptMessage(Channel& channel, Client& sender, std::string& msg);
