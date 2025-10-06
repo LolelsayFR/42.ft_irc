@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/06 12:31:50 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/06 13:27:45 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -267,20 +267,19 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 	else if (command == "NICK") {
 		std::string nick;
 		iss >> nick;
-		if (nick.empty())
-			throwRFCException(ERR_ALREADYREGISTRED, nick);
-		client.setNickname(nick);
-		std::cout << "Nickname set to " << nick << " for fd " << client.getUid() << std::endl;
+		this->setClientNick(client, nick);
 	}
 	else if (command == "USER") {
 		std::string username, hostname, realname, nickname;
 		iss >> username >> nickname >> hostname;
 		std::getline(iss, realname);
-		if (!realname.empty() && realname[0] == ':')
-			realname.erase(0, 1);
+		if (this->findClient(username) != -1)
+			return ;
+			//EXCEPTION USERNAME ALREADY USE
+		if (client.getNickname().empty())
+			this->setClientNick(client, nickname);
 		client.setUsername(username);
-		client.setNickname(nickname);
-		client.setRealname(realname);
+		client.setRealname(realname.c_str() + 2);
 		client.setHostname(hostname);
 		std::cout << "Username set to " << username << " for fd " << client.getUid() << std::endl;
 	}
@@ -311,6 +310,21 @@ void Server::linkClientToChannel(Client& client, std::string& arg) {
 	}
 	name = arg.substr(pos + 1, arg.length() - pos);
 	makeChannel(name)->Join(client);
+}
+
+void Server::setClientNick(Client& client, std::string& nick) {
+
+		if (nick.empty())
+			throwRFCException(ERR_ALREADYREGISTRED, nick);
+		if (this->findClientByNick(nick) == -1) {
+			std::string myMsg = ":" + client.getNickname() + " NICK " + " :" + nick + "\r\n";
+			send(client.getUid(), myMsg.c_str(), myMsg.length(), MSG_NOSIGNAL);
+			client.setNickname(nick);
+		}
+		else
+			return ;
+			//EXCEPTION NICKNAME ALREADY USE
+		std::cout << "Nickname set to " << nick << " for fd " << client.getUid() << std::endl;
 }
 
 void Server::privMsgSend(Client& client, const std::string& arg) {

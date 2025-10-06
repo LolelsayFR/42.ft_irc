@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:52:45 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/03 14:10:32 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/06 13:24:21 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,7 @@ public:
 	int findChannel(Channel& channel);
 	int findChannel(std::string name);
 
+	void setClientNick(Client& client, std::string& nick);
 	void privMsgSend(Client& client, const std::string& name);
 	std::vector<Client*>::iterator isAvailable(Client& client);
 	void linkClientToChannel(Client& client, std::string& name);
