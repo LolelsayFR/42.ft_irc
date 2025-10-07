@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 12:51:16 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 14:58:10 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -278,7 +278,7 @@ void	Server::destroyOneClient(std::vector<struct pollfd> &fds , int i)
 		if (channel->findClientInvite(*target) != -1)
 			channel->DeInvite(*target, *this);
 		if (channel->findClientOp(*target) != -1)
-			channel->DeOp(*target, *this);
+			channel->DeOp(*target, *this, *target);
 		it++;
 	}
 	//destroy client in server base class
@@ -354,13 +354,14 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 	else if (command == "KICK") {
 		this->clientLeaveChannel(client, msg);
 		std::string channel, targetNick, reason;
-			iss >> channel >> targetNick >> reason;
+		iss >> channel >> targetNick;
+		getline(iss, reason);
 		int targetPos = this->_channelList[this->findChannel(channel)]->findClientJoin(targetNick);
 		if (this->_channelList[this->findChannel(channel)]->findClientOp(client) == -1)
-			return; //throw() dont have permision to do this
+			{std::cout << WHI << std::setw(100) << std::endl; return;} //throw() dont have permision to do this
 		if (targetPos == -1)
-			return; //throw() no client find to kick
-		this->_channelList[this->findChannel(channel)]->Kick(targetNick, *this, reason, false, client);
+			{std::cout << WHI << std::setw(100) << std::endl; return;} //throw() no client find to kick
+		this->_channelList[this->findChannel(channel)]->Kick(targetNick, *this, reason.c_str() + 2, false, client);
 	}
 	else if (command == "MODE") {
 		std::string cmd;

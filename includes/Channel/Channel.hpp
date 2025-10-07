@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 17:46:54 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 12:41:25 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 14:43:21 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,8 +55,8 @@ public:
 	void Broadcast(Client& sender, std::string msg, broadcast type, Server& server);
  
 	void setPassword(std::string pass);
-	void Op(Client& client, Server& server);
-	void DeOp(Client& client, Server& server);
+	void Op(Client& client, Server& server, Client& sender);
+	void DeOp(Client& client, Server& server, Client& sender);
 	void Join(Client& client, Server& server);
 	void Kick(std::string nick, Server& server, std::string reason, bool leave, Client& sender);
 	void Invite(Client& client, Server& server);
@@ -65,6 +65,7 @@ public:
 	void Mode(Client& sender , std::string option, Server& server);
 
 	int findClientOp(Client& client);
+	int findClientOp(std::string nick);
 	int findClientJoin(Client& client);
 	int findClientJoin(std::string nick);
 	int findClientInvite(Client& client);
