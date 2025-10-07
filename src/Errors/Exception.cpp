@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:35:21 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 21:28:28 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/07 21:31:01 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,6 +97,15 @@ UnknownModeException::UnknownModeException(const std::string& arg) : message(arg
 
 UnknownModeException::~UnknownModeException() throw() {}
 
+NeedMoreParamsException::NeedMoreParamsException(const std::string& arg) : message(arg)
+{
+	this->fullMessage = this->message + E_NEEDMOREPARAMS;
+}
+
+NeedMoreParamsException::~NeedMoreParamsException() throw() {}
+
+
+
 
 const char* AlreadyRegisteredException::what() const throw() {
 	return (this->fullMessage.c_str());
@@ -130,6 +139,10 @@ const char* UnknownModeException::what(void) const throw() {
 	return (this->fullMessage.c_str());
 }
 
+const char* NeedMoreParamsException::what(void) const throw() {
+	return (this->fullMessage.c_str());
+}
+
 void throwRFCException(enum Exceptions exception, std::string arg) {
 	switch (exception)
 	{
@@ -149,6 +162,8 @@ void throwRFCException(enum Exceptions exception, std::string arg) {
 			throw ChanOpPrivsNeededException(arg);
 		case ERR_UNKNOWNMODE:
 			throw UnknownModeException(arg);
+		case ERR_NEEDMOREPARAMS:
+			throw NeedMoreParamsException(arg);
 		default :
 			throw RFCException();
 	}

@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 21:26:49 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/07 21:29:31 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -334,7 +334,7 @@ void Channel::Mode(Client& sender, std::string option, Server& server) {
 	else if (opt == "+k") {
 		this->_needPassword = true;
 		if (target.empty())
-			return ; //throwRFCException(ERR_NEEDMOREPARAMS, opt);
+			throwRFCException(ERR_NEEDMOREPARAMS, opt);
 		if (target.length() > 255)
 			return ; //throwRFCException(ERR_KEYTOOLONG, this->getName());
 		this->setPassword(target);

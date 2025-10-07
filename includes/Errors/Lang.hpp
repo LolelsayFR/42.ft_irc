@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:08:58 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 21:28:04 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/07 21:30:33 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,5 +32,6 @@
 # define E_BADCHANNELKEY     	": Cannot join channel (+k)."
 # define E_CHANOPRIVSNEEDED     ": You're not channel operator."
 # define E_UNKNOWNMODE			": is unknown mode char to me."
+# define E_NEEDMOREPARAMS		": Not enough parameters."
 
 #endif // LANG_HPP

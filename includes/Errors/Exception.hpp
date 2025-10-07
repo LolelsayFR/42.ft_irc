@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:10:41 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 21:27:45 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/07 21:32:39 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,14 +21,15 @@
 
 enum Exceptions
 {
-	ERR_ALREADYREGISTRED = 461,
+	ERR_ALREADYREGISTRED = 462,
 	ERR_NOSUCHNICK = 401,
 	ERR_NOTONCHANNEL = 442,
 	ERR_CHANNELISFULL = 471,
 	ERR_INVITEONLYCHAN = 473,
 	ERR_BADCHANNELKEY = 475,
 	ERR_CHANOPRIVSNEEDED = 482,
-	ERR_UNKNOWNMODE = 472
+	ERR_UNKNOWNMODE = 472,
+	ERR_NEEDMOREPARAMS = 461,
 };
 
 class ParsingException : public std::exception
@@ -147,6 +148,18 @@ class UnknownModeException : public RFCException
 	public:
 		UnknownModeException(const std::string& arg);
 		virtual ~UnknownModeException() throw();
+		virtual const char* what() const throw();
+};
+
+class NeedMoreParamsException : public RFCException
+{
+	private:
+		std::string message;
+		std::string fullMessage;
+
+	public:
+		NeedMoreParamsException(const std::string& arg);
+		virtual ~NeedMoreParamsException() throw();
 		virtual const char* what() const throw();
 };
 
