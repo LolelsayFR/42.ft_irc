@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/06 18:04:53 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 09:29:24 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ Server::~Server(void) {
 		this->destroyOneClient(this->getFds(), i);
 	}
 	for (int i = this->_setupList.size(); i > 0; i--) {
-		this->destroyOneClient(this->getFds(), i);
+		delete this->_setupList[i];
 	}
 	std::vector<Channel*>::iterator	it = this->_channelList.begin();
 	std::vector<Channel*>::iterator	end = this->_channelList.end();
@@ -54,39 +54,56 @@ Server::~Server(void) {
 //Ostream insertion operator
 std::ostream& operator<<(std::ostream& o, Server& s) {
 	Client* ptr;
-	o << "\n/* Server View * */" << std::endl;
-	o 	<< "/\tPort : " << s.getPort()
-		<< "\n/\tPassword : " << s.getPassword()
-		<< "\n/\tHost : " << s.getHost() << std::endl;
+	o << std::endl << WHI << "/* Server View * */" << RES << std::endl;
+	o 	<< " /\tPort : " << s.getPort()
+		<< "\n /\tPassword : " << s.getPassword()
+		<< "\n /\tHost : " << s.getHost() << std::endl
+		<< WHI << "/* ** */" << RES << std::endl;
 	{
 		std::vector<Client*> list = s.getClientList();
 		std::vector<Client*>::iterator	it = list.begin();
 		std::vector<Client*>::iterator	end = list.end();
-		o << "/* Client connected * */" << std::endl;
-		for (int i = 0; it != end; i++, it++) {
-			ptr = *it;
-			{
-			o 	<< "| n°" << std::setw(3) << i
-				<< " | U = " <<  std::setw(10) << ptr->getUsername()
-				<< " | N = " <<  std::setw(10) << ptr->getNickname()
-				<< " | R = " <<  std::setw(20) << ptr->getRealname()
-				<< " | H = " <<  std::setw(10) << ptr->getHostname()
-				<< " |"  << std::endl;
-			}
-		}
+		o << std::endl << WHI <<  "/* Client connected * */" << RES << std::endl;
 		if (list.empty())
-			o << "/\tEmpty.." << std::endl;
-		o << "/* ** */" << std::endl;
+			o << " /\tEmpty.." << std::endl;
+		else 
+			for (int i = 0; it != end; i++, it++) {
+				ptr = *it;
+				{
+				o 	<< "| n°" << std::setw(3) << i
+					<< " | U = " <<  std::setw(10) << ptr->getUsername()
+					<< " | N = " <<  std::setw(10) << ptr->getNickname()
+					<< " | R = " <<  std::setw(20) << ptr->getRealname()
+					<< " | H = " <<  std::setw(10) << ptr->getHostname()
+					<< " |"  << std::endl;
+				}
+			}
+		o << WHI << "/* ** */" << RES << std::endl;
+	}
+	{
+		std::vector<Client*> list = s.getSetupList();
+		std::vector<Client*>::iterator	it = list.begin();
+		std::vector<Client*>::iterator	end = list.end();
+		o << std::endl <<  WHI << "/* Client in setup * */" << RES << std::endl;
+		if (list.empty())
+			o << " /\tEmpty.." << std::endl;
+		else
+			for (int i = 0; it != end; i++, it++) {
+				ptr = *it;
+				{
+				o 	<< "| n°" << std::setw(3) << i
+					<< " | ID = " <<  std::setw(5) << ptr->getUid()
+					<< " |"  << std::endl;
+				}
+			}
+		o << WHI << "/* ** */" << RES << std::endl;
 	}
 	{
 		std::vector<Channel*> list = s.getChannelList();
 		std::vector<Channel*>::iterator	it = list.begin();
 		std::vector<Channel*>::iterator	end = list.end();
-		for (int i = 0; it != end; i++, it++) {
+		for (int i = 0; it != end; i++, it++)
 			o << *(static_cast<Channel*>(*it));
-			if (list.empty())
-				o << "\tEmpty.." << std::endl;
-		}
 	}
 	return (o);
 }
@@ -114,6 +131,11 @@ std::vector<struct pollfd>& Server::getFds(void) {
 //Channel JoinList getter
 const std::vector<Client*>&	Server::getClientList(void) const {
 	return (this->_clientList);
+}
+
+//Channel JoinList getter
+const std::vector<Client*>&	Server::getSetupList(void) const {
+	return (this->_setupList);
 }
 
 //Channel OpList getter
@@ -192,10 +214,23 @@ int Server::findClientByNick(std::string nickname) {
 	return (-1);
 }
 
-//Channel id in join vector list by nick
+//Find client in setup list by fd
 int Server::findClientSetup(int fd) {
 	std::vector<Client*>::iterator	it = this->_setupList.begin();
 	std::vector<Client*>::iterator	end = this->_setupList.end();
+	for(int i = 0; it != end; i++) {
+		if (static_cast<Client*>(*it)->getUid() == fd) {
+			return (i);
+		}
+		it++;
+	}
+	return (-1);
+}
+
+//Find client by fd
+int Server::findClient(int fd) {
+	std::vector<Client*>::iterator	it = this->_clientList.begin();
+	std::vector<Client*>::iterator	end = this->_clientList.end();
 	for(int i = 0; it != end; i++) {
 		if (static_cast<Client*>(*it)->getUid() == fd) {
 			return (i);
@@ -271,25 +306,7 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 	std::istringstream iss(msg);
 	std::string command;
 	iss >> command;
-	if (command == "PING")
-	{
-		std::string server;
-		iss >> server;
-		//std::cout << "Received PING from " << server << std::endl;
-		std::string pongResponse = "PONG :" + server + "\r\n";
-		send(client.getUid(), pongResponse.c_str(), pongResponse.size(), MSG_NOSIGNAL);
-		//std::cout << "Responded to PING with PONG" << std::endl;
-	}
-	else if (command == "PASS") {
-		std::string pass;
-		iss >> pass;
-		if (pass.empty())
-			throw ClientPasswordException();
-		if (pass != _password)
-			throw ClientPasswordException();
-		std::cout << "Password Correct" << std::endl;
-	}
-	else if (command == "NICK") {
+	if (command == "NICK") {
 		std::string nick;
 		iss >> nick;
 		this->setClientNick(client, nick);
@@ -303,6 +320,34 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 		client.setHostname(hostname);
 		std::cout << "Username set to " << username << " for fd " << client.getUid() << std::endl;
 	}
+	else if (command == "PASS") {
+		std::string pass;
+		iss >> pass;
+		if (pass.empty())
+			throw ClientPasswordException();
+		if (pass != _password)
+			throw ClientPasswordException();
+		std::cout << "Password Correct" << std::endl;
+	}
+	else if (command == "QUIT") {
+		//if (this->findClientSetup(client.getUid()) != -1) {
+		//	this->_setupList.erase(this->_setupList.begin() + this->findClientSetup(client.getUid()));
+		//	delete &client;
+		//}	
+		//else
+		//	destroyOneClient(_fds, findClient(client));
+	}
+	else if (this->findClientSetup(client.getUid()) != -1) // Limite les action des setupClients
+		return; //throw() Peut etre une exception custom ??
+	else if (command == "PING")
+	{
+		std::string server;
+		iss >> server;
+		//std::cout << "Received PING from " << server << std::endl;
+		std::string pongResponse = "PONG :" + server + "\r\n";
+		send(client.getUid(), pongResponse.c_str(), pongResponse.size(), MSG_NOSIGNAL);
+		//std::cout << "Responded to PING with PONG" << std::endl;
+	}
 	else if (command == "JOIN") {
 		std::string arg;
 		iss >> arg;
@@ -313,6 +358,11 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 	}
 	else if (command == "PART") {
 		this->clientLeaveChannel(client, msg);
+	}
+	else if (command == "MODE") {
+		std::string cmd; 
+		std::getline(iss, cmd);
+		this->sendModeChannel(client, cmd.c_str() + 1);
 	}
 	else {
 		std::cout << "Unknown command: " << command << std::endl << *this;
@@ -361,12 +411,21 @@ void Server::privMsgSend(Client& client, const std::string& arg) {
 		int Pos = this->findClientByNick(dest);
 		if (Pos == -1)
 		{
-			std::cout << "TEST" << std::endl;
 			//throwRFCException(ERR_NOSUCHNICK, dest); //Throw error Cant find any user :<serveur> 401 <nick> <nickname> :No such nick/channel
 			return ;
 		}
 		else
 			this->_clientList[Pos]->receptMessage(client, msg);
+	}
+}
+
+void Server::sendModeChannel(Client& client, const std::string& arg) {
+	if (arg[0] == '#' || arg[0] == '&' || arg[0] == '+' || arg[0] == '!') {
+		int Pos = this->findChannel(arg.substr(1, arg.find(" ") - 1));
+		if (Pos == -1)
+			throwRFCException(ERR_NOSUCHNICK, arg.substr(1, arg.find(" ") - 1)); //Throw error cant find any channel :<serveur> 401 <nick> <nickname> :No such nick/channel
+		else
+			this->_channelList[Pos]->Mode(client, arg.substr(arg.find(" ") + 1));
 	}
 }
 
@@ -380,7 +439,6 @@ void Server::clientLeaveChannel(Client& client, const std::string& arg) {
 	int Pos = this->findChannel(dest);
 	if (Pos == -1)
 	{
-		std::cout << "TEST" << std::endl;
 		return ;
 		//throwRFCException(ERR_NOTONCHANNEL, dest); //Throw error cant find any channel :<serveur> 401 <nick> <nickname> :No such nick/channel
 	}
@@ -399,6 +457,9 @@ void Server::clientLeaveChannel(Client& client, const std::string& arg) {
 	}
 }
 
+/* ************************************************************************** */
+/* Cliant Handler */
+/* ************************************************************************** */
 
 void Server::clientSetupHandler(int i, int n, char *buffer)
 {
@@ -409,7 +470,7 @@ void Server::clientSetupHandler(int i, int n, char *buffer)
 		while (client->hasMessage()) {
 			std::string msg = client->popMessage();
 			try {
-				parseMessage(*client, msg);
+				parseMessage(*client, msg.erase(msg.length() - 1));
 			}
 			catch (AlreadyRegisteredException &e) {
 				std::string errorMsg = ":" + this->_hostName + " " + e.what() + "\r\n";
@@ -447,7 +508,7 @@ void Server::clientHandler(int i, int n, char *buffer)
 			std::cout << "Message received from client: ";
 			std::string msg = client->popMessage();
 			try {
-				parseMessage(*client, msg);
+				parseMessage(*client, msg.erase(msg.length() - 1));
 			}
 			catch (AlreadyRegisteredException &e) {
 				std::string errorMsg = ":" + this->_hostName + " " + e.what() + "\r\n";
@@ -471,17 +532,18 @@ void Server::clientHandler(int i, int n, char *buffer)
 	}
 }
 
+/* ************************************************************************** */
+/* Server start and loop */
+/* ************************************************************************** */
+
 void Server::start(void){
 	char buffer[4096];
-
 	std::cout << *this << std::endl;
-
 	// specifying the serv address
 	sockaddr_in serverAddress;
 	serverAddress.sin_family = AF_INET;
 	serverAddress.sin_port = htons(this->_port);
 	serverAddress.sin_addr.s_addr = INADDR_ANY;
-
 	// Configuration du socket...
 	int server_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (server_fd == -1)
@@ -491,25 +553,19 @@ void Server::start(void){
 		close(server_fd);
 		throw SetOptionSocketErrorException();
 	}
-
 	// binding socket.
 	if (bind(server_fd, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == -1) {
 		close(server_fd);
 		throw PortErrorException();
 	}
-
 	// Ajouter le socket serveur
 	addNewSocket(_fds, server_fd);
-
 	// listening to the assigned socket
 	if (listen(server_fd, 5) == -1) {
 		close(server_fd);
 		_fds.erase(_fds.begin());
 		throw ListeningErrorException();
 	}
-
-	std::cout << "Server is on" << std::endl;
-
 	while (true) {
 		int ret = poll(_fds.data(), _fds.size(), -1); // -1 = attente infinie
 		if (ret < 0)

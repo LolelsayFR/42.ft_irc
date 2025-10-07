@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:52:45 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/06 17:34:42 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/06 19:00:13 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,7 @@ public:
 	std::string getHost(void) const;
 	std::vector<struct pollfd>& getFds(void);
 	const std::vector<Client*>& getClientList(void) const;
+	const std::vector<Client*>& getSetupList(void) const;
 	const std::vector<Channel*>&	getChannelList(void) const;
 
 	void start(void);
@@ -49,6 +50,7 @@ public:
 	void welcomeUser(Client *client);
 
 	int findClient(Client& client);
+	int findClient(int fd);
 	int findClient(std::string name);
 	int findClientByNick(std::string nick);
 	int findClientSetup(int fd);
@@ -58,6 +60,7 @@ public:
 
 	void setClientNick(Client& client, std::string& nick);
 	void privMsgSend(Client& client, const std::string& name);
+	void sendModeChannel(Client& client, const std::string& name);
 	std::vector<Client*>::iterator isAvailable(Client& client);
 	void linkClientToChannel(Client& client, std::string& name);
 	void destroyOneClient(std::vector<struct pollfd> &fds, int i);
