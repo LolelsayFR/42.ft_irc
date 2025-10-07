@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
+/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 09:42:00 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/07 11:49:14 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,7 +149,7 @@ void Channel::setPassword(std::string pass) {
 /* ************************************************************************** */
 
 
-void Channel::Broadcast(Client& sender, std::string msg, broadcast type) {
+void Channel::Broadcast(Client& sender, std::string msg, broadcast type, Server& server) {
 	if (this->findClientJoin(sender) == -1) {
 		return ;
 		//throwRFCException(ERR_NOTONCHANNEL, this->getName());
@@ -164,93 +164,123 @@ void Channel::Broadcast(Client& sender, std::string msg, broadcast type) {
 		else if (type == BRCST_LEAVE_MSG)
 			static_cast<Client*>(*it)->leaveChannel(sender, msg, *this);
 		else if (type == BRCST_JOIN) {
-			std::string myMsg = ":" + sender.getNickname() + " JOIN " + this->getName() + "\r\n";
+			std::string myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " JOIN " + this->getName() + "\r\n";
 			send(static_cast<Client*>(*it)->getUid(), myMsg.c_str(), myMsg.length(), MSG_NOSIGNAL);
 		}
 		else if (type == BRCST_OP) {
-			std::string myMsg = ":" + SERVERNAME + " MODE " + this->getName() + " +o " + sender.getNickname() + "\r\n";
+			std::string myMsg = ":" + server.getHost() + " MODE " + this->getName() + " +o " + sender.getNickname() + "\r\n";
+			send(static_cast<Client*>(*it)->getUid(), myMsg.c_str(), myMsg.length(), MSG_NOSIGNAL);
+		}
+		else if (type == BRCST_DEOP) {
+			std::string myMsg = ":" + server.getHost() + " MODE " + this->getName() + " -o " + sender.getNickname() + "\r\n";
 			send(static_cast<Client*>(*it)->getUid(), myMsg.c_str(), myMsg.length(), MSG_NOSIGNAL);
 		}
 		it++;
 	}
+	(void)server;
 }
 
 //Channel command to join
-void Channel::Join(Client& client) {
+void Channel::Join(Client& client, Server& server) {
 	int clientPos = this->findClientJoin(client);
 	if (clientPos == -1) {
-	    std::vector<Client*>::iterator it = this->_inviteList.begin();
-	    std::vector<Client*>::iterator end = this->_inviteList.end();
 		this->_joinedList.push_back(&client);
-		if (this->_joinedList[0] == &client) {
-			this->Op(client);
-		}
-		this->Broadcast(client, "", BRCST_JOIN);
-		std::string myMsg = ":" + SERVERNAME + " 331 " + client.getNickname() + " " + this->getName() + " :No topic is set\r\n";
+
+		//Join Broadcast
+		this->Broadcast(client, "", BRCST_JOIN, server);
+
+		//Auto op
+		if (this->_joinedList[0] == &client)
+			this->Op(client, server);
+		//Topic
+		std::string myMsg = ":" + server.getHost() + " 331 " + client.getNickname() + " " + this->getName() + " :No topic is set\r\n";
 		if (!this->_topic.empty())
-    		myMsg = ":" + SERVERNAME + " 332 " + client.getNickname() + " " + this->getName() + " :" + this->_topic + "\r\n";
-		myMsg += ":" + SERVERNAME + " 353 " + client.getNickname() + " = " + this->getName() + " :";
-		myMsg += client.getNickname() + " ";
-	    for (; it != end; ++it)
-	        myMsg += static_cast<Client*>(*it)->getNickname() + " ";
-	    if (!this->_inviteList.empty())
-	        myMsg.erase(myMsg.size() - 1);
+    		myMsg = ":" + server.getHost() + " 332 " + client.getNickname() + " " + this->getName() + " :" + this->_topic + "\r\n";
+
+		//List of client
+		myMsg += ":" + server.getHost() + " 353 " + client.getNickname() + " = " + this->getName() + " :";
+	    std::vector<Client*>::iterator it = this->_joinedList.begin();
+	    std::vector<Client*>::iterator end = this->_joinedList.end();
+	    for (; it != end; ++it) {
+			if (this->findClientOp(*static_cast<Client*>(*it)) != -1)
+				myMsg += "@";
+	        myMsg += static_cast<Client*>(*it)->getNickname();
+			if (it + 1 != end)
+				myMsg += " ";
+		}
 	    myMsg += "\r\n";
-		myMsg += ":" + SERVERNAME + " 366 " + client.getNickname() + " " + this->getName() + " :End of /NAMES list.\r\n";
+		//End of list
+		myMsg += ":" + server.getHost() + " 366 " + client.getNickname() + " " + this->getName() + " :End of /NAMES list.\r\n";	
 		send(client.getUid(), myMsg.c_str(), myMsg.length(), MSG_NOSIGNAL);
 	}
+	(void)server;
 }
 
 //Channel command to kick
-void Channel::Kick(Client& client) {
+void Channel::Kick(Client& client, Server& server) {
 	int clientPos = this->findClientJoin(client);
 	if (clientPos >= 0)
 		this->_joinedList.erase(_joinedList.begin() + clientPos);
+	(void)server;
 }
 
 //Channel command to add invite
-void Channel::Invite(Client& client) {
+void Channel::Invite(Client& client, Server& server) {
 	int clientPos = this->findClientInvite(client);
 	if (clientPos == -1)
 		this->_inviteList.push_back(&client);
+	(void)server;
 }
 
 //Channel command to remove invite
-void Channel::DeInvite(Client& client) {
+void Channel::DeInvite(Client& client, Server& server) {
 	int clientPos = this->findClientInvite(client);
 	if (clientPos >= 0)
 		this->_inviteList.erase(_inviteList.begin() + clientPos);
+	(void)server;
 }
 
 //Channel command to add operator
-void Channel::Op(Client& client) {
+void Channel::Op(Client& client, Server&server) {
 	int clientPos = this->findClientOp(client);
 	if (clientPos == -1) {
 		this->_opList.push_back(&client);
-		this->Broadcast(client, "", BRCST_OP);
+		this->Broadcast(client, "", BRCST_OP, server);
 	}
 }
 
 //Channel command to remove operator
-void Channel::DeOp(Client& client) {
+void Channel::DeOp(Client& client, Server& server) {
 	int clientPos = this->findClientOp(client);
-	if (clientPos >= 0)
+	if (clientPos != -1) {
 		this->_opList.erase(_opList.begin() + clientPos);
+		this->Broadcast(client, "", BRCST_DEOP, server);
+	}
 }
 
 //Channel command to set topic
-void Channel::Topic(std::string topic) {
+void Channel::Topic(std::string topic, Server& server) {
 	if (topic.length() < 256)
 		this->_topic = topic;
+	(void)server;
 }
 
 //Channel commands
-void Channel::Mode(Client& sender , std::string option) {
-	int clientPos = this->findClientOp(sender);
-	if (clientPos == -1)
-		return ;//throwRFCException(ERR_NOTONCHANNEL, this->getName());
-	//if (option)
-	std::cout << option  + "----------------------------------------------------------" << std::endl;
+void Channel::Mode(Client& sender , std::string option, Server& server) {
+	int senderPos = this->findClientOp(sender);
+	std::istringstream iss(option);
+	std::string opt, targetName, channel;
+		iss >> channel >> opt >> targetName;
+	if (!targetName.empty()){
+		int targetPos = this->findClientJoin(targetName);
+		Client *target = this->_joinedList[targetPos];
+		if (senderPos == -1)
+			return ;//throwRFCException(ERR_NOTONCHANNEL, this->getName()); ?? // PAS OP
+		if (opt == "+o")
+			this->Op(*target, server); 
+		else if (opt == "-o")
+			this->DeOp(*target, server);
+	}
 }
 
 /* ************************************************************************** */
@@ -264,6 +294,19 @@ int Channel::findClientJoin(Client& client) {
 	for(int i = 0; it != end; i++) {
 		if (*it == &client)
 			return (i);
+		it++;
+	}
+	return (-1);
+}
+
+//Client id in join vector list By nick
+int Channel::findClientJoin(std::string nick) {
+	std::vector<Client*>::iterator	it = this->_joinedList.begin();
+	std::vector<Client*>::iterator	end = this->_joinedList.end();
+	for(int i = 0; it != end; i++) {
+		if (static_cast<Client*>(*it)->getNickname() == nick) {
+			return (i);
+		}
 		it++;
 	}
 	return (-1);

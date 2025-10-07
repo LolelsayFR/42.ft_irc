@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
+/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 10:02:40 by artgirar         ###   ########.fr       */
+/*   Updated: 2025/10/07 11:49:38 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -274,11 +274,11 @@ void	Server::destroyOneClient(std::vector<struct pollfd> &fds , int i)
 	for(int i = 0; it != end; i++) {
 		channel = static_cast<Channel*>(*it);
 		if (channel->findClientJoin(*target) != -1)
-			channel->Kick(*target);
+			channel->Kick(*target, *this);
 		if (channel->findClientInvite(*target) != -1)
-			channel->DeInvite(*target);
+			channel->DeInvite(*target, *this);
 		if (channel->findClientOp(*target) != -1)
-			channel->DeOp(*target);
+			channel->DeOp(*target, *this);
 		it++;
 	}
 	//destroy client in server base class
@@ -329,8 +329,6 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 			throw ClientPasswordException();
 		std::cout << "Password Correct" << std::endl;
 	}
-	else if (this->findClientSetup(client.getUid()) != -1) // Limite les action des setupClients
-		return; //throw() Peut etre une exception custom ??
 	else if (command == "PING")
 	{
 		std::string server;
@@ -340,6 +338,8 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 		send(client.getUid(), pongResponse.c_str(), pongResponse.size(), MSG_NOSIGNAL);
 		//std::cout << "Responded to PING with PONG" << std::endl;
 	}
+	else if (this->findClientSetup(client.getUid()) != -1) // Limite les action des setupClients
+		return; //throw() Peut etre une exception custom ??
 	else if (command == "JOIN") {
 		std::string arg;
 		iss >> arg;
@@ -350,6 +350,11 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 	}
 	else if (command == "PART") {
 		this->clientLeaveChannel(client, msg);
+	}
+	else if (command == "KICK") {
+		this->clientLeaveChannel(client, msg);
+		std::string channel, targetNick, reason;
+			iss >> channel >> targetNick >> reason;
 	}
 	else if (command == "MODE") {
 		std::string cmd;
@@ -368,10 +373,10 @@ void Server::linkClientToChannel(Client& client, std::string& arg) {
 		name = arg.substr(pos + 1, arg.length() - pos);
 		arg.erase(pos, arg.length() - pos);
 		pos = arg.rfind(",");
-		makeChannel(name)->Join(client);
+		makeChannel(name)->Join(client, *this);
 	}
 	name = arg.substr(pos + 1, arg.length() - pos);
-	makeChannel(name)->Join(client);
+	makeChannel(name)->Join(client, *this);
 }
 
 void Server::setClientNick(Client& client, std::string& nick) {
@@ -397,7 +402,7 @@ void Server::privMsgSend(Client& client, const std::string& arg) {
 		if (Pos == -1)
 			throwRFCException(ERR_NOSUCHNICK, dest); //Throw error cant find any channel :<serveur> 401 <nick> <nickname> :No such nick/channel
 		else
-			this->_channelList[Pos]->Broadcast(client, msg, BRCST_PRVMSG);
+			this->_channelList[Pos]->Broadcast(client, msg, BRCST_PRVMSG, *this);
 	}
 	else {
 		int Pos = this->findClientByNick(dest);
@@ -412,12 +417,15 @@ void Server::privMsgSend(Client& client, const std::string& arg) {
 }
 
 void Server::sendModeChannel(Client& client, const std::string& arg) {
+	std::istringstream iss(arg);
+	std::string target;
+		iss >> target;
 	if (arg[0] == '#' || arg[0] == '&' || arg[0] == '+' || arg[0] == '!') {
-		int Pos = this->findChannel(arg.substr(1, arg.find(" ") - 1));
+		int Pos = this->findChannel(target);
 		if (Pos == -1)
 			throwRFCException(ERR_NOSUCHNICK, arg.substr(1, arg.find(" ") - 1)); //Throw error cant find any channel :<serveur> 401 <nick> <nickname> :No such nick/channel
 		else
-			this->_channelList[Pos]->Mode(client, arg.substr(arg.find(" ") + 1));
+			this->_channelList[Pos]->Mode(client, arg, *this);
 	}
 }
 
@@ -440,11 +448,11 @@ void Server::clientLeaveChannel(Client& client, const std::string& arg) {
 			return ;
 		if (separatorPos > 0 && separatorPos < (int)arg.length()) {
 			std::string	msg(arg.substr(separatorPos + 1));
-			this->_channelList[Pos]->Broadcast(client, msg, BRCST_LEAVE_MSG);
+			this->_channelList[Pos]->Broadcast(client, msg, BRCST_LEAVE_MSG, *this);
 		}
 		else
-			this->_channelList[Pos]->Broadcast(client, "", BRCST_LEAVE);
-		this->_channelList[Pos]->Kick(client);
+			this->_channelList[Pos]->Broadcast(client, "", BRCST_LEAVE, *this);
+		this->_channelList[Pos]->Kick(client, *this);
 
 	}
 }
@@ -468,7 +476,7 @@ void Server::clientSetupHandler(int i, int n, char *buffer)
 				parseMessage(*client, msg.erase(msg.length() - endMessages));
 			}
 			catch (AlreadyRegisteredException &e) {
-				std::string errorMsg = ":" + this->_hostName + " " + e.what() + "\r\n";
+				std::string errorMsg = ":" + this->_hostName + " " + e.what() + "\r\n"; 
 				send(client->getUid(), errorMsg.c_str(), errorMsg.length(), MSG_NOSIGNAL);
 				destroyOneClient(_fds, i);
 				std::cerr << e.what() << std::endl;

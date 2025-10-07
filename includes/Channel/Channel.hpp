@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 17:46:54 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/06 15:29:40 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 11:27:27 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 # include "Irc.hpp"
 
 class Client;
+class Server;
 
 enum broadcast
 {
@@ -24,7 +25,8 @@ enum broadcast
 	BRCST_LEAVE_MSG,
 	BRCST_KICK,
 	BRCST_JOIN,
-	BRCST_OP
+	BRCST_OP,
+	BRCST_DEOP	
 };
 
 class Channel {
@@ -50,20 +52,21 @@ public:
 	const std::vector<Client*>&     getOpList(void) const;
 	const std::vector<Client*>&	getInviteList(void) const;
 
-	void Broadcast(Client& sender, std::string msg, broadcast type);
+	void Broadcast(Client& sender, std::string msg, broadcast type, Server& server);
  
 	void setPassword(std::string pass);
-	void Op(Client& client);
-	void DeOp(Client& client);
-	void Join(Client& client);
-	void Kick(Client& client);
-	void Invite(Client& client);
-	void DeInvite(Client& client);
-	void Topic(std::string topic);
-	void Mode(Client& sender , std::string option);
+	void Op(Client& client, Server& server);
+	void DeOp(Client& client, Server& server);
+	void Join(Client& client, Server& server);
+	void Kick(Client& client, Server& server);
+	void Invite(Client& client, Server& server);
+	void DeInvite(Client& client, Server& server);
+	void Topic(std::string topic, Server& server);
+	void Mode(Client& sender , std::string option, Server& server);
 
 	int findClientOp(Client& client);
 	int findClientJoin(Client& client);
+	int findClientJoin(std::string nick);
 	int findClientInvite(Client& client);
 };
 
