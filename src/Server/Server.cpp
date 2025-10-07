@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/06 19:02:30 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 09:29:24 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ Server::~Server(void) {
 		this->destroyOneClient(this->getFds(), i);
 	}
 	for (int i = this->_setupList.size(); i > 0; i--) {
-		this->destroyOneClient(this->getFds(), i);
+		delete this->_setupList[i];
 	}
 	std::vector<Channel*>::iterator	it = this->_channelList.begin();
 	std::vector<Channel*>::iterator	end = this->_channelList.end();
@@ -306,25 +306,7 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 	std::istringstream iss(msg);
 	std::string command;
 	iss >> command;
-	if (command == "PING")
-	{
-		std::string server;
-		iss >> server;
-		//std::cout << "Received PING from " << server << std::endl;
-		std::string pongResponse = "PONG :" + server + "\r\n";
-		send(client.getUid(), pongResponse.c_str(), pongResponse.size(), MSG_NOSIGNAL);
-		//std::cout << "Responded to PING with PONG" << std::endl;
-	}
-	else if (command == "PASS") {
-		std::string pass;
-		iss >> pass;
-		if (pass.empty())
-			throw ClientPasswordException();
-		if (pass != _password)
-			throw ClientPasswordException();
-		std::cout << "Password Correct" << std::endl;
-	}
-	else if (command == "NICK") {
+	if (command == "NICK") {
 		std::string nick;
 		iss >> nick;
 		this->setClientNick(client, nick);
@@ -337,6 +319,34 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 		client.setRealname(realname.c_str() + 2);
 		client.setHostname(hostname);
 		std::cout << "Username set to " << username << " for fd " << client.getUid() << std::endl;
+	}
+	else if (command == "PASS") {
+		std::string pass;
+		iss >> pass;
+		if (pass.empty())
+			throw ClientPasswordException();
+		if (pass != _password)
+			throw ClientPasswordException();
+		std::cout << "Password Correct" << std::endl;
+	}
+	else if (command == "QUIT") {
+		//if (this->findClientSetup(client.getUid()) != -1) {
+		//	this->_setupList.erase(this->_setupList.begin() + this->findClientSetup(client.getUid()));
+		//	delete &client;
+		//}	
+		//else
+		//	destroyOneClient(_fds, findClient(client));
+	}
+	else if (this->findClientSetup(client.getUid()) != -1) // Limite les action des setupClients
+		return; //throw() Peut etre une exception custom ??
+	else if (command == "PING")
+	{
+		std::string server;
+		iss >> server;
+		//std::cout << "Received PING from " << server << std::endl;
+		std::string pongResponse = "PONG :" + server + "\r\n";
+		send(client.getUid(), pongResponse.c_str(), pongResponse.size(), MSG_NOSIGNAL);
+		//std::cout << "Responded to PING with PONG" << std::endl;
 	}
 	else if (command == "JOIN") {
 		std::string arg;
@@ -447,6 +457,9 @@ void Server::clientLeaveChannel(Client& client, const std::string& arg) {
 	}
 }
 
+/* ************************************************************************** */
+/* Cliant Handler */
+/* ************************************************************************** */
 
 void Server::clientSetupHandler(int i, int n, char *buffer)
 {
@@ -519,17 +532,18 @@ void Server::clientHandler(int i, int n, char *buffer)
 	}
 }
 
+/* ************************************************************************** */
+/* Server start and loop */
+/* ************************************************************************** */
+
 void Server::start(void){
 	char buffer[4096];
-
 	std::cout << *this << std::endl;
-
 	// specifying the serv address
 	sockaddr_in serverAddress;
 	serverAddress.sin_family = AF_INET;
 	serverAddress.sin_port = htons(this->_port);
 	serverAddress.sin_addr.s_addr = INADDR_ANY;
-
 	// Configuration du socket...
 	int server_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (server_fd == -1)
@@ -539,25 +553,19 @@ void Server::start(void){
 		close(server_fd);
 		throw SetOptionSocketErrorException();
 	}
-
 	// binding socket.
 	if (bind(server_fd, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == -1) {
 		close(server_fd);
 		throw PortErrorException();
 	}
-
 	// Ajouter le socket serveur
 	addNewSocket(_fds, server_fd);
-
 	// listening to the assigned socket
 	if (listen(server_fd, 5) == -1) {
 		close(server_fd);
 		_fds.erase(_fds.begin());
 		throw ListeningErrorException();
 	}
-
-	std::cout << "Server is on" << std::endl;
-
 	while (true) {
 		int ret = poll(_fds.data(), _fds.size(), -1); // -1 = attente infinie
 		if (ret < 0)
