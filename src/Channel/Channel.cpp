@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 21:19:15 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/07 21:21:02 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -278,7 +278,7 @@ void Channel::DeOp(Client& client, Server& server, Client& sender) {
 //Channel command to set topic
 void Channel::Topic(std::string topic, Server& server, Client& sender) {
 	if (this->_needOpTopic == true && this->findClientOp(sender) == -1)
-		return ; //throwRFCException(ERR_CHANOPRIVSNEEDED, this->getName());
+		throwRFCException(ERR_CHANOPRIVSNEEDED, this->getName());
 	if (topic.length() < 255)
 	{
 		std::string myMsg = ":" + server.getHost() + " 332 " + sender.getNickname() + " " + this->_name + " :" + topic.c_str() + "\r\n";

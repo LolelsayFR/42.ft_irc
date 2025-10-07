@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:35:21 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 21:20:16 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/07 21:22:43 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,7 +83,12 @@ BadChannelKeyException::BadChannelKeyException(const std::string& arg) : message
 
 BadChannelKeyException::~BadChannelKeyException() throw() {}
 
+ChanOpPrivsNeededException::ChanOpPrivsNeededException(const std::string& arg) : message(arg)
+{
+	this->fullMessage = this->message + E_CHANOPRIVSNEEDED;
+}
 
+ChanOpPrivsNeededException::~ChanOpPrivsNeededException() throw() {}
 
 
 const char* AlreadyRegisteredException::what() const throw() {
@@ -110,6 +115,10 @@ const char* BadChannelKeyException::what(void) const throw() {
 	return (this->fullMessage.c_str());
 }
 
+const char* ChanOpPrivsNeededException::what(void) const throw() {
+	return (this->fullMessage.c_str());
+}
+
 void throwRFCException(enum Exceptions exception, std::string arg) {
 	switch (exception)
 	{
@@ -119,6 +128,14 @@ void throwRFCException(enum Exceptions exception, std::string arg) {
 			throw NosuchNickException(arg);
 		case ERR_NOTONCHANNEL:
 			throw NotOnChannelException(arg);
+		case ERR_CHANNELISFULL:
+			throw ChannelIsFullException(arg);
+		case ERR_INVITEONLYCHAN:
+			throw InviteOnlyChanException(arg);
+		case ERR_BADCHANNELKEY:
+			throw BadChannelKeyException(arg);
+		case ERR_CHANOPRIVSNEEDED:
+			throw ChanOpPrivsNeededException(arg);
 		default :
 			throw RFCException();
 	}
