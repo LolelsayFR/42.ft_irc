@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 17:46:54 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 15:41:13 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 16:33:16 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ public:
 	void DeOp(Client& client, Server& server, Client& sender);
 	void Join(Client& client, Server& server);
 	void Kick(std::string nick, Server& server, std::string reason, bool leave, Client& sender);
-	void Invite(Client& client, Server& server);
+	void Invite(Client& client, Client& sender);
 	void DeInvite(Client& client, Server& server);
 	void Topic(std::string topic, Server& server);
 	void Mode(Client& sender , std::string option, Server& server);

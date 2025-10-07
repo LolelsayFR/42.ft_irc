@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 16:21:14 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 16:33:11 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -349,7 +349,8 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 		int channelPos = this->findChannel(channelName);
 		if (channelPos == -1)
 			return; //throw() no channel find to invite in
-		this->_channelList[channelPos]->Invite(*this->_clientList[targetPos], *this);
+		this->_channelList[channelPos]->Invite(*this->_clientList[targetPos], client);
+		
 	}
 	else if (command == "JOIN") {
 		std::string arg;
