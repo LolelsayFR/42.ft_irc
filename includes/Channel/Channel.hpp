@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 17:46:54 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 11:27:27 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 12:41:25 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,10 +23,10 @@ enum broadcast
 	BRCST_PRVMSG,
 	BRCST_LEAVE,
 	BRCST_LEAVE_MSG,
-	BRCST_KICK,
 	BRCST_JOIN,
 	BRCST_OP,
-	BRCST_DEOP	
+	BRCST_DEOP,
+	BRCST_KICK
 };
 
 class Channel {
@@ -58,7 +58,7 @@ public:
 	void Op(Client& client, Server& server);
 	void DeOp(Client& client, Server& server);
 	void Join(Client& client, Server& server);
-	void Kick(Client& client, Server& server);
+	void Kick(std::string nick, Server& server, std::string reason, bool leave, Client& sender);
 	void Invite(Client& client, Server& server);
 	void DeInvite(Client& client, Server& server);
 	void Topic(std::string topic, Server& server);

@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 11:54:12 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 13:17:59 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -173,6 +173,8 @@ void Channel::Broadcast(Client& sender, std::string msg, broadcast type, Server&
 			std::string myMsg = ":" + server.getHost() + " MODE " + this->getName() + " -o " + sender.getNickname() + "\r\n";
 			send(static_cast<Client*>(*it)->getUid(), myMsg.c_str(), myMsg.length(), MSG_NOSIGNAL);
 		}
+		else if (type == BRCST_KICK)
+			send(static_cast<Client*>(*it)->getUid(), msg.c_str(), msg.length(), MSG_NOSIGNAL);
 		it++;
 	}
 	(void)server;
@@ -215,9 +217,14 @@ void Channel::Join(Client& client, Server& server) {
 }
 
 //Channel command to kick
-void Channel::Kick(Client& client, Server& server) {
-	int clientPos = this->findClientJoin(client);
-	if (clientPos >= 0)
+void Channel::Kick(std::string nick, Server& server, std::string reason, bool leave, Client& sender) {
+	int clientPos = this->findClientJoin(nick);
+	if (clientPos >= 0) {
+		std::string myMsg = ":" + sender.getNickname() + " KICK " + this->getName() + " " + nick + "\r\n";
+		if (reason.length() > 1)
+			std::string myMsg = ":" + sender.getNickname() + " KICK " + this->getName() + " " + nick + " " + reason + "\r\n";
+		if (leave == false)
+			this->Broadcast(sender, myMsg, BRCST_KICK, server);
 		this->_joinedList.erase(_joinedList.begin() + clientPos);
 	int opPos = this->findClientOp(client);
 	if (opPos >= 0)
@@ -274,6 +281,8 @@ void Channel::Mode(Client& sender , std::string option, Server& server) {
 		iss >> channel >> opt >> targetName;
 	if (!targetName.empty()){
 		int targetPos = this->findClientJoin(targetName);
+		if (targetPos == -1)
+			return; //throw() no client find to aply mode
 		Client *target = this->_joinedList[targetPos];
 		if (senderPos == -1)
 			return ;//throwRFCException(ERR_NOTONCHANNEL, this->getName()); ?? // PAS OP
