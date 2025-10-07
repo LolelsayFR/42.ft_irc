@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
+/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 17:46:54 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 12:41:25 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 15:51:15 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,8 @@ enum broadcast
 	BRCST_JOIN,
 	BRCST_OP,
 	BRCST_DEOP,
-	BRCST_KICK
+	BRCST_KICK,
+	BRCST_TOPIC
 };
 
 class Channel {
@@ -53,7 +54,7 @@ public:
 	const std::vector<Client*>&	getInviteList(void) const;
 
 	void Broadcast(Client& sender, std::string msg, broadcast type, Server& server);
- 
+
 	void setPassword(std::string pass);
 	void Op(Client& client, Server& server);
 	void DeOp(Client& client, Server& server);
