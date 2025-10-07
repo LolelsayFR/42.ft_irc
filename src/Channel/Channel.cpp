@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 14:47:55 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 15:02:16 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -212,7 +212,6 @@ void Channel::Kick(std::string nick, Server& server, std::string reason, bool le
 	int clientPos = this->findClientJoin(nick);
 	if (clientPos >= 0) {
 
-		std::cout << "asdas\n\n\n" << reason << "\n\n\n";
 		std::string myMsg;
 		if (!reason.empty()) {
 		    myMsg = ":" + sender.getNickname() + " KICK " + this->getName() + " " + nick + " :" + reason + "\r\n";
