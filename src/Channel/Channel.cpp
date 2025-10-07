@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 15:55:41 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/07 16:03:14 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ Channel::Channel(std::string name) : _name(name) {
 	this->_password = "";
 	this->_needInvite = false;
 	this->_needPassword = false;
+	this->_maxClient = 0;
 }
 
 // Default destructor
@@ -178,6 +179,19 @@ void Channel::Broadcast(Client& sender, std::string msg, broadcast type, Server&
 void Channel::Join(Client& client, Server& server) {
 	int clientPos = this->findClientJoin(client);
 	if (clientPos == -1) {
+		if (this->_maxClient != 0 && (int)this->_joinedList.size() >= this->_maxClient) {
+			//throwRFCException(ERR_CHANNELISFULL, this->getName());
+			return ;
+		}
+		if (this->_needInvite == true && this->findClientInvite(client) == -1) {
+			//throwRFCException(ERR_INVITEONLYCHAN, this->getName());
+			return ;
+		}
+		if (this->_needPassword == true) {
+			//Password check pass
+			//if (this->_password != pass)
+				//throwRFCException(ERR_BADCHANNELKEY, this->getName());
+		}
 		this->_joinedList.push_back(&client);
 
 		//Join Broadcast
@@ -277,13 +291,50 @@ void Channel::Topic(std::string topic, Server& server) {
 }
 
 //Channel commands
-void Channel::Mode(Client& sender , std::string option, Server& server) {
+void Channel::Mode(Client& sender, std::string option, Server& server) {
 	int senderPos = this->findClientOp(sender);
 	std::istringstream iss(option);
-	std::string opt, targetName, channel;
-		iss >> channel >> opt >> targetName;
-	if (!targetName.empty()){
-		int targetPos = this->findClientJoin(targetName);
+	std::string opt, target, channel;
+		iss >> channel >> opt >> target;
+	if (opt == "+l") {
+		int maxValue = std::atoi(target.c_str());
+		if (maxValue > 0) {
+			this->_maxClient = maxValue;
+		}
+		std::cout << "Max client set to " << this->_maxClient << std::endl;
+	}
+	else if (opt == "-l") {
+		this->_maxClient = 0;
+		std::cout << "Max client remove" << std::endl;
+	}
+	else if (opt == "+t") {
+		this->_needOpTopic = true;
+		std::cout << "Need op to set topic" << std::endl;
+	}
+	else if (opt == "-t") {
+		this->_needOpTopic = false;
+		std::cout << "No need op to set topic" << std::endl;
+	}
+	else if (opt == "+i") {
+		this->_needInvite = true;
+		std::cout << "Need invite to join channel" << std::endl;
+	}
+	else if (opt == "-i") {
+		this->_needInvite = false;
+		std::cout << "No need invite to join channel" << std::endl;
+	}
+	else if (opt == "+k") {
+		this->_needPassword = true;
+		this->setPassword(target);
+		std::cout << "Need password to join channel, the pass is '" << this->getPassword() << "'" << std::endl;
+	}
+	else if (opt == "-k") {
+		this->_needPassword = false;
+		this->setPassword("");
+		std::cout << "No need password to join channel" << std::endl;
+	}
+	else if (!target.empty() && opt != "+o" && opt != "-o") {
+		int targetPos = this->findClientJoin(target);
 		if (targetPos == -1)
 			return; //throw() no client find to aply mode
 		Client *target = this->_joinedList[targetPos];
@@ -293,7 +344,8 @@ void Channel::Mode(Client& sender , std::string option, Server& server) {
 			this->Op(*target, server, sender); 
 		else if (opt == "-o")
 			this->DeOp(*target, server, sender);
-	}
+	} 
+
 }
 
 /* ************************************************************************** */
