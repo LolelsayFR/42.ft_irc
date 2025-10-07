@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:35:21 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 21:15:05 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/07 21:18:19 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,13 @@ ChannelIsFullException::ChannelIsFullException(const std::string& arg) : message
 ChannelIsFullException::~ChannelIsFullException() throw() {}
 
 
+InviteOnlyChanException::InviteOnlyChanException(const std::string& arg) : message(arg)
+{
+	this->fullMessage = this->message + E_INVITEONLYCHAN;
+}
+
+InviteOnlyChanException::~InviteOnlyChanException() throw() {}
+
 
 const char* AlreadyRegisteredException::what() const throw() {
 	return (this->fullMessage.c_str());
@@ -82,6 +89,10 @@ const char* NotOnChannelException::what(void) const throw() {
 }
 
 const char* ChannelIsFullException::what(void) const throw() {
+	return (this->fullMessage.c_str());
+}
+
+const char* InviteOnlyChanException::what(void) const throw() {
 	return (this->fullMessage.c_str());
 }
 

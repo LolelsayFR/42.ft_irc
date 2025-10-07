@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:10:41 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 21:14:19 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/07 21:17:49 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,8 @@ enum Exceptions
 	ERR_ALREADYREGISTRED = 461,
 	ERR_NOSUCHNICK = 401,
 	ERR_NOTONCHANNEL = 442,
-	ERR_CHANNELISFULL = 471
+	ERR_CHANNELISFULL = 471,
+	ERR_INVITEONLYCHAN = 473
 };
 
 class ParsingException : public std::exception
@@ -98,6 +99,17 @@ class ChannelIsFullException : public RFCException
 		virtual const char* what() const throw();
 };
 
+class InviteOnlyChanException : public RFCException
+{
+	private:
+		std::string message;
+		std::string fullMessage;
+
+	public:
+		InviteOnlyChanException(const std::string& arg);
+		virtual ~InviteOnlyChanException() throw();
+		virtual const char* what() const throw();
+};
 
 class ClientPasswordException : public std::exception
 {

@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:08:58 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 21:15:52 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/07 21:17:59 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,5 +28,6 @@
 # define E_NOSUCHNICK        	": No such nick/channel."
 # define E_NOTONCHANNEL     	": You're not on that channel."
 # define E_CHANNELISFULL     	": Cannot join channel (+l)."
+# define E_INVITEONLYCHAN     	": Cannot join channel (+i)."
 
 #endif // LANG_HPP
