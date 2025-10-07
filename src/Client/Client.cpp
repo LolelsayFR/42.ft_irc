@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 15:34:55 by arthur            #+#    #+#             */
-/*   Updated: 2025/10/06 18:08:57 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 17:43:39 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,6 @@
 #include "Server/Server.hpp"
 #include "Errors/Exception.hpp"
 #include "Channel/Channel.hpp"
-
-# define WHI 			"\e[1;38;5;0;107m "
-# define RES			" \e[0m"
 
 Client::Client(int fd) : _uid(fd), _isRegistered(false), _welcomeSent(false), _realname(""), _hostname(""){
 	std::cout << "New client connected with fd: " << fd << std::endl;
