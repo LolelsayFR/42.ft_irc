@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 11:51:56 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 11:54:12 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -189,7 +189,7 @@ void Channel::Join(Client& client, Server& server) {
 
 		//Auto op
 		if (this->_joinedList[0] == &client)
-			this->Op(client, server);
+			this->_opList.push_back(&client);
 		//Topic
 		std::string myMsg = ":" + server.getHost() + " 331 " + client.getNickname() + " " + this->getName() + " :No topic is set\r\n";
 		if (!this->_topic.empty())
