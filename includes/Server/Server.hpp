@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:52:45 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 10:16:52 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 17:59:57 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,9 @@
 #include "Irc.hpp"
 #include "Client/Client.hpp"
 #include "Channel/Channel.hpp"
+
+# define WLCM_MESSAGE 			"\e[48;2;20;100;20;1m Welcome to IRCDebout \e[0m "
+
 
 class Client;
 

@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 17:25:25 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 17:58:14 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -159,7 +159,7 @@ void Server::welcomeUser(Client *client)
 {
 	if (!client->getWelcomeSent())
 	{
-		std::string welcomeMsg = ": ""001 " + client->getNickname() + " :Welcome to the IRC Network, " + client->getNickname() + "\r\n";
+		std::string welcomeMsg = ": ""001 " + client->getNickname() + " :" + WLCM_MESSAGE + ": your nick is " + client->getNickname() + "\r\n";
 		welcomeMsg += ": 002 " + client->getNickname() + " :Your host is " + this->_hostName + ", running version 1.0\r\n";
 		welcomeMsg += ": 003 " + client->getNickname() + " :This server was created today\r\n";
 		welcomeMsg += ": 004 " + client->getNickname() + " " + this->_hostName + " " + client->getHostname() + "\r\n";
@@ -168,12 +168,16 @@ void Server::welcomeUser(Client *client)
 		int setupPos = this->findClientSetup(client->getUid());
 		this->_setupList.erase(this->_setupList.begin() + setupPos);
 		this->_clientList.push_back(client);
-		std::cout << WHI << "USER SETUP OK" << RES << std::endl
-				<< " | U = " <<  std::setw(10) << client->getUsername()
-				<< " | N = " <<  std::setw(10) << client->getNickname()
-				<< " | R = " <<  std::setw(20) << client->getRealname()
-				<< " | H = " <<  std::setw(10) << client->getHostname()
-				<< " |"  << std::endl;
+		std::cout << WHI << "USER SETUP OK" << RES << std::endl;
+		//Broadcast welcome message to all clients
+		std::vector<Client*>::iterator	it = this->_clientList.begin();
+		std::vector<Client*>::iterator	end = this->_clientList.end();
+		std::string broadcastMsg = ":" + client->getNickname() + "!" + client->getUsername() + "@" + client->getHostname() + " JOIN :" + WLCM_MESSAGE + "\r\n";
+		for (; it != end; it++) {
+			if (static_cast<Client*>(*it)->getNickname() != client->getNickname())
+				send(static_cast<Client*>(*it)->getUid(), broadcastMsg.c_str(), broadcastMsg.length(), MSG_NOSIGNAL);
+		}
+
 	}
 }
 
