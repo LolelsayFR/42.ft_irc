@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 09:29:24 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 10:02:40 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -470,7 +470,10 @@ void Server::clientSetupHandler(int i, int n, char *buffer)
 		while (client->hasMessage()) {
 			std::string msg = client->popMessage();
 			try {
-				parseMessage(*client, msg.erase(msg.length() - 1));
+				int endMessages = 0;
+				if (msg[msg.length() - 1] == '\r')
+					endMessages = 1;
+				parseMessage(*client, msg.erase(msg.length() - endMessages));
 			}
 			catch (AlreadyRegisteredException &e) {
 				std::string errorMsg = ":" + this->_hostName + " " + e.what() + "\r\n";
@@ -508,7 +511,10 @@ void Server::clientHandler(int i, int n, char *buffer)
 			std::cout << "Message received from client: ";
 			std::string msg = client->popMessage();
 			try {
-				parseMessage(*client, msg.erase(msg.length() - 1));
+				int endMessages = 0;
+				if (msg[msg.length() - 1] == '\r')
+					endMessages = 1;
+				parseMessage(*client, msg.erase(msg.length() - endMessages));
 			}
 			catch (AlreadyRegisteredException &e) {
 				std::string errorMsg = ":" + this->_hostName + " " + e.what() + "\r\n";
