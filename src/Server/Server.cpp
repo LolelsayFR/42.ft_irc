@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
+/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 09:29:24 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 10:20:17 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ std::ostream& operator<<(std::ostream& o, Server& s) {
 		o << std::endl << WHI <<  "/* Client connected * */" << RES << std::endl;
 		if (list.empty())
 			o << " /\tEmpty.." << std::endl;
-		else 
+		else
 			for (int i = 0; it != end; i++, it++) {
 				ptr = *it;
 				{
@@ -329,14 +329,6 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 			throw ClientPasswordException();
 		std::cout << "Password Correct" << std::endl;
 	}
-	else if (command == "QUIT") {
-		//if (this->findClientSetup(client.getUid()) != -1) {
-		//	this->_setupList.erase(this->_setupList.begin() + this->findClientSetup(client.getUid()));
-		//	delete &client;
-		//}	
-		//else
-		//	destroyOneClient(_fds, findClient(client));
-	}
 	else if (this->findClientSetup(client.getUid()) != -1) // Limite les action des setupClients
 		return; //throw() Peut etre une exception custom ??
 	else if (command == "PING")
@@ -360,7 +352,7 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 		this->clientLeaveChannel(client, msg);
 	}
 	else if (command == "MODE") {
-		std::string cmd; 
+		std::string cmd;
 		std::getline(iss, cmd);
 		this->sendModeChannel(client, cmd.c_str() + 1);
 	}
@@ -393,7 +385,7 @@ void Server::setClientNick(Client& client, std::string& nick) {
 		}
 		else
 			return ;
-			//EXCEPTION NICKNAME ALREADY USE 
+			//EXCEPTION NICKNAME ALREADY USE
 		std::cout << "Nickname set to " << nick << " for fd " << client.getUid() << std::endl;
 }
 

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
+/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/06 19:05:33 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 09:42:00 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -196,7 +196,7 @@ void Channel::Join(Client& client) {
 	    if (!this->_inviteList.empty())
 	        myMsg.erase(myMsg.size() - 1);
 	    myMsg += "\r\n";
-		myMsg += ":" + SERVERNAME + " 366 " + client.getNickname() + " " + this->getName() + " :End of /NAMES list.\r\n";	
+		myMsg += ":" + SERVERNAME + " 366 " + client.getNickname() + " " + this->getName() + " :End of /NAMES list.\r\n";
 		send(client.getUid(), myMsg.c_str(), myMsg.length(), MSG_NOSIGNAL);
 	}
 }
@@ -248,7 +248,7 @@ void Channel::Topic(std::string topic) {
 void Channel::Mode(Client& sender , std::string option) {
 	int clientPos = this->findClientOp(sender);
 	if (clientPos == -1)
-		;//throwRFCException(ERR_NOTONCHANNEL, this->getName());
+		return ;//throwRFCException(ERR_NOTONCHANNEL, this->getName());
 	//if (option)
 	std::cout << option  + "----------------------------------------------------------" << std::endl;
 }
