@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
+/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 15:34:55 by arthur            #+#    #+#             */
-/*   Updated: 2025/10/07 17:43:39 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 21:11:25 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,15 +112,16 @@ void Client::receptMessage(Client& sender, std::string& msg) {
 	send(this->getUid(), myMsg.c_str(), myMsg.length(), MSG_NOSIGNAL);
 }
 
-//PART (leave) handler
+// PART (leave) handler avec message
 void Client::leaveChannel(Client& sender, std::string& msg, Channel& channel) {
-	std::string myMsg = ":" + sender.getNickname() + " PART " + channel.getName() + " :" + msg + "\r\n";
+	std::string host = sender.getHostname().empty() ? "localhost" : sender.getHostname();
+	std::string myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + host + " PART " + channel.getName() + " :" + msg + "\r\n";
 	send(this->getUid(), myMsg.c_str(), myMsg.length(), MSG_NOSIGNAL);
 }
 
-//PART (leave) handler
+// PART (leave) handler sans message
 void Client::leaveChannel(Client& sender, Channel& channel) {
-	std::string myMsg = ":" + sender.getNickname() + " PART " + channel.getName() + "\r\n";
+	std::string host = sender.getHostname().empty() ? "localhost" : sender.getHostname();
+	std::string myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + host + " PART " + channel.getName() + "\r\n";
 	send(this->getUid(), myMsg.c_str(), myMsg.length(), MSG_NOSIGNAL);
 }
-
