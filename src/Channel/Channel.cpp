@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 13:17:59 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 13:30:04 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -226,7 +226,8 @@ void Channel::Kick(std::string nick, Server& server, std::string reason, bool le
 		if (leave == false)
 			this->Broadcast(sender, myMsg, BRCST_KICK, server);
 		this->_joinedList.erase(_joinedList.begin() + clientPos);
-	int opPos = this->findClientOp(client);
+	}
+	int opPos = this->findClientOp(sender);
 	if (opPos >= 0)
 		this->_opList.erase(_opList.begin() + opPos);
 	(void)server;
