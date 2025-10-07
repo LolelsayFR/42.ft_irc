@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 16:03:14 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 16:35:19 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -242,11 +242,13 @@ void Channel::Kick(std::string nick, Server& server, std::string reason, bool le
 }
 
 //Channel command to add invite
-void Channel::Invite(Client& client, Server& server) {
+void Channel::Invite(Client& client, Client& sender) {
 	int clientPos = this->findClientInvite(client);
-	if (clientPos == -1)
+	if (clientPos == -1){
+		std::string myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " INVITE " + client.getNickname() + " " + this->getName() + "\r\n";
+		send(client.getUid(), myMsg.c_str(), myMsg.length(), MSG_NOSIGNAL);
 		this->_inviteList.push_back(&client);
-	(void)server;
+	}
 }
 
 //Channel command to remove invite
