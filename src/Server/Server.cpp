@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 17:58:14 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 19:07:06 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -337,10 +337,8 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 	{
 		std::string server;
 		iss >> server;
-		//std::cout << "Received PING from " << server << std::endl;
 		std::string pongResponse = "PONG :" + server + "\r\n";
 		send(client.getUid(), pongResponse.c_str(), pongResponse.size(), MSG_NOSIGNAL);
-		//std::cout << "Responded to PING with PONG" << std::endl;
 	}
 	else if (this->findClientSetup(client.getUid()) != -1) // Limite les action des setupClients
 		return; //throw() Peut etre une exception custom ??
@@ -358,7 +356,7 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 	}
 	else if (command == "JOIN") {
 		std::string arg;
-		iss >> arg;
+		getline(iss, arg);
 		this->linkClientToChannel(client, arg);
 	}
 	else if (command == "PRIVMSG") {
@@ -374,9 +372,9 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 		getline(iss, reason);
 		int targetPos = this->_channelList[this->findChannel(channel)]->findClientJoin(targetNick);
 		if (this->_channelList[this->findChannel(channel)]->findClientOp(client) == -1)
-			{std::cout << WHI << std::setw(100) << std::endl; return;} //throw() dont have permision to do this
+			return ; //throw() dont have permision to do this
 		if (targetPos == -1)
-			{std::cout << WHI << std::setw(100) << std::endl; return;} //throw() no client find to kick
+			return ; //throw() no client find to kick
 		this->_channelList[this->findChannel(channel)]->Kick(targetNick, *this, reason.c_str() + 2, false, client);
 	}
 	else if (command == "MODE") {
@@ -404,16 +402,22 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 }
 
 void Server::linkClientToChannel(Client& client, std::string& arg) {
-	std::string name;
+	std::string work, name, pass;
 	int pos = arg.rfind(",");
 	while (pos > 0 && pos < (int)arg.length()) {
-		name = arg.substr(pos + 1, arg.length() - pos);
+		work = arg.substr(pos + 1, arg.length() - pos);
+		std::istringstream iss(work);
+		iss >> name >> pass;
 		arg.erase(pos, arg.length() - pos);
 		pos = arg.rfind(",");
-		makeChannel(name)->Join(client, *this);
+		
+		makeChannel(name)->Join(client, *this, pass);
 	}
-	name = arg.substr(pos + 1, arg.length() - pos);
-	makeChannel(name)->Join(client, *this);
+	work = arg.substr(pos + 1, arg.length() - pos);
+	std::istringstream iss(work);
+	iss >> name >> pass;
+	std::cout << "Joining channel: " << name << " with pass: " << pass << std::endl;	
+	makeChannel(name)->Join(client, *this, pass);
 }
 
 void Server::setClientNick(Client& client, std::string& nick) {

@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 17:34:20 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 18:28:50 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -175,22 +175,16 @@ void Channel::Broadcast(Client& sender, std::string msg, broadcast type, Server&
 }
 
 //Channel command to join
-void Channel::Join(Client& client, Server& server) {
+void Channel::Join(Client& client, Server& server, std::string& pass) {
+	std::cout << "PASS=" << pass << "| VS SERV PASS=" << this->_password << "|" << std::endl;
 	int clientPos = this->findClientJoin(client);
 	if (clientPos == -1) {
-		if (this->_maxClient != 0 && (int)this->_joinedList.size() >= this->_maxClient) {
-			//throwRFCException(ERR_CHANNELISFULL, this->getName());
-			return ;
-		}
-		if (this->_needInvite == true && this->findClientInvite(client) == -1) {
-			//throwRFCException(ERR_INVITEONLYCHAN, this->getName());
-			return ;
-		}
-		if (this->_needPassword == true) {
-			//Password check pass
-			//if (this->_password != pass)
-				//throwRFCException(ERR_BADCHANNELKEY, this->getName());
-		}
+		if (this->_maxClient != 0 && (int)this->_joinedList.size() >= this->_maxClient)
+			return ;//throwRFCException(ERR_CHANNELISFULL, this->getName());
+		if (this->_needInvite == true && this->findClientInvite(client) == -1)
+			return ;//throwRFCException(ERR_INVITEONLYCHAN, this->getName());
+		if (this->_needPassword == true && this->_password != pass)
+			return; //throwRFCException(ERR_BADCHANNELKEY, this->getName());
 		this->_joinedList.push_back(&client);
 
 		//Join Broadcast

@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 17:46:54 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 17:28:11 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 18:07:46 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ public:
 	void setPassword(std::string pass);
 	void Op(Client& client, Server& server, Client& sender);
 	void DeOp(Client& client, Server& server, Client& sender);
-	void Join(Client& client, Server& server);
+	void Join(Client& client, Server& server, std::string& pass);
 	void Kick(std::string nick, Server& server, std::string reason, bool leave, Client& sender);
 	void Invite(Client& client, Client& sender);
 	void DeInvite(Client& client, Server& server);
