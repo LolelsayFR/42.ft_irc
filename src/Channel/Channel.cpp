@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 11:54:12 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 12:59:23 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -215,10 +215,21 @@ void Channel::Join(Client& client, Server& server) {
 }
 
 //Channel command to kick
-void Channel::Kick(Client& client, Server& server) {
-	int clientPos = this->findClientJoin(client);
-	if (clientPos >= 0)
+void Channel::Kick(std::string nick, Server& server, std::string reason, bool leave, Client& sender) {
+	std::vector<Client*>::iterator	it = this->_joinedList.begin();
+	std::vector<Client*>::iterator	end = this->_joinedList.end();
+	int clientPos = this->findClientJoin(nick);
+	if (clientPos >= 0) {
+		std::string myMsg = ":" + nick + " KICK " + this->getName() + " " + sender.getNickname() + "\r\n";
+		if (reason.length() > 1)
+			std::string myMsg = ":" + nick + " KICK " + this->getName() + " " + sender.getNickname() + " " + reason + "\r\n";
+		if (leave == false) {
+			for(int i = 0; it != end; i++) {
+				send(static_cast<Client*>(*it)->getUid(), myMsg.c_str(), myMsg.length(), MSG_NOSIGNAL);
+			}
+		}
 		this->_joinedList.erase(_joinedList.begin() + clientPos);
+	}
 	(void)server;
 }
 
@@ -271,6 +282,8 @@ void Channel::Mode(Client& sender , std::string option, Server& server) {
 		iss >> channel >> opt >> targetName;
 	if (!targetName.empty()){
 		int targetPos = this->findClientJoin(targetName);
+		if (targetPos == -1)
+			return; //throw() no client find to aply mode
 		Client *target = this->_joinedList[targetPos];
 		if (senderPos == -1)
 			return ;//throwRFCException(ERR_NOTONCHANNEL, this->getName()); ?? // PAS OP
