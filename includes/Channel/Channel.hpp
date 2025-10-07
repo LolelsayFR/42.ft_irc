@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 17:46:54 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 15:00:12 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 16:01:57 by artgirar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ private:
 	std::string				_password;
 	bool					_needInvite;
 	bool					_needPassword;
-	bool					_maxClient;
+	//bool					_maxClient;
 	std::vector<Client*>	_joinedList;
 	std::vector<Client*>	_opList;
 	std::vector<Client*>	_inviteList;
