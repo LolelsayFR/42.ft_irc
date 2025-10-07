@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:35:21 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 21:22:43 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/07 21:28:28 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,6 +90,13 @@ ChanOpPrivsNeededException::ChanOpPrivsNeededException(const std::string& arg) :
 
 ChanOpPrivsNeededException::~ChanOpPrivsNeededException() throw() {}
 
+UnknownModeException::UnknownModeException(const std::string& arg) : message(arg)
+{
+	this->fullMessage = this->message + E_UNKNOWNMODE;
+}
+
+UnknownModeException::~UnknownModeException() throw() {}
+
 
 const char* AlreadyRegisteredException::what() const throw() {
 	return (this->fullMessage.c_str());
@@ -119,6 +126,10 @@ const char* ChanOpPrivsNeededException::what(void) const throw() {
 	return (this->fullMessage.c_str());
 }
 
+const char* UnknownModeException::what(void) const throw() {
+	return (this->fullMessage.c_str());
+}
+
 void throwRFCException(enum Exceptions exception, std::string arg) {
 	switch (exception)
 	{
@@ -136,6 +147,8 @@ void throwRFCException(enum Exceptions exception, std::string arg) {
 			throw BadChannelKeyException(arg);
 		case ERR_CHANOPRIVSNEEDED:
 			throw ChanOpPrivsNeededException(arg);
+		case ERR_UNKNOWNMODE:
+			throw UnknownModeException(arg);
 		default :
 			throw RFCException();
 	}

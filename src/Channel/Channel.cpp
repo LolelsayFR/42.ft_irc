@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 21:25:39 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/07 21:26:49 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -303,8 +303,7 @@ void Channel::Mode(Client& sender, std::string option, Server& server) {
 			this->Broadcast(sender, myMsg, BRCST_MODE, server);
 		}
 		else {
-			//throwRFCException(ERR_UNKNOWNMODE, opt);
-			return ;
+			throwRFCException(ERR_UNKNOWNMODE, opt);
 		}
 	}
 	else if (opt == "-l") {
