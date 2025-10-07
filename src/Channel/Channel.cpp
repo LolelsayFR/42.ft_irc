@@ -226,7 +226,10 @@ void Channel::Kick(std::string nick, Server& server, std::string reason, bool le
 		if (leave == false)
 			this->Broadcast(sender, myMsg, BRCST_KICK, server);
 		this->_joinedList.erase(_joinedList.begin() + clientPos);
-	}
+	int opPos = this->findClientOp(client);
+	if (opPos >= 0)
+		this->_opList.erase(_opList.begin() + opPos);
+	(void)server;
 }
 
 //Channel command to add invite
