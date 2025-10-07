@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 21:29:31 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/07 21:39:02 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -336,7 +336,7 @@ void Channel::Mode(Client& sender, std::string option, Server& server) {
 		if (target.empty())
 			throwRFCException(ERR_NEEDMOREPARAMS, opt);
 		if (target.length() > 255)
-			return ; //throwRFCException(ERR_KEYTOOLONG, this->getName());
+			throw std::runtime_error("Password too long");
 		this->setPassword(target);
 		myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " +k\r\n";
 		this->Broadcast(sender, myMsg, BRCST_MODE, server);
@@ -350,10 +350,10 @@ void Channel::Mode(Client& sender, std::string option, Server& server) {
 	else if (!target.empty() && (opt == "+o" || opt == "-o")) {
 		int targetPos = this->findClientJoin(target);
 		if (targetPos == -1)
-			return; //throw() no client find to aply mode
+			throwRFCException(ERR_NOSUCHNICK, target);
 		Client *target = this->_joinedList[targetPos];
 		if (senderPos == -1)
-			return ;//throwRFCException(ERR_NOTONCHANNEL, this->getName()); ?? // PAS OP
+			throwRFCException(ERR_NOTONCHANNEL, this->getName());
 		if (opt == "+o")
 			this->Op(*target, server, sender);
 		else if (opt == "-o")
