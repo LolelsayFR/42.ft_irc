@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 11:49:14 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 11:51:56 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,6 @@
 // Assignation constructor
 Channel::Channel(std::string name) : _name(name) {
 	this->_topic = "";
-	if (name == "#yo")
-		_topic = "sakhjdfkjASHDKJHSAKJd";
 	this->_password = "";
 	this->_needInvite = false;
 	this->_needPassword = false;
