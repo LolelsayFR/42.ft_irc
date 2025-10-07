@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 17:46:54 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/03 12:19:05 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/06 15:29:40 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,8 @@ enum broadcast
 	BRCST_LEAVE,
 	BRCST_LEAVE_MSG,
 	BRCST_KICK,
-	BRCST_JOIN
+	BRCST_JOIN,
+	BRCST_OP
 };
 
 class Channel {
@@ -59,7 +60,7 @@ public:
 	void Invite(Client& client);
 	void DeInvite(Client& client);
 	void Topic(std::string topic);
-	void Mode(std::string option);
+	void Mode(Client& sender , std::string option);
 
 	int findClientOp(Client& client);
 	int findClientJoin(Client& client);

@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/06 18:04:53 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/06 19:02:30 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,39 +54,56 @@ Server::~Server(void) {
 //Ostream insertion operator
 std::ostream& operator<<(std::ostream& o, Server& s) {
 	Client* ptr;
-	o << "\n/* Server View * */" << std::endl;
-	o 	<< "/\tPort : " << s.getPort()
-		<< "\n/\tPassword : " << s.getPassword()
-		<< "\n/\tHost : " << s.getHost() << std::endl;
+	o << std::endl << WHI << "/* Server View * */" << RES << std::endl;
+	o 	<< " /\tPort : " << s.getPort()
+		<< "\n /\tPassword : " << s.getPassword()
+		<< "\n /\tHost : " << s.getHost() << std::endl
+		<< WHI << "/* ** */" << RES << std::endl;
 	{
 		std::vector<Client*> list = s.getClientList();
 		std::vector<Client*>::iterator	it = list.begin();
 		std::vector<Client*>::iterator	end = list.end();
-		o << "/* Client connected * */" << std::endl;
-		for (int i = 0; it != end; i++, it++) {
-			ptr = *it;
-			{
-			o 	<< "| n°" << std::setw(3) << i
-				<< " | U = " <<  std::setw(10) << ptr->getUsername()
-				<< " | N = " <<  std::setw(10) << ptr->getNickname()
-				<< " | R = " <<  std::setw(20) << ptr->getRealname()
-				<< " | H = " <<  std::setw(10) << ptr->getHostname()
-				<< " |"  << std::endl;
-			}
-		}
+		o << std::endl << WHI <<  "/* Client connected * */" << RES << std::endl;
 		if (list.empty())
-			o << "/\tEmpty.." << std::endl;
-		o << "/* ** */" << std::endl;
+			o << " /\tEmpty.." << std::endl;
+		else 
+			for (int i = 0; it != end; i++, it++) {
+				ptr = *it;
+				{
+				o 	<< "| n°" << std::setw(3) << i
+					<< " | U = " <<  std::setw(10) << ptr->getUsername()
+					<< " | N = " <<  std::setw(10) << ptr->getNickname()
+					<< " | R = " <<  std::setw(20) << ptr->getRealname()
+					<< " | H = " <<  std::setw(10) << ptr->getHostname()
+					<< " |"  << std::endl;
+				}
+			}
+		o << WHI << "/* ** */" << RES << std::endl;
+	}
+	{
+		std::vector<Client*> list = s.getSetupList();
+		std::vector<Client*>::iterator	it = list.begin();
+		std::vector<Client*>::iterator	end = list.end();
+		o << std::endl <<  WHI << "/* Client in setup * */" << RES << std::endl;
+		if (list.empty())
+			o << " /\tEmpty.." << std::endl;
+		else
+			for (int i = 0; it != end; i++, it++) {
+				ptr = *it;
+				{
+				o 	<< "| n°" << std::setw(3) << i
+					<< " | ID = " <<  std::setw(5) << ptr->getUid()
+					<< " |"  << std::endl;
+				}
+			}
+		o << WHI << "/* ** */" << RES << std::endl;
 	}
 	{
 		std::vector<Channel*> list = s.getChannelList();
 		std::vector<Channel*>::iterator	it = list.begin();
 		std::vector<Channel*>::iterator	end = list.end();
-		for (int i = 0; it != end; i++, it++) {
+		for (int i = 0; it != end; i++, it++)
 			o << *(static_cast<Channel*>(*it));
-			if (list.empty())
-				o << "\tEmpty.." << std::endl;
-		}
 	}
 	return (o);
 }
@@ -114,6 +131,11 @@ std::vector<struct pollfd>& Server::getFds(void) {
 //Channel JoinList getter
 const std::vector<Client*>&	Server::getClientList(void) const {
 	return (this->_clientList);
+}
+
+//Channel JoinList getter
+const std::vector<Client*>&	Server::getSetupList(void) const {
+	return (this->_setupList);
 }
 
 //Channel OpList getter
@@ -192,10 +214,23 @@ int Server::findClientByNick(std::string nickname) {
 	return (-1);
 }
 
-//Channel id in join vector list by nick
+//Find client in setup list by fd
 int Server::findClientSetup(int fd) {
 	std::vector<Client*>::iterator	it = this->_setupList.begin();
 	std::vector<Client*>::iterator	end = this->_setupList.end();
+	for(int i = 0; it != end; i++) {
+		if (static_cast<Client*>(*it)->getUid() == fd) {
+			return (i);
+		}
+		it++;
+	}
+	return (-1);
+}
+
+//Find client by fd
+int Server::findClient(int fd) {
+	std::vector<Client*>::iterator	it = this->_clientList.begin();
+	std::vector<Client*>::iterator	end = this->_clientList.end();
 	for(int i = 0; it != end; i++) {
 		if (static_cast<Client*>(*it)->getUid() == fd) {
 			return (i);
@@ -314,6 +349,11 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 	else if (command == "PART") {
 		this->clientLeaveChannel(client, msg);
 	}
+	else if (command == "MODE") {
+		std::string cmd; 
+		std::getline(iss, cmd);
+		this->sendModeChannel(client, cmd.c_str() + 1);
+	}
 	else {
 		std::cout << "Unknown command: " << command << std::endl << *this;
 	}
@@ -361,12 +401,21 @@ void Server::privMsgSend(Client& client, const std::string& arg) {
 		int Pos = this->findClientByNick(dest);
 		if (Pos == -1)
 		{
-			std::cout << "TEST" << std::endl;
 			//throwRFCException(ERR_NOSUCHNICK, dest); //Throw error Cant find any user :<serveur> 401 <nick> <nickname> :No such nick/channel
 			return ;
 		}
 		else
 			this->_clientList[Pos]->receptMessage(client, msg);
+	}
+}
+
+void Server::sendModeChannel(Client& client, const std::string& arg) {
+	if (arg[0] == '#' || arg[0] == '&' || arg[0] == '+' || arg[0] == '!') {
+		int Pos = this->findChannel(arg.substr(1, arg.find(" ") - 1));
+		if (Pos == -1)
+			throwRFCException(ERR_NOSUCHNICK, arg.substr(1, arg.find(" ") - 1)); //Throw error cant find any channel :<serveur> 401 <nick> <nickname> :No such nick/channel
+		else
+			this->_channelList[Pos]->Mode(client, arg.substr(arg.find(" ") + 1));
 	}
 }
 
@@ -380,7 +429,6 @@ void Server::clientLeaveChannel(Client& client, const std::string& arg) {
 	int Pos = this->findChannel(dest);
 	if (Pos == -1)
 	{
-		std::cout << "TEST" << std::endl;
 		return ;
 		//throwRFCException(ERR_NOTONCHANNEL, dest); //Throw error cant find any channel :<serveur> 401 <nick> <nickname> :No such nick/channel
 	}
@@ -409,7 +457,7 @@ void Server::clientSetupHandler(int i, int n, char *buffer)
 		while (client->hasMessage()) {
 			std::string msg = client->popMessage();
 			try {
-				parseMessage(*client, msg);
+				parseMessage(*client, msg.erase(msg.length() - 1));
 			}
 			catch (AlreadyRegisteredException &e) {
 				std::string errorMsg = ":" + this->_hostName + " " + e.what() + "\r\n";
@@ -447,7 +495,7 @@ void Server::clientHandler(int i, int n, char *buffer)
 			std::cout << "Message received from client: ";
 			std::string msg = client->popMessage();
 			try {
-				parseMessage(*client, msg);
+				parseMessage(*client, msg.erase(msg.length() - 1));
 			}
 			catch (AlreadyRegisteredException &e) {
 				std::string errorMsg = ":" + this->_hostName + " " + e.what() + "\r\n";

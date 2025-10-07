@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/06 17:38:41 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/06 19:05:33 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,22 +45,22 @@ Channel::~Channel(void) {
 //Ostream insertion operator
 std::ostream& operator<<(std::ostream& o, Channel& c) {
 	Client* ptr;
-	o << "\n/* Channel View */" << std::endl;
+	o << std::endl << WHI << "/* Channel View */" << RES << std::endl;
 	{
 		std::vector<Client*> list = c.getJoinList();
 		std::vector<Client*>::iterator	it = list.begin();
 		std::vector<Client*>::iterator	end = list.end();
-		o << "/\tChannel name : " << c.getName() << std::endl;
+		o << " /\tChannel name : " << c.getName() << std::endl;
 		if (c.getNeedPassword())
-			o << "/\tNeed password : true, the pass is '" << c.getPassword() << "'" << std::endl;
+			o << " /\tNeed password : true, the pass is '" << c.getPassword() << "'" << std::endl;
 		else
-			o << "/\tNeed password : false" << std::endl;
-		o << "/\tChannel topic : " << c.getTopic() << std::endl;
-		o << "/* Client in channel */" << std::endl;
+			o << " /\tNeed password : false" << std::endl;
+		o << " /\tChannel topic : " << c.getTopic() << std::endl;
+		o << WHI << "/* Client in channel */" << RES << std::endl;
 		for (int i = 0; it != end; i++, it++) {
 			ptr = *it;
 			{
-			o 	<< "| n°" << std::setw(5) << i
+			o 	<< " | n°" << std::setw(5) << i
 				<< " | Username = " <<  std::setw(10) << ptr->getUsername()
 				<< " | Nickname = " <<  std::setw(10) << ptr->getNickname()
 				<< " | Is op = " << ((c.findClientOp(*ptr) == -1) ? ("false") : ("true "))
@@ -77,16 +77,17 @@ std::ostream& operator<<(std::ostream& o, Channel& c) {
 		std::vector<Client*> list = c.getInviteList();
 		std::vector<Client*>::iterator	it = list.begin();
 		std::vector<Client*>::iterator	end = list.end();
-		o << "/* Client invitation list from channel */" << std::endl;
-		for (int i = 0; it != end; i++, it++) {
-			ptr = *it;
-			o 	<< "| n°" << std::setw(5) << i
-				<< " | Username = " <<  std::setw(10) << ptr->getUsername()
-				<< " | Nickname = " <<  std::setw(10) << ptr->getNickname()
-				<< " |"  << std::endl;
-		}
+		o << WHI << "/* Client invitation list from channel */" << RES << std::endl;
 		if (list.empty())
 			o << "\tEmpty.." << std::endl;
+		else
+			for (int i = 0; it != end; i++, it++) {
+				ptr = *it;
+				o 	<< "| n°" << std::setw(5) << i
+					<< " | Username = " <<  std::setw(10) << ptr->getUsername()
+					<< " | Nickname = " <<  std::setw(10) << ptr->getNickname()
+					<< " |"  << std::endl;
+			}
 		o << "/* ** */" << std::endl;
 	}
 	return (o);
@@ -149,7 +150,7 @@ void Channel::setPassword(std::string pass) {
 
 
 void Channel::Broadcast(Client& sender, std::string msg, broadcast type) {
-	if (this->findClientJoin(sender) == -1){
+	if (this->findClientJoin(sender) == -1) {
 		return ;
 		//throwRFCException(ERR_NOTONCHANNEL, this->getName());
 	}
@@ -166,6 +167,10 @@ void Channel::Broadcast(Client& sender, std::string msg, broadcast type) {
 			std::string myMsg = ":" + sender.getNickname() + " JOIN " + this->getName() + "\r\n";
 			send(static_cast<Client*>(*it)->getUid(), myMsg.c_str(), myMsg.length(), MSG_NOSIGNAL);
 		}
+		else if (type == BRCST_OP) {
+			std::string myMsg = ":" + SERVERNAME + " MODE " + this->getName() + " +o " + sender.getNickname() + "\r\n";
+			send(static_cast<Client*>(*it)->getUid(), myMsg.c_str(), myMsg.length(), MSG_NOSIGNAL);
+		}
 		it++;
 	}
 }
@@ -173,13 +178,13 @@ void Channel::Broadcast(Client& sender, std::string msg, broadcast type) {
 //Channel command to join
 void Channel::Join(Client& client) {
 	int clientPos = this->findClientJoin(client);
-	if (this->_joinedList.empty()) {
-		this->_opList.push_back(&client);
-	}
 	if (clientPos == -1) {
 	    std::vector<Client*>::iterator it = this->_inviteList.begin();
 	    std::vector<Client*>::iterator end = this->_inviteList.end();
 		this->_joinedList.push_back(&client);
+		if (this->_joinedList[0] == &client) {
+			this->Op(client);
+		}
 		this->Broadcast(client, "", BRCST_JOIN);
 		std::string myMsg = ":" + SERVERNAME + " 331 " + client.getNickname() + " " + this->getName() + " :No topic is set\r\n";
 		if (!this->_topic.empty())
@@ -220,8 +225,10 @@ void Channel::DeInvite(Client& client) {
 //Channel command to add operator
 void Channel::Op(Client& client) {
 	int clientPos = this->findClientOp(client);
-	if (clientPos == -1)
+	if (clientPos == -1) {
 		this->_opList.push_back(&client);
+		this->Broadcast(client, "", BRCST_OP);
+	}
 }
 
 //Channel command to remove operator
@@ -238,8 +245,12 @@ void Channel::Topic(std::string topic) {
 }
 
 //Channel commands
-void Channel::Mode(std::string option) {
-	(void)option;
+void Channel::Mode(Client& sender , std::string option) {
+	int clientPos = this->findClientOp(sender);
+	if (clientPos == -1)
+		;//throwRFCException(ERR_NOTONCHANNEL, this->getName());
+	//if (option)
+	std::cout << option  + "----------------------------------------------------------" << std::endl;
 }
 
 /* ************************************************************************** */
