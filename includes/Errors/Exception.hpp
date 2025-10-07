@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:10:41 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 21:17:49 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/07 21:19:47 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,8 @@ enum Exceptions
 	ERR_NOSUCHNICK = 401,
 	ERR_NOTONCHANNEL = 442,
 	ERR_CHANNELISFULL = 471,
-	ERR_INVITEONLYCHAN = 473
+	ERR_INVITEONLYCHAN = 473,
+	ERR_BADCHANNELKEY = 475
 };
 
 class ParsingException : public std::exception
@@ -108,6 +109,18 @@ class InviteOnlyChanException : public RFCException
 	public:
 		InviteOnlyChanException(const std::string& arg);
 		virtual ~InviteOnlyChanException() throw();
+		virtual const char* what() const throw();
+};
+
+class BadChannelKeyException : public RFCException
+{
+	private:
+		std::string message;
+		std::string fullMessage;
+
+	public:
+		BadChannelKeyException(const std::string& arg);
+		virtual ~BadChannelKeyException() throw();
 		virtual const char* what() const throw();
 };
 

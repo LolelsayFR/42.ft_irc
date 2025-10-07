@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:35:21 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 21:18:19 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/07 21:20:16 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,6 +76,16 @@ InviteOnlyChanException::InviteOnlyChanException(const std::string& arg) : messa
 InviteOnlyChanException::~InviteOnlyChanException() throw() {}
 
 
+BadChannelKeyException::BadChannelKeyException(const std::string& arg) : message(arg)
+{
+	this->fullMessage = this->message + E_BADCHANNELKEY;
+}
+
+BadChannelKeyException::~BadChannelKeyException() throw() {}
+
+
+
+
 const char* AlreadyRegisteredException::what() const throw() {
 	return (this->fullMessage.c_str());
 }
@@ -93,6 +103,10 @@ const char* ChannelIsFullException::what(void) const throw() {
 }
 
 const char* InviteOnlyChanException::what(void) const throw() {
+	return (this->fullMessage.c_str());
+}
+
+const char* BadChannelKeyException::what(void) const throw() {
 	return (this->fullMessage.c_str());
 }
 
