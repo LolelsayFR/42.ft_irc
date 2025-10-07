@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
+/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:52:45 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 19:17:27 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/07 19:29:24 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ public:
 	void start(void);
 	void parseMessage(Client &client, const std::string &msg);
 
-	Channel* makeChannel(std::string name);
+	Channel* makeChannel(std::string name, std::string pass);
 
 	void welcomeUser(Client *client);
 
