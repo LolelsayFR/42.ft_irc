@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
+/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 16:33:11 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 17:25:25 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -391,15 +391,8 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 			return; //throw() no channel find
 		if (this->_channelList[channelPos]->findClientJoin(client) == -1)
 			return; //throw() client not in channel
-		if (this->_channelList[channelPos]->findClientOp(client) == -1)
-			return; //throw() dont have permision to do this
-		if (topic.empty())
-			send(client.getUid(), (":" + this->getHost() + " 331 " + client.getNickname() + " " + channel + " :No topic is set\r\n").c_str(), (":" + this->getHost() + " 331 " + client.getNickname() + " " + channel + " :No topic is set\r\n").length(), MSG_NOSIGNAL);
-		else
-		{
-			send(client.getUid(), (":" + this->getHost() + " 332 " + client.getNickname() + " " + channel + " :" + topic.c_str() + "\r\n").c_str(), (":" + this->getHost() + " 332 " + client.getNickname() + " " + channel + " :" + topic.c_str() + "\r\n").length(), MSG_NOSIGNAL);
-			this->_channelList[channelPos]->Topic(topic.c_str() + 2, *this);
-		}
+		if (!topic.empty())
+			this->_channelList[channelPos]->Topic(topic.c_str() + 2, *this, client);		
 	}
 	else {
 		std::cout << "Unknown command: " << command << std::endl << *this;
