@@ -165,15 +165,7 @@ void Channel::Broadcast(Client& sender, std::string msg, broadcast type, Server&
 			std::string myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " JOIN " + this->getName() + "\r\n";
 			send(static_cast<Client*>(*it)->getUid(), myMsg.c_str(), myMsg.length(), MSG_NOSIGNAL);
 		}
-		else if (type == BRCST_OP) {
-			std::string myMsg = ":" + server.getHost() + " MODE " + this->getName() + " +o " + sender.getNickname() + "\r\n";
-			send(static_cast<Client*>(*it)->getUid(), myMsg.c_str(), myMsg.length(), MSG_NOSIGNAL);
-		}
-		else if (type == BRCST_DEOP) {
-			std::string myMsg = ":" + server.getHost() + " MODE " + this->getName() + " -o " + sender.getNickname() + "\r\n";
-			send(static_cast<Client*>(*it)->getUid(), myMsg.c_str(), myMsg.length(), MSG_NOSIGNAL);
-		}
-		else if (type == BRCST_KICK)
+		else if (type == BRCST_KICK || type == BRCST_DEOP || type == BRCST_OP)
 			send(static_cast<Client*>(*it)->getUid(), msg.c_str(), msg.length(), MSG_NOSIGNAL);
 		else if (type == BRCST_TOPIC)
 			send(static_cast<Client*>(*it)->getUid(), msg.c_str(), msg.length(), MSG_NOSIGNAL);
@@ -215,24 +207,26 @@ void Channel::Join(Client& client, Server& server) {
 		myMsg += ":" + server.getHost() + " 366 " + client.getNickname() + " " + this->getName() + " :End of /NAMES list.\r\n";
 		send(client.getUid(), myMsg.c_str(), myMsg.length(), MSG_NOSIGNAL);
 	}
-	(void)server;
 }
 
 //Channel command to kick
 void Channel::Kick(std::string nick, Server& server, std::string reason, bool leave, Client& sender) {
 	int clientPos = this->findClientJoin(nick);
 	if (clientPos >= 0) {
-		std::string myMsg = ":" + sender.getNickname() + " KICK " + this->getName() + " " + nick + "\r\n";
-		if (reason.length() > 1)
-			std::string myMsg = ":" + sender.getNickname() + " KICK " + this->getName() + " " + nick + " " + reason + "\r\n";
+
+		std::string myMsg;
+		if (!reason.empty()) {
+		    myMsg = ":" + sender.getNickname() + " KICK " + this->getName() + " " + nick + " :" + reason + "\r\n";
+		} else {
+		    myMsg = ":" + sender.getNickname() + " KICK " + this->getName() + " " + nick + "\r\n";
+		}
 		if (leave == false)
 			this->Broadcast(sender, myMsg, BRCST_KICK, server);
 		this->_joinedList.erase(_joinedList.begin() + clientPos);
 	}
-	int opPos = this->findClientOp(sender);
-	if (opPos >= 0)
+	int opPos = this->findClientOp(nick);
+	if (opPos != -1)
 		this->_opList.erase(_opList.begin() + opPos);
-	(void)server;
 }
 
 //Channel command to add invite
@@ -252,20 +246,22 @@ void Channel::DeInvite(Client& client, Server& server) {
 }
 
 //Channel command to add operator
-void Channel::Op(Client& client, Server&server) {
+void Channel::Op(Client& client, Server&server, Client& sender) {
 	int clientPos = this->findClientOp(client);
 	if (clientPos == -1) {
 		this->_opList.push_back(&client);
-		this->Broadcast(client, "", BRCST_OP, server);
+		std::string myMsg = ":" + sender.getHostname() + " MODE " + this->getName() + " +o " + client.getNickname() + "\r\n";
+		this->Broadcast(client, myMsg, BRCST_OP, server);
 	}
 }
 
 //Channel command to remove operator
-void Channel::DeOp(Client& client, Server& server) {
+void Channel::DeOp(Client& client, Server& server, Client& sender) {
 	int clientPos = this->findClientOp(client);
 	if (clientPos != -1) {
 		this->_opList.erase(_opList.begin() + clientPos);
-		this->Broadcast(client, "", BRCST_DEOP, server);
+		std::string myMsg = ":" + sender.getHostname() + " MODE " + this->getName() + " -o " + client.getNickname() + "\r\n";
+		this->Broadcast(client, myMsg, BRCST_DEOP, server);
 	}
 }
 
@@ -294,9 +290,9 @@ void Channel::Mode(Client& sender , std::string option, Server& server) {
 		if (senderPos == -1)
 			return ;//throwRFCException(ERR_NOTONCHANNEL, this->getName()); ?? // PAS OP
 		if (opt == "+o")
-			this->Op(*target, server);
+			this->Op(*target, server, sender); 
 		else if (opt == "-o")
-			this->DeOp(*target, server);
+			this->DeOp(*target, server, sender);
 	}
 }
 
@@ -336,6 +332,19 @@ int Channel::findClientOp(Client& client) {
 	for(int i = 0; it != end; i++) {
 		if (*it == &client)
 			return (i);
+		it++;
+	}
+	return (-1);
+}
+
+//Client id in op vector list by nick
+int Channel::findClientOp(std::string nick) {
+	std::vector<Client*>::iterator	it = this->_opList.begin();
+	std::vector<Client*>::iterator	end = this->_opList.end();
+	for(int i = 0; it != end; i++) {
+		if (static_cast<Client*>(*it)->getNickname() == nick) {
+			return (i);
+		}
 		it++;
 	}
 	return (-1);
