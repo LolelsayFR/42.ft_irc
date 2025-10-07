@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
+/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 19:07:06 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 19:16:25 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ Server::~Server(void) {
 		this->destroyOneClient(this->getFds(), i);
 	}
 	for (int i = this->_setupList.size(); i > 0; i--) {
-		delete this->_setupList[i];
+		delete this->_setupList[i - 1];
 	}
 	std::vector<Channel*>::iterator	it = this->_channelList.begin();
 	std::vector<Channel*>::iterator	end = this->_channelList.end();
@@ -297,6 +297,35 @@ void	Server::destroyOneClient(std::vector<struct pollfd> &fds , int i)
 	fds.erase(fds.begin() + i);
 }
 
+void	Server::destroyOneWaiting(std::vector<struct pollfd> &fds , int i)
+{
+	Client* target = findClientByFd(_setupList, fds[i].fd);
+	Channel* channel;
+	//destroy client in all channel
+	std::vector<Channel*>::iterator	it = this->_channelList.begin();
+	std::vector<Channel*>::iterator	end = this->_channelList.end();
+	for(int i = 0; it != end; i++) {
+		channel = static_cast<Channel*>(*it);
+		if (channel->findClientJoin(*target) != -1)
+			channel->Kick(target->getNickname(), *this, "", true, *target);
+		if (channel->findClientInvite(*target) != -1)
+			channel->DeInvite(*target, *this);
+		if (channel->findClientOp(*target) != -1)
+			channel->DeOp(*target, *this, *target);
+		it++;
+	}
+	//destroy client in server base class
+	for (size_t j = 0; j < _setupList.size(); j++) {
+		if (_setupList[j] == target) {
+			_setupList.erase(_setupList.begin() + j);
+				break;
+		}
+	}
+	delete target;
+	close(fds[i].fd);
+	fds.erase(fds.begin() + i);
+}
+
 void	addNewSocket(std::vector<struct pollfd> &fds , int socketFD)
 {
 	pollfd server_poll;
@@ -352,7 +381,7 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 		if (channelPos == -1)
 			return; //throw() no channel find to invite in
 		this->_channelList[channelPos]->Invite(*this->_clientList[targetPos], client);
-		
+
 	}
 	else if (command == "JOIN") {
 		std::string arg;
@@ -394,8 +423,10 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 		if (this->_channelList[channelPos]->findClientJoin(client) == -1)
 			return; //throw() client not in channel
 		if (!topic.empty())
-			this->_channelList[channelPos]->Topic(topic.c_str() + 2, *this, client);		
+			this->_channelList[channelPos]->Topic(topic.c_str() + 2, *this, client);
 	}
+	else if (command == "QUIT")
+		close(client.getUid());
 	else {
 		std::cout << "Unknown command: " << command << std::endl << *this;
 	}
@@ -410,13 +441,13 @@ void Server::linkClientToChannel(Client& client, std::string& arg) {
 		iss >> name >> pass;
 		arg.erase(pos, arg.length() - pos);
 		pos = arg.rfind(",");
-		
+
 		makeChannel(name)->Join(client, *this, pass);
 	}
 	work = arg.substr(pos + 1, arg.length() - pos);
 	std::istringstream iss(work);
 	iss >> name >> pass;
-	std::cout << "Joining channel: " << name << " with pass: " << pass << std::endl;	
+	std::cout << "Joining channel: " << name << " with pass: " << pass << std::endl;
 	makeChannel(name)->Join(client, *this, pass);
 }
 
@@ -512,14 +543,14 @@ void Server::clientSetupHandler(int i, int n, char *buffer)
 			std::string msg = client->popMessage();
 			try {
 				int endMessages = 0;
-				if (msg[msg.length() - 1] == '\r')
+				if (!msg.empty() && msg[msg.length() - 1] == '\r')
 					endMessages = 1;
 				parseMessage(*client, msg.erase(msg.length() - endMessages));
 			}
 			catch (AlreadyRegisteredException &e) {
 				std::string errorMsg = ":" + this->_hostName + " " + e.what() + "\r\n";
 				send(client->getUid(), errorMsg.c_str(), errorMsg.length(), MSG_NOSIGNAL);
-				destroyOneClient(_fds, i);
+				destroyOneWaiting(_fds, i);
 				std::cerr << e.what() << std::endl;
 				break ;
 			}
@@ -530,7 +561,7 @@ void Server::clientSetupHandler(int i, int n, char *buffer)
 				break ;
 			}
 			catch (ClientPasswordException & e) {
-				destroyOneClient(_fds, i);
+				destroyOneWaiting(_fds, i);
 				std::cerr << e.what() << std::endl;
 				break ;
 			}
@@ -628,6 +659,7 @@ void Server::start(void){
 					std::cout << "User try to connect..." << std::endl;
 					addNewSocket(_fds, clientSocket);
 					_setupList.push_back(new Client(clientSocket));
+
 				} else {
 					// Données d'un client existant
 					int n = recv(_fds[i].fd, buffer, 1024, 0);

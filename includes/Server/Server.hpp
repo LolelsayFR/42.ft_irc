@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
+/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:52:45 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 17:59:57 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 19:17:27 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,7 @@ public:
 	int findClient(std::string name);
 	int findClientByNick(std::string nick);
 	int findClientSetup(int fd);
- 
+
 	int findChannel(Channel& channel);
 	int findChannel(std::string name);
 
@@ -65,6 +65,7 @@ public:
 	std::vector<Client*>::iterator isAvailable(Client& client);
 	void linkClientToChannel(Client& client, std::string& name);
 	void destroyOneClient(std::vector<struct pollfd> &fds, int i);
+	void destroyOneWaiting(std::vector<struct pollfd> &fds, int i);
 
 	void clientLeaveChannel(Client& client, const std::string& name);
 
