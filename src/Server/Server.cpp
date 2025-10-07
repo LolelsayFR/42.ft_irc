@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
+/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 16:33:11 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 19:07:06 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -159,7 +159,7 @@ void Server::welcomeUser(Client *client)
 {
 	if (!client->getWelcomeSent())
 	{
-		std::string welcomeMsg = ": ""001 " + client->getNickname() + " :Welcome to the IRC Network, " + client->getNickname() + "\r\n";
+		std::string welcomeMsg = ": ""001 " + client->getNickname() + " :" + WLCM_MESSAGE + ": your nick is " + client->getNickname() + "\r\n";
 		welcomeMsg += ": 002 " + client->getNickname() + " :Your host is " + this->_hostName + ", running version 1.0\r\n";
 		welcomeMsg += ": 003 " + client->getNickname() + " :This server was created today\r\n";
 		welcomeMsg += ": 004 " + client->getNickname() + " " + this->_hostName + " " + client->getHostname() + "\r\n";
@@ -168,12 +168,16 @@ void Server::welcomeUser(Client *client)
 		int setupPos = this->findClientSetup(client->getUid());
 		this->_setupList.erase(this->_setupList.begin() + setupPos);
 		this->_clientList.push_back(client);
-		std::cout << WHI << "USER SETUP OK" << RES << std::endl
-				<< " | U = " <<  std::setw(10) << client->getUsername()
-				<< " | N = " <<  std::setw(10) << client->getNickname()
-				<< " | R = " <<  std::setw(20) << client->getRealname()
-				<< " | H = " <<  std::setw(10) << client->getHostname()
-				<< " |"  << std::endl;
+		std::cout << WHI << "USER SETUP OK" << RES << std::endl;
+		//Broadcast welcome message to all clients
+		std::vector<Client*>::iterator	it = this->_clientList.begin();
+		std::vector<Client*>::iterator	end = this->_clientList.end();
+		std::string broadcastMsg = ":" + client->getNickname() + "!" + client->getUsername() + "@" + client->getHostname() + " JOIN :" + WLCM_MESSAGE + "\r\n";
+		for (; it != end; it++) {
+			if (static_cast<Client*>(*it)->getNickname() != client->getNickname())
+				send(static_cast<Client*>(*it)->getUid(), broadcastMsg.c_str(), broadcastMsg.length(), MSG_NOSIGNAL);
+		}
+
 	}
 }
 
@@ -333,10 +337,8 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 	{
 		std::string server;
 		iss >> server;
-		//std::cout << "Received PING from " << server << std::endl;
 		std::string pongResponse = "PONG :" + server + "\r\n";
 		send(client.getUid(), pongResponse.c_str(), pongResponse.size(), MSG_NOSIGNAL);
-		//std::cout << "Responded to PING with PONG" << std::endl;
 	}
 	else if (this->findClientSetup(client.getUid()) != -1) // Limite les action des setupClients
 		return; //throw() Peut etre une exception custom ??
@@ -354,7 +356,7 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 	}
 	else if (command == "JOIN") {
 		std::string arg;
-		iss >> arg;
+		getline(iss, arg);
 		this->linkClientToChannel(client, arg);
 	}
 	else if (command == "PRIVMSG") {
@@ -370,9 +372,9 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 		getline(iss, reason);
 		int targetPos = this->_channelList[this->findChannel(channel)]->findClientJoin(targetNick);
 		if (this->_channelList[this->findChannel(channel)]->findClientOp(client) == -1)
-			{std::cout << WHI << std::setw(100) << std::endl; return;} //throw() dont have permision to do this
+			return ; //throw() dont have permision to do this
 		if (targetPos == -1)
-			{std::cout << WHI << std::setw(100) << std::endl; return;} //throw() no client find to kick
+			return ; //throw() no client find to kick
 		this->_channelList[this->findChannel(channel)]->Kick(targetNick, *this, reason.c_str() + 2, false, client);
 	}
 	else if (command == "MODE") {
@@ -391,15 +393,8 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 			return; //throw() no channel find
 		if (this->_channelList[channelPos]->findClientJoin(client) == -1)
 			return; //throw() client not in channel
-		if (this->_channelList[channelPos]->findClientOp(client) == -1)
-			return; //throw() dont have permision to do this
-		if (topic.empty())
-			send(client.getUid(), (":" + this->getHost() + " 331 " + client.getNickname() + " " + channel + " :No topic is set\r\n").c_str(), (":" + this->getHost() + " 331 " + client.getNickname() + " " + channel + " :No topic is set\r\n").length(), MSG_NOSIGNAL);
-		else
-		{
-			send(client.getUid(), (":" + this->getHost() + " 332 " + client.getNickname() + " " + channel + " :" + topic.c_str() + "\r\n").c_str(), (":" + this->getHost() + " 332 " + client.getNickname() + " " + channel + " :" + topic.c_str() + "\r\n").length(), MSG_NOSIGNAL);
-			this->_channelList[channelPos]->Topic(topic.c_str() + 2, *this);
-		}
+		if (!topic.empty())
+			this->_channelList[channelPos]->Topic(topic.c_str() + 2, *this, client);		
 	}
 	else {
 		std::cout << "Unknown command: " << command << std::endl << *this;
@@ -407,16 +402,22 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 }
 
 void Server::linkClientToChannel(Client& client, std::string& arg) {
-	std::string name;
+	std::string work, name, pass;
 	int pos = arg.rfind(",");
 	while (pos > 0 && pos < (int)arg.length()) {
-		name = arg.substr(pos + 1, arg.length() - pos);
+		work = arg.substr(pos + 1, arg.length() - pos);
+		std::istringstream iss(work);
+		iss >> name >> pass;
 		arg.erase(pos, arg.length() - pos);
 		pos = arg.rfind(",");
-		makeChannel(name)->Join(client, *this);
+		
+		makeChannel(name)->Join(client, *this, pass);
 	}
-	name = arg.substr(pos + 1, arg.length() - pos);
-	makeChannel(name)->Join(client, *this);
+	work = arg.substr(pos + 1, arg.length() - pos);
+	std::istringstream iss(work);
+	iss >> name >> pass;
+	std::cout << "Joining channel: " << name << " with pass: " << pass << std::endl;	
+	makeChannel(name)->Join(client, *this, pass);
 }
 
 void Server::setClientNick(Client& client, std::string& nick) {

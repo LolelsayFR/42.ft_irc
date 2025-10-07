@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
+/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 17:46:54 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 16:33:16 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 18:07:46 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,8 @@ enum broadcast
 	BRCST_OP,
 	BRCST_DEOP,
 	BRCST_KICK,
-	BRCST_TOPIC
+	BRCST_TOPIC,
+	BRCST_MODE,
 };
 
 class Channel {
@@ -60,11 +61,11 @@ public:
 	void setPassword(std::string pass);
 	void Op(Client& client, Server& server, Client& sender);
 	void DeOp(Client& client, Server& server, Client& sender);
-	void Join(Client& client, Server& server);
+	void Join(Client& client, Server& server, std::string& pass);
 	void Kick(std::string nick, Server& server, std::string reason, bool leave, Client& sender);
 	void Invite(Client& client, Client& sender);
 	void DeInvite(Client& client, Server& server);
-	void Topic(std::string topic, Server& server);
+	void Topic(std::string topic, Server& server, Client& sender);
 	void Mode(Client& sender , std::string option, Server& server);
 
 	int findClientOp(Client& client);

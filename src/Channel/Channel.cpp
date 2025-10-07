@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
+/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 16:36:34 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 18:28:50 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ Channel::Channel(std::string name) : _name(name) {
 	this->_password = "";
 	this->_needInvite = false;
 	this->_needPassword = false;
+	this->_needOpTopic = false;
 	this->_maxClient = 0;
 }
 
@@ -166,9 +167,7 @@ void Channel::Broadcast(Client& sender, std::string msg, broadcast type, Server&
 			std::string myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " JOIN " + this->getName() + "\r\n";
 			send(static_cast<Client*>(*it)->getUid(), myMsg.c_str(), myMsg.length(), MSG_NOSIGNAL);
 		}
-		else if (type == BRCST_KICK || type == BRCST_DEOP || type == BRCST_OP)
-			send(static_cast<Client*>(*it)->getUid(), msg.c_str(), msg.length(), MSG_NOSIGNAL);
-		else if (type == BRCST_TOPIC)
+		else if (type == BRCST_KICK || type == BRCST_DEOP || type == BRCST_OP || type == BRCST_TOPIC || type == BRCST_MODE)
 			send(static_cast<Client*>(*it)->getUid(), msg.c_str(), msg.length(), MSG_NOSIGNAL);
 		it++;
 	}
@@ -176,22 +175,16 @@ void Channel::Broadcast(Client& sender, std::string msg, broadcast type, Server&
 }
 
 //Channel command to join
-void Channel::Join(Client& client, Server& server) {
+void Channel::Join(Client& client, Server& server, std::string& pass) {
+	std::cout << "PASS=" << pass << "| VS SERV PASS=" << this->_password << "|" << std::endl;
 	int clientPos = this->findClientJoin(client);
 	if (clientPos == -1) {
-		if (this->_maxClient != 0 && (int)this->_joinedList.size() >= this->_maxClient) {
-			//throwRFCException(ERR_CHANNELISFULL, this->getName());
-			return ;
-		}
-		if (this->_needInvite == true && this->findClientInvite(client) == -1) {
-			//throwRFCException(ERR_INVITEONLYCHAN, this->getName());
-			return ;
-		}
-		if (this->_needPassword == true) {
-			//Password check pass
-			//if (this->_password != pass)
-				//throwRFCException(ERR_BADCHANNELKEY, this->getName());
-		}
+		if (this->_maxClient != 0 && (int)this->_joinedList.size() >= this->_maxClient)
+			return ;//throwRFCException(ERR_CHANNELISFULL, this->getName());
+		if (this->_needInvite == true && this->findClientInvite(client) == -1)
+			return ;//throwRFCException(ERR_INVITEONLYCHAN, this->getName());
+		if (this->_needPassword == true && this->_password != pass)
+			return; //throwRFCException(ERR_BADCHANNELKEY, this->getName());
 		this->_joinedList.push_back(&client);
 
 		//Join Broadcast
@@ -266,8 +259,7 @@ void Channel::Op(Client& client, Server&server, Client& sender) {
 	int clientPos = this->findClientOp(client);
 	if (clientPos == -1) {
 		this->_opList.push_back(&client);
-		std::string myMsg = ":" + sender.getHostname() + " MODE " + this->getName() + " +o " + client.getNickname() + "\r\n";
-		this->Broadcast(client, myMsg, BRCST_OP, server);
+		std::string myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " +o " + client.getNickname() + "\r\n";		this->Broadcast(client, myMsg, BRCST_OP, server);
 	}
 }
 
@@ -276,58 +268,84 @@ void Channel::DeOp(Client& client, Server& server, Client& sender) {
 	int clientPos = this->findClientOp(client);
 	if (clientPos != -1) {
 		this->_opList.erase(_opList.begin() + clientPos);
-		std::string myMsg = ":" + sender.getHostname() + " MODE " + this->getName() + " -o " + client.getNickname() + "\r\n";
-		this->Broadcast(client, myMsg, BRCST_DEOP, server);
+		std::string myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " -o " + client.getNickname() + "\r\n";		this->Broadcast(client, myMsg, BRCST_DEOP, server);
 	}
 }
 
 //Channel command to set topic
-void Channel::Topic(std::string topic, Server& server) {
-	if (topic.length() < 256)
+void Channel::Topic(std::string topic, Server& server, Client& sender) {
+	if (this->_needOpTopic == true && this->findClientOp(sender) == -1)
+		return ; //throwRFCException(ERR_CHANOPRIVSNEEDED, this->getName());
+	if (topic.length() < 255)
 	{
+		std::string myMsg = ":" + server.getHost() + " 332 " + sender.getNickname() + " " + this->_name + " :" + topic.c_str() + "\r\n";
 		this->_topic = topic;
-		//std::string myMsg = ":" + server.getHost() + " 332 " + this->getName() + " :" + this->_topic + "\r\n";
-		//this->Broadcast(*_joinedList[0] , myMsg, BRCST_TOPIC, server);
+		this->Broadcast(sender, myMsg, BRCST_TOPIC, server);
 	}
-	(void)server;
+	else
+		return ;//throwRFCException(ERR_TOPICTOOLONG, this->getName());
 }
 
 //Channel commands
 void Channel::Mode(Client& sender, std::string option, Server& server) {
 	int senderPos = this->findClientOp(sender);
 	std::istringstream iss(option);
-	std::string opt, target, channel;
+	std::string opt, target, channel, myMsg;
 		iss >> channel >> opt >> target;
 	if (opt == "+l") {
 		int maxValue = std::atoi(target.c_str());
 		if (maxValue > 0) {
 			this->_maxClient = maxValue;
+			myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " +l " + target + "\r\n";
+			this->Broadcast(sender, myMsg, BRCST_MODE, server);
+		}
+		else {
+			//throwRFCException(ERR_UNKNOWNMODE, opt);
+			return ;	
 		}
 	}
 	else if (opt == "-l") {
 		this->_maxClient = 0;
+		myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " -l\r\n";
+		this->Broadcast(sender, myMsg, BRCST_MODE, server);
 	}
 	else if (opt == "+t") {
 		this->_needOpTopic = true;
+		myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " +t\r\n";
+		this->Broadcast(sender, myMsg, BRCST_MODE, server);
 	}
 	else if (opt == "-t") {
 		this->_needOpTopic = false;
+		myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " -t\r\n";
+		this->Broadcast(sender, myMsg, BRCST_MODE, server);
 	}
 	else if (opt == "+i") {
 		this->_needInvite = true;
+		myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " +i\r\n";
+		this->Broadcast(sender, myMsg, BRCST_MODE, server);
 	}
 	else if (opt == "-i") {
 		this->_needInvite = false;
+		myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " -i\r\n";
+		this->Broadcast(sender, myMsg, BRCST_MODE, server);
 	}
 	else if (opt == "+k") {
 		this->_needPassword = true;
+		if (target.empty())
+			return ; //throwRFCException(ERR_NEEDMOREPARAMS, opt);
+		if (target.length() > 255)
+			return ; //throwRFCException(ERR_KEYTOOLONG, this->getName());
 		this->setPassword(target);
+		myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " +k\r\n";
+		this->Broadcast(sender, myMsg, BRCST_MODE, server);
 	}
 	else if (opt == "-k") {
 		this->_needPassword = false;
 		this->setPassword("");
+		myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " -k\r\n";
+		this->Broadcast(sender, myMsg, BRCST_MODE, server);
 	}
-	else if (!target.empty() && opt != "+o" && opt != "-o") {
+	else if (!target.empty() && (opt == "+o" || opt == "-o")) {
 		int targetPos = this->findClientJoin(target);
 		if (targetPos == -1)
 			return; //throw() no client find to aply mode
