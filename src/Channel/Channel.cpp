@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 21:21:02 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/07 21:25:39 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -286,7 +286,7 @@ void Channel::Topic(std::string topic, Server& server, Client& sender) {
 		this->Broadcast(sender, myMsg, BRCST_TOPIC, server);
 	}
 	else
-		return ;//throwRFCException(ERR_TOPICTOOLONG, this->getName());
+		throw std::runtime_error("Topic too long");
 }
 
 //Channel commands
