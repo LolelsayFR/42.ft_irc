@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 21:43:02 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/07 22:48:27 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -375,7 +375,7 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 		send(client.getUid(), pongResponse.c_str(), pongResponse.size(), MSG_NOSIGNAL);
 	}
 	else if (this->findClientSetup(client.getUid()) != -1)
-		throw std::runtime_error("Client not registered");
+		return;
 	else if (command == "INVITE") {
 		std::string targetNick, channelName;
 		iss >> targetNick >> channelName;
@@ -446,7 +446,7 @@ void Server::linkClientToChannel(Client& client, std::string& arg) {
 		iss >> name >> pass;
 		arg.erase(pos, arg.length() - pos);
 		pos = arg.rfind(",");
-
+		
 		makeChannel(name, pass)->Join(client, *this, pass);
 	}
 	work = arg.substr(pos + 1, arg.length() - pos);
@@ -604,6 +604,10 @@ void Server::clientHandler(int i, int n, char *buffer)
 			catch (ClientPasswordException & e) {
 				destroyOneClient(_fds, i);
 				std::cerr << e.what() << std::endl;
+				break ;
+			}
+			catch (std::exception & e) {
+				std::cerr << "Unexpected error: " << e.what() << std::endl;
 				break ;
 			}
 		}

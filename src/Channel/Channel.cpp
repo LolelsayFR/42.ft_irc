@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 21:39:02 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/07 22:45:47 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -180,44 +180,46 @@ void Channel::Broadcast(Client& sender, std::string msg, broadcast type, Server&
 //Channel command to join
 void Channel::Join(Client& client, Server& server, std::string& pass) {
 	std::cout << "PASS=" << pass << "| VS SERV PASS=" << this->_password << "|" << std::endl;
+
 	int clientPos = this->findClientJoin(client);
-	if (clientPos == -1) {
-		if (this->_maxClient != 0 && (int)this->_joinedList.size() >= this->_maxClient)
-			throwRFCException(ERR_CHANNELISFULL, this->getName());
-		if (this->_needInvite == true && this->findClientInvite(client) == -1)
-			throwRFCException(ERR_INVITEONLYCHAN, this->getName());
-		if (this->_needPassword == true && this->_password != pass)
-			throwRFCException(ERR_BADCHANNELKEY, this->getName());
-		this->_joinedList.push_back(&client);
+	if (clientPos != -1)
+		return; // Déjà dans le channel
 
-		//Join Broadcast
-		this->Broadcast(client, "", BRCST_JOIN, server);
+	if (this->_maxClient != 0 && (int)this->_joinedList.size() >= this->_maxClient)
+		throwRFCException(ERR_CHANNELISFULL, this->getName());
+	if (this->_needInvite && this->findClientInvite(client) == -1)
+		throwRFCException(ERR_INVITEONLYCHAN, this->getName());
+	if (this->_needPassword && this->_password != pass)
+		throwRFCException(ERR_BADCHANNELKEY, this->getName());
+	this->_joinedList.push_back(&client);
 
-		//Auto op
-		if (this->_joinedList[0] == &client)
-			this->_opList.push_back(&client);
-		//Topic
-		std::string myMsg = ":" + server.getHost() + " 331 " + client.getNickname() + " " + this->getName() + " :No topic is set\r\n";
-		if (!this->_topic.empty())
-    		myMsg = ":" + server.getHost() + " 332 " + client.getNickname() + " " + this->getName() + " :" + this->_topic + "\r\n";
+	this->Broadcast(client, "", BRCST_JOIN, server);
 
-		//List of client
-		myMsg += ":" + server.getHost() + " 353 " + client.getNickname() + " = " + this->getName() + " :";
-	    std::vector<Client*>::iterator it = this->_joinedList.begin();
-	    std::vector<Client*>::iterator end = this->_joinedList.end();
-	    for (; it != end; ++it) {
-			if (this->findClientOp(*static_cast<Client*>(*it)) != -1)
-				myMsg += "@";
-	        myMsg += static_cast<Client*>(*it)->getNickname();
-			if (it + 1 != end)
-				myMsg += " ";
-		}
-	    myMsg += "\r\n";
-		//End of list
-		myMsg += ":" + server.getHost() + " 366 " + client.getNickname() + " " + this->getName() + " :End of /NAMES list.\r\n";
-		send(client.getUid(), myMsg.c_str(), myMsg.length(), MSG_NOSIGNAL);
+	if (this->_joinedList[0] == &client)
+		this->_opList.push_back(&client);
+
+	std::string myMsg;
+	if (this->_topic.empty())
+		myMsg = ":" + server.getHost() + " 331 " + client.getNickname() + " " + this->getName() + " :No topic is set\r\n";
+	else
+		myMsg = ":" + server.getHost() + " 332 " + client.getNickname() + " " + this->getName() + " :" + this->_topic + "\r\n";
+
+	// Liste des clients
+	myMsg += ":" + server.getHost() + " 353 " + client.getNickname() + " = " + this->getName() + " :";
+	for (size_t i = 0; i < this->_joinedList.size(); ++i) {
+		Client *c = this->_joinedList[i];
+		if (this->findClientOp(*c) != -1)
+			myMsg += "@";
+		myMsg += c->getNickname();
+		if (i + 1 < this->_joinedList.size())
+			myMsg += " ";
 	}
+	myMsg += "\r\n:" + server.getHost() + " 366 " + client.getNickname() + " " + this->getName() + " :End of /NAMES list.\r\n";
+
+	send(client.getUid(), myMsg.c_str(), myMsg.length(), MSG_NOSIGNAL);
 }
+
+
 
 //Channel command to kick
 void Channel::Kick(std::string nick, Server& server, std::string reason, bool leave, Client& sender) {
