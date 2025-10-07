@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 17:46:54 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 17:07:10 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 17:28:11 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ enum broadcast
 	BRCST_DEOP,
 	BRCST_KICK,
 	BRCST_TOPIC,
+	BRCST_MODE,
 };
 
 class Channel {

@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 17:22:15 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 17:34:20 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,7 +167,7 @@ void Channel::Broadcast(Client& sender, std::string msg, broadcast type, Server&
 			std::string myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " JOIN " + this->getName() + "\r\n";
 			send(static_cast<Client*>(*it)->getUid(), myMsg.c_str(), myMsg.length(), MSG_NOSIGNAL);
 		}
-		else if (type == BRCST_KICK || type == BRCST_DEOP || type == BRCST_OP || type == BRCST_TOPIC)
+		else if (type == BRCST_KICK || type == BRCST_DEOP || type == BRCST_OP || type == BRCST_TOPIC || type == BRCST_MODE)
 			send(static_cast<Client*>(*it)->getUid(), msg.c_str(), msg.length(), MSG_NOSIGNAL);
 		it++;
 	}
@@ -296,36 +296,60 @@ void Channel::Topic(std::string topic, Server& server, Client& sender) {
 void Channel::Mode(Client& sender, std::string option, Server& server) {
 	int senderPos = this->findClientOp(sender);
 	std::istringstream iss(option);
-	std::string opt, target, channel;
+	std::string opt, target, channel, myMsg;
 		iss >> channel >> opt >> target;
 	if (opt == "+l") {
 		int maxValue = std::atoi(target.c_str());
 		if (maxValue > 0) {
 			this->_maxClient = maxValue;
+			myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " +l " + target + "\r\n";
+			this->Broadcast(sender, myMsg, BRCST_MODE, server);
+		}
+		else {
+			//throwRFCException(ERR_UNKNOWNMODE, opt);
+			return ;	
 		}
 	}
 	else if (opt == "-l") {
 		this->_maxClient = 0;
+		myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " -l\r\n";
+		this->Broadcast(sender, myMsg, BRCST_MODE, server);
 	}
 	else if (opt == "+t") {
 		this->_needOpTopic = true;
+		myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " +t\r\n";
+		this->Broadcast(sender, myMsg, BRCST_MODE, server);
 	}
 	else if (opt == "-t") {
 		this->_needOpTopic = false;
+		myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " -t\r\n";
+		this->Broadcast(sender, myMsg, BRCST_MODE, server);
 	}
 	else if (opt == "+i") {
 		this->_needInvite = true;
+		myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " +i\r\n";
+		this->Broadcast(sender, myMsg, BRCST_MODE, server);
 	}
 	else if (opt == "-i") {
 		this->_needInvite = false;
+		myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " -i\r\n";
+		this->Broadcast(sender, myMsg, BRCST_MODE, server);
 	}
 	else if (opt == "+k") {
 		this->_needPassword = true;
+		if (target.empty())
+			return ; //throwRFCException(ERR_NEEDMOREPARAMS, opt);
+		if (target.length() > 255)
+			return ; //throwRFCException(ERR_KEYTOOLONG, this->getName());
 		this->setPassword(target);
+		myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " +k\r\n";
+		this->Broadcast(sender, myMsg, BRCST_MODE, server);
 	}
 	else if (opt == "-k") {
 		this->_needPassword = false;
 		this->setPassword("");
+		myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " -k\r\n";
+		this->Broadcast(sender, myMsg, BRCST_MODE, server);
 	}
 	else if (!target.empty() && (opt == "+o" || opt == "-o")) {
 		int targetPos = this->findClientJoin(target);
