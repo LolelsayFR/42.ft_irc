@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
+/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
 /*   Updated: 2025/10/07 16:03:14 by emaillet         ###   ########.fr       */
@@ -168,6 +168,8 @@ void Channel::Broadcast(Client& sender, std::string msg, broadcast type, Server&
 		}
 		else if (type == BRCST_KICK || type == BRCST_DEOP || type == BRCST_OP)
 			send(static_cast<Client*>(*it)->getUid(), msg.c_str(), msg.length(), MSG_NOSIGNAL);
+		else if (type == BRCST_TOPIC)
+			send(static_cast<Client*>(*it)->getUid(), msg.c_str(), msg.length(), MSG_NOSIGNAL);
 		it++;
 	}
 	(void)server;
@@ -216,7 +218,7 @@ void Channel::Join(Client& client, Server& server) {
 		}
 	    myMsg += "\r\n";
 		//End of list
-		myMsg += ":" + server.getHost() + " 366 " + client.getNickname() + " " + this->getName() + " :End of /NAMES list.\r\n";	
+		myMsg += ":" + server.getHost() + " 366 " + client.getNickname() + " " + this->getName() + " :End of /NAMES list.\r\n";
 		send(client.getUid(), myMsg.c_str(), myMsg.length(), MSG_NOSIGNAL);
 	}
 }
@@ -280,7 +282,11 @@ void Channel::DeOp(Client& client, Server& server, Client& sender) {
 //Channel command to set topic
 void Channel::Topic(std::string topic, Server& server) {
 	if (topic.length() < 256)
+	{
 		this->_topic = topic;
+		//std::string myMsg = ":" + server.getHost() + " 332 " + this->getName() + " :" + this->_topic + "\r\n";
+		//this->Broadcast(*_joinedList[0] , myMsg, BRCST_TOPIC, server);
+	}
 	(void)server;
 }
 

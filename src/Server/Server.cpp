@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
+/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
 /*   Updated: 2025/10/07 16:21:14 by emaillet         ###   ########.fr       */
@@ -24,7 +24,7 @@
 Server::Server(int port, std::string password) : _port(port), _password(password) {
 	char hostname[256];
 	gethostname(hostname, sizeof(hostname));
-    this->_hostName = hostname;
+	this->_hostName = hostname;
 }
 
 // Default destructor
@@ -379,6 +379,27 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 		std::getline(iss, cmd);
 		this->sendModeChannel(client, cmd.c_str() + 1);
 	}
+	else if (command == "TOPIC")
+	{
+		std::string channel, topic;
+		iss >> channel;
+		std::getline(iss, topic);
+
+		int channelPos = this->findChannel(channel);
+		if (channelPos == -1)
+			return; //throw() no channel find
+		if (this->_channelList[channelPos]->findClientJoin(client) == -1)
+			return; //throw() client not in channel
+		if (this->_channelList[channelPos]->findClientOp(client) == -1)
+			return; //throw() dont have permision to do this
+		if (topic.empty())
+			send(client.getUid(), (":" + this->getHost() + " 331 " + client.getNickname() + " " + channel + " :No topic is set\r\n").c_str(), (":" + this->getHost() + " 331 " + client.getNickname() + " " + channel + " :No topic is set\r\n").length(), MSG_NOSIGNAL);
+		else
+		{
+			send(client.getUid(), (":" + this->getHost() + " 332 " + client.getNickname() + " " + channel + " :" + topic.c_str() + "\r\n").c_str(), (":" + this->getHost() + " 332 " + client.getNickname() + " " + channel + " :" + topic.c_str() + "\r\n").length(), MSG_NOSIGNAL);
+			this->_channelList[channelPos]->Topic(topic.c_str() + 2, *this);
+		}
+	}
 	else {
 		std::cout << "Unknown command: " << command << std::endl << *this;
 	}
@@ -494,7 +515,7 @@ void Server::clientSetupHandler(int i, int n, char *buffer)
 				parseMessage(*client, msg.erase(msg.length() - endMessages));
 			}
 			catch (AlreadyRegisteredException &e) {
-				std::string errorMsg = ":" + this->_hostName + " " + e.what() + "\r\n"; 
+				std::string errorMsg = ":" + this->_hostName + " " + e.what() + "\r\n";
 				send(client->getUid(), errorMsg.c_str(), errorMsg.length(), MSG_NOSIGNAL);
 				destroyOneClient(_fds, i);
 				std::cerr << e.what() << std::endl;
@@ -609,8 +630,8 @@ void Server::start(void){
 					// Données d'un client existant
 					int n = recv(_fds[i].fd, buffer, 1024, 0);
 					if (n > 0) {
-					    std::string msg(buffer, n);
-					    std::cout << "Received: " << msg << std::endl;
+						std::string msg(buffer, n);
+						std::cout << "Received: " << msg << std::endl;
 					}
 					if (n <= 0) {
 						std::cout << "User disconnected" << std::endl;
