@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 17:46:54 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 18:07:46 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 19:30:48 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,7 @@ public:
 	const std::vector<Client*>&     getOpList(void) const;
 	const std::vector<Client*>&	getInviteList(void) const;
 
+	void setNeedPassword(bool val);
 	void Broadcast(Client& sender, std::string msg, broadcast type, Server& server);
 
 	void setPassword(std::string pass);

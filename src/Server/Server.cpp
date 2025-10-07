@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
+/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 19:16:25 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/07 19:43:14 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,10 +144,15 @@ const std::vector<Channel*>&	Server::getChannelList(void) const {
 }
 
 //Create new channel
-Channel* Server::makeChannel(std::string name) {
+Channel* Server::makeChannel(std::string name, std::string pass) {
 	int channelPos = this->findChannel(name);
-	if (channelPos == -1)
+	if (channelPos == -1) {
 		this->_channelList.push_back(new Channel(name));
+		if (!pass.empty()) {
+			this->_channelList.back()->setPassword(pass);
+			this->_channelList.back()->setNeedPassword(true);
+		}
+	}
 	else
 		return (this->_channelList[channelPos]);
 	return (this->_channelList.back());
@@ -442,13 +447,13 @@ void Server::linkClientToChannel(Client& client, std::string& arg) {
 		arg.erase(pos, arg.length() - pos);
 		pos = arg.rfind(",");
 
-		makeChannel(name)->Join(client, *this, pass);
+		makeChannel(name, pass)->Join(client, *this, pass);
 	}
 	work = arg.substr(pos + 1, arg.length() - pos);
 	std::istringstream iss(work);
 	iss >> name >> pass;
 	std::cout << "Joining channel: " << name << " with pass: " << pass << std::endl;
-	makeChannel(name)->Join(client, *this, pass);
+	makeChannel(name, pass)->Join(client, *this, pass);
 }
 
 void Server::setClientNick(Client& client, std::string& nick) {

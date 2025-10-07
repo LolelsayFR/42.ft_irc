@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 18:28:50 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 19:31:30 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,6 +141,10 @@ bool Channel::getNeedPassword(void) const {
 //Password setter
 void Channel::setPassword(std::string pass) {
 	this->_password = pass;
+}
+
+void Channel::setNeedPassword(bool val) {
+	this->_needPassword = val;
 }
 
 
