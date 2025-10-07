@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 20:47:12 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/07 21:13:05 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -183,7 +183,7 @@ void Channel::Join(Client& client, Server& server, std::string& pass) {
 	int clientPos = this->findClientJoin(client);
 	if (clientPos == -1) {
 		if (this->_maxClient != 0 && (int)this->_joinedList.size() >= this->_maxClient)
-			return ;//throwRFCException(ERR_CHANNELISFULL, this->getName());
+			throwRFCException(ERR_CHANNELISFULL, this->getName());
 		if (this->_needInvite == true && this->findClientInvite(client) == -1)
 			return ;//throwRFCException(ERR_INVITEONLYCHAN, this->getName());
 		if (this->_needPassword == true && this->_password != pass)

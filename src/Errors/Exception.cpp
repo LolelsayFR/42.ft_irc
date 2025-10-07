@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:35:21 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/05 20:04:47 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/07 21:15:05 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,8 @@ AlreadyRegisteredException::AlreadyRegisteredException(const std::string& arg) :
 
 AlreadyRegisteredException::~AlreadyRegisteredException() throw() {}
 
+
+
 NosuchNickException::NosuchNickException(const std::string& arg) : message(arg)
 {
 	this->fullMessage = this->message + E_NOSUCHNICK;
@@ -48,12 +50,24 @@ NosuchNickException::NosuchNickException(const std::string& arg) : message(arg)
 
 NosuchNickException::~NosuchNickException() throw() {}
 
+
+
 NotOnChannelException::NotOnChannelException(const std::string& arg) : message(arg)
 {
 	this->fullMessage = this->message + E_NOTONCHANNEL;
 }
 
 NotOnChannelException::~NotOnChannelException() throw() {}
+
+
+ChannelIsFullException::ChannelIsFullException(const std::string& arg) : message(arg)
+{
+	this->fullMessage = this->message + E_CHANNELISFULL;
+}
+
+ChannelIsFullException::~ChannelIsFullException() throw() {}
+
+
 
 const char* AlreadyRegisteredException::what() const throw() {
 	return (this->fullMessage.c_str());
@@ -67,7 +81,9 @@ const char* NotOnChannelException::what(void) const throw() {
 	return (this->fullMessage.c_str());
 }
 
-
+const char* ChannelIsFullException::what(void) const throw() {
+	return (this->fullMessage.c_str());
+}
 
 void throwRFCException(enum Exceptions exception, std::string arg) {
 	switch (exception)
