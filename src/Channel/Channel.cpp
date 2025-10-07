@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 16:35:19 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 16:36:34 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -297,37 +297,29 @@ void Channel::Mode(Client& sender, std::string option, Server& server) {
 		if (maxValue > 0) {
 			this->_maxClient = maxValue;
 		}
-		std::cout << "Max client set to " << this->_maxClient << std::endl;
 	}
 	else if (opt == "-l") {
 		this->_maxClient = 0;
-		std::cout << "Max client remove" << std::endl;
 	}
 	else if (opt == "+t") {
 		this->_needOpTopic = true;
-		std::cout << "Need op to set topic" << std::endl;
 	}
 	else if (opt == "-t") {
 		this->_needOpTopic = false;
-		std::cout << "No need op to set topic" << std::endl;
 	}
 	else if (opt == "+i") {
 		this->_needInvite = true;
-		std::cout << "Need invite to join channel" << std::endl;
 	}
 	else if (opt == "-i") {
 		this->_needInvite = false;
-		std::cout << "No need invite to join channel" << std::endl;
 	}
 	else if (opt == "+k") {
 		this->_needPassword = true;
 		this->setPassword(target);
-		std::cout << "Need password to join channel, the pass is '" << this->getPassword() << "'" << std::endl;
 	}
 	else if (opt == "-k") {
 		this->_needPassword = false;
 		this->setPassword("");
-		std::cout << "No need password to join channel" << std::endl;
 	}
 	else if (!target.empty() && opt != "+o" && opt != "-o") {
 		int targetPos = this->findClientJoin(target);
