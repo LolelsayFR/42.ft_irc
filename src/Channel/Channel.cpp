@@ -219,6 +219,9 @@ void Channel::Kick(Client& client, Server& server) {
 	int clientPos = this->findClientJoin(client);
 	if (clientPos >= 0)
 		this->_joinedList.erase(_joinedList.begin() + clientPos);
+	int opPos = this->findClientOp(client);
+	if (opPos >= 0)
+		this->_opList.erase(_opList.begin() + opPos);
 	(void)server;
 }
 
