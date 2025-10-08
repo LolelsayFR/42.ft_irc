@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/08 12:29:51 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/08 13:42:32 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -221,7 +221,7 @@ void	Server::destroyOneClient(std::vector<struct pollfd> &fds , int i)
 	for(int i = 0; it != end; i++) {
 		channel = static_cast<Channel*>(*it);
 		if (channel->findClientJoin(*target) != -1)
-			channel->Kick(target->getNickname(),"", true, *target);
+			channel->Kick(target->getNickname(), "", true, *target);
 		if (channel->findClientInvite(*target) != -1)
 			channel->DeInvite(*target, *this);
 		if (channel->findClientOp(*target) != -1)
@@ -292,8 +292,13 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 		iss >> username >> hostname >> servername;
 		std::getline(iss, realname);
 		client.setUsername(username);
-		client.setRealname(realname.c_str() + 2);
+		if (hostname.empty())
+			hostname = "unknown";
 		client.setHostname(hostname);
+		if (realname.length() >= 2)
+			client.setRealname(realname.c_str() + 2);
+		else
+			client.setRealname(username);
 		std::cout << "Username set to " << username << " for fd " << client.getUid() << std::endl;
 	}
 	else if (command == "PASS") {
@@ -342,12 +347,15 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 		std::string channel, targetNick, reason;
 		iss >> channel >> targetNick;
 		getline(iss, reason);
-		int targetPos = this->_channelList[this->findChannel(channel)]->findClientJoin(targetNick);
-		if (this->_channelList[this->findChannel(channel)]->findClientOp(client) == -1)
-			throwRFCException(ERR_CHANOPRIVSNEEDED, channel, client.getNickname());
-		if (targetPos == -1)
+		int channelPos = this->findChannel(channel);
+		if (channelPos == -1)
+			throwRFCException(ERR_NOSUCHNICK, channel, client.getNickname());
+		int targetPos = this->_channelList[channelPos]->findClientJoin(targetNick);
+		if (this->_channelList[channelPos]->findClientOp(client) == -1)
+			throwRFCException(ERR_CHANOPRIVSNEEDED, targetNick, client.getNickname());
+		else if (targetPos == -1)
 			throwRFCException(ERR_NOSUCHNICK, targetNick, client.getNickname());
-		this->_channelList[this->findChannel(channel)]->Kick(targetNick, reason.c_str() + 2, false, client);
+		this->_channelList[channelPos]->Kick(targetNick, reason.c_str() + 2, false, client);
 	}
 	else if (command == "MODE") {
 		std::string cmd;
@@ -452,7 +460,7 @@ void Server::clientLeaveChannel(Client& client, const std::string& arg) {
 		dest = std::string(arg.substr(5));
 	int Pos = this->findChannel(dest);
 	if (Pos == -1)
-		throwRFCException(ERR_NOSUCHNICK, dest, client.getNickname());
+		return	;
 	else {
 		if (this->_channelList[Pos]->findClientJoin(client) == -1)
 			throwRFCException(ERR_NOTONCHANNEL, dest, client.getNickname());
@@ -476,7 +484,10 @@ void Server::clientSetupHandler(int i, int n, char *buffer)
 	if (this->findClientSetup(_fds[i].fd) != -1)
 	{
 		Client *client = findClientByFd(_setupList, _fds[i].fd);
+		if (!client)
+			return;
 		client->appendBuffer(buffer, n);
+		bool client_deleted = false;
 		while (client->hasMessage()) {
 			std::string msg = client->popMessage();
 			try {
@@ -489,6 +500,7 @@ void Server::clientSetupHandler(int i, int n, char *buffer)
 				std::string errorMsg = ":" + this->_hostName + " " + e.what() + "\r\n";
 				send(client->getUid(), errorMsg.c_str(), errorMsg.length(), MSG_NOSIGNAL);
 				destroyOneWaiting(_fds, i);
+				client_deleted = true;
 				std::cerr << e.what() << std::endl;
 				break ;
 			}
@@ -500,10 +512,13 @@ void Server::clientSetupHandler(int i, int n, char *buffer)
 			}
 			catch (ClientPasswordException & e) {
 				destroyOneWaiting(_fds, i);
+				client_deleted = true;
 				std::cerr << e.what() << std::endl;
 				break ;
 			}
 		}
+		if (client_deleted)
+			return;
 		Server::isAvailable(*client);
 		client->checkRegistration();
 		if (client->isRegistered()) {
@@ -514,6 +529,10 @@ void Server::clientSetupHandler(int i, int n, char *buffer)
 
 void Server::clientHandler(int i, int n, char *buffer)
 {
+	if(i < 0 || static_cast<size_t>(i) >= _fds.size())
+		return;
+	if (_fds[i].fd < 0)
+		return;
 	Client *client = findClientByFd(_clientList, _fds[i].fd);
 	if (client && this->findClientSetup(_fds[i].fd) == -1) {
 		client->appendBuffer(buffer, n);
@@ -522,7 +541,7 @@ void Server::clientHandler(int i, int n, char *buffer)
 			std::string msg = client->popMessage();
 			try {
 				int endMessages = 0;
-				if (msg[msg.length() - 1] == '\r')
+				if (!msg.empty() && msg[msg.length() - 1] == '\r')
 					endMessages = 1;
 				parseMessage(*client, msg.erase(msg.length() - endMessages));
 			}
@@ -591,36 +610,36 @@ void Server::start(void){
 		if (ret < 0)
 			break;
 
-		for (size_t i = 0; i < _fds.size(); i++) {
+		for (size_t i = 0; i < _fds.size(); ) {
 			if (_fds[i].revents != 0) {
 				if (_fds[i].fd == server_fd) {
-					// Nouvelle connexion
 					int clientSocket = accept(server_fd, NULL, NULL);
 					if (clientSocket == -1)
-							break ;
+						break;
 					std::cout << "User try to connect..." << std::endl;
 					addNewSocket(_fds, clientSocket);
 					_setupList.push_back(new Client(clientSocket));
-
+					i++; // on avance, rien n’a été effacé
 				} else {
-					// Données d'un client existant
 					int n = recv(_fds[i].fd, buffer, 1024, 0);
-					if (n > 0) {
-						std::string msg(buffer, n);
-						std::cout << "Received: " << msg << std::endl;
-					}
 					if (n <= 0) {
 						std::cout << "User disconnected" << std::endl;
+						if (findClientSetup(_fds[i].fd) != -1)
+							destroyOneWaiting(_fds, i);
+						else
 						destroyOneClient(_fds, i);
 						std::cout << *this << std::endl;
-						continue ;
+						continue;
 					}
-					// Traitement des donnees
 					this->clientSetupHandler(i, n, buffer);
 					this->clientHandler(i, n, buffer);
+					i++;
 				}
+			} else {
+				i++;
 			}
 		}
+
 	}
 }
 
