@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/08 15:31:26 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/08 15:33:37 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -382,9 +382,10 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 		if (this->_channelList[channelPos]->findClientJoin(client) == -1)
 			throwRFCException(ERR_NOTONCHANNEL, channel, client.getNickname());
 		if (!topic.empty())
-			this->_channelList[channelPos]->Topic(topic.c_str() + 2, *this, client);
+			this->_channelList[channelPos]->Topic(topic.c_str() + 1, *this, client);
 		else {
-			std::string topicMsg = ": " + this->_hostName + " 332 " + client.getNickname() + " " + channel + " :" + this->_channelList[channelPos]->getTopic() + "\r\n";
+			std::string actualtopic = this->_channelList[channelPos]->getTopic().empty() ? ":No topic is set" : (": " + this->_channelList[channelPos]->getTopic());
+			std::string topicMsg = ": " + this->_hostName + " 332 " + client.getNickname() + " " + channel + actualtopic + "\r\n";
 			send(client.getUid(), topicMsg.c_str(), topicMsg.length(), MSG_NOSIGNAL);
 		}
 	}
