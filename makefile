@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+         #
+#    By: arthur <arthur@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/03/04 17:23:35 by arthur            #+#    #+#              #
-#    Updated: 2025/09/30 11:03:11 by emaillet         ###   ########.fr        #
+#    Updated: 2025/10/08 14:33:17 by arthur           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -39,6 +39,14 @@ OBJS = $(SRC:.cpp=.o)
 all: $(NAME)
 	@echo "$(GREEN)Compilation successful !$(DEF_COLOR)"
 
+bonus:
+	@$(CC) $(CFLAGS) bonus/bot.cpp -o bot_bonus
+	@echo "$(GREEN)Bonus compilation successful !$(DEF_COLOR)"
+
+bonus_clean:
+	@rm -f bot_bonus
+	@echo "$(GREEN)Bonus clean successful !$(DEF_COLOR)"
+
 $(NAME): $(OBJS)
 	@$(CC) $(CFLAGS) $(OBJS) -o $(NAME)
 
@@ -55,4 +63,4 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: all clean fclean re
+.PHONY: all clean fclean re bonus bonus_clean
