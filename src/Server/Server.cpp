@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/08 15:52:01 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/08 16:04:12 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -481,7 +481,7 @@ void Server::clientLeaveChannel(Client& client, const std::string& arg) {
 		dest = std::string(arg.substr(5));
 	int Pos = this->findChannel(dest);
 	if (Pos == -1)
-		return	;
+		throwRFCException(ERR_NOSUCHCHANNEL, dest, client.getNickname());
 	else {
 		if (this->_channelList[Pos]->findClientJoin(client) == -1)
 			throwRFCException(ERR_NOTONCHANNEL, dest, client.getNickname());
