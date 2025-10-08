@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 14:43:51 by arthur            #+#    #+#             */
-/*   Updated: 2025/10/06 11:10:45 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/08 14:43:56 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,8 @@ private :
 	std::string		_realname;
 	std::string		_hostname;
 	std::string		_buffer;
+	bool			_fdIsClear;
+
 public :
 	Client(int fd);
 	~Client(void);
@@ -39,6 +41,8 @@ public :
 	std::string getNickname(void) const;
 	std::string getRealname(void) const;
 	std::string getHostname(void) const;
+	bool getFdIsClear(void) const;
+	void fdIsClear(void);
 
 	void checkRegistration();
 	void setWelcomeSent(bool val);
