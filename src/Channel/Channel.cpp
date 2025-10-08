@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
+/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/08 11:02:27 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/08 12:24:28 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,61 +37,6 @@ Channel::~Channel(void) {
 	this->_opList.empty();
 }
 
-
-/* ************************************************************************** */
-/* All operator overload */
-/* ************************************************************************** */
-
-//Ostream insertion operator
-std::ostream& operator<<(std::ostream& o, Channel& c) {
-	Client* ptr;
-	o << std::endl << WHI << "/* Channel View */" << RES << std::endl;
-	{
-		std::vector<Client*> list = c.getJoinList();
-		std::vector<Client*>::iterator	it = list.begin();
-		std::vector<Client*>::iterator	end = list.end();
-		o << " /\tChannel name : " << c.getName() << std::endl;
-		if (c.getNeedPassword())
-			o << " /\tNeed password : true, the pass is '" << c.getPassword() << "'" << std::endl;
-		else
-			o << " /\tNeed password : false" << std::endl;
-		o << " /\tChannel topic : " << c.getTopic() << std::endl;
-		o << WHI << "/* Client in channel */" << RES << std::endl;
-		for (int i = 0; it != end; i++, it++) {
-			ptr = *it;
-			{
-			o 	<< " | n°" << std::setw(5) << i
-				<< " | Username = " <<  std::setw(10) << ptr->getUsername()
-				<< " | Nickname = " <<  std::setw(10) << ptr->getNickname()
-				<< " | Is op = " << ((c.findClientOp(*ptr) == -1) ? ("false") : ("true "))
-				<< " |"  << std::endl;
-			}
-		}
-		if (list.empty())
-			o << "/\tEmpty.." << std::endl;
-		o << "/* ** */" << std::endl;
-	}
-	if (!c.getNeedInvite())
-		return (o);
-	{
-		std::vector<Client*> list = c.getInviteList();
-		std::vector<Client*>::iterator	it = list.begin();
-		std::vector<Client*>::iterator	end = list.end();
-		o << WHI << "/* Client invitation list from channel */" << RES << std::endl;
-		if (list.empty())
-			o << "\tEmpty.." << std::endl;
-		else
-			for (int i = 0; it != end; i++, it++) {
-				ptr = *it;
-				o 	<< "| n°" << std::setw(5) << i
-					<< " | Username = " <<  std::setw(10) << ptr->getUsername()
-					<< " | Nickname = " <<  std::setw(10) << ptr->getNickname()
-					<< " |"  << std::endl;
-			}
-		o << "/* ** */" << std::endl;
-	}
-	return (o);
-}
 
 /* ************************************************************************** */
 /* All getter */

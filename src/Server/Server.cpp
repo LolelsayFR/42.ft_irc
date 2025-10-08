@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/08 11:08:59 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/08 12:22:07 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,68 +44,6 @@ Server::~Server(void) {
 	this->_channelList.clear();
 	this->_clientList.clear();
 	this->_setupList.clear();
-}
-
-
-/* ************************************************************************** */
-/* All operator overload */
-/* ************************************************************************** */
-
-//Ostream insertion operator
-std::ostream& operator<<(std::ostream& o, Server& s) {
-	Client* ptr;
-	o << std::endl << WHI << "/* Server View * */" << RES << std::endl;
-	o 	<< " /\tPort : " << s.getPort()
-		<< "\n /\tPassword : " << s.getPassword()
-		<< "\n /\tHost : " << s.getHost() << std::endl
-		<< WHI << "/* ** */" << RES << std::endl;
-	{
-		std::vector<Client*> list = s.getClientList();
-		std::vector<Client*>::iterator	it = list.begin();
-		std::vector<Client*>::iterator	end = list.end();
-		o << std::endl << WHI <<  "/* Client connected * */" << RES << std::endl;
-		if (list.empty())
-			o << " /\tEmpty.." << std::endl;
-		else
-			for (int i = 0; it != end; i++, it++) {
-				ptr = *it;
-				{
-				o 	<< "| n°" << std::setw(3) << i
-					<< " | U = " <<  std::setw(10) << ptr->getUsername()
-					<< " | N = " <<  std::setw(10) << ptr->getNickname()
-					<< " | R = " <<  std::setw(20) << ptr->getRealname()
-					<< " | H = " <<  std::setw(10) << ptr->getHostname()
-					<< " |"  << std::endl;
-				}
-			}
-		o << WHI << "/* ** */" << RES << std::endl;
-	}
-	{
-		std::vector<Client*> list = s.getSetupList();
-		std::vector<Client*>::iterator	it = list.begin();
-		std::vector<Client*>::iterator	end = list.end();
-		o << std::endl <<  WHI << "/* Client in setup * */" << RES << std::endl;
-		if (list.empty())
-			o << " /\tEmpty.." << std::endl;
-		else
-			for (int i = 0; it != end; i++, it++) {
-				ptr = *it;
-				{
-				o 	<< "| n°" << std::setw(3) << i
-					<< " | ID = " <<  std::setw(5) << ptr->getUid()
-					<< " |"  << std::endl;
-				}
-			}
-		o << WHI << "/* ** */" << RES << std::endl;
-	}
-	{
-		std::vector<Channel*> list = s.getChannelList();
-		std::vector<Channel*>::iterator	it = list.begin();
-		std::vector<Channel*>::iterator	end = list.end();
-		for (int i = 0; it != end; i++, it++)
-			o << *(static_cast<Channel*>(*it));
-	}
-	return (o);
 }
 
 /* ************************************************************************** */
