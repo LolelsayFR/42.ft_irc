@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 12:12:51 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/08 12:22:43 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/08 12:46:52 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ std::ostream& operator<<(std::ostream& o, Server& s) {
 	o 	<< " /\tPort : " << s.getPort()
 		<< "\n /\tPassword : " << s.getPassword()
 		<< "\n /\tHost : " << s.getHost() << std::endl
-		<< WHI << "/* ** */" << RES << std::endl;
+		<< WHI << "/* ********* */" << RES << std::endl;
 	{
 		std::vector<Client*> list = s.getClientList();
 		std::vector<Client*>::iterator	it = list.begin();
@@ -47,7 +47,7 @@ std::ostream& operator<<(std::ostream& o, Server& s) {
 					<< " |"  << std::endl;
 				}
 			}
-		o << WHI << "/* ** */" << RES << std::endl;
+		o << WHI << "/* ********* */" << RES << std::endl;
 	}
 	{
 		std::vector<Client*> list = s.getSetupList();
@@ -65,7 +65,7 @@ std::ostream& operator<<(std::ostream& o, Server& s) {
 					<< " |"  << std::endl;
 				}
 			}
-		o << WHI << "/* ** */" << RES << std::endl;
+		o << WHI << "/* ********* */" << RES << std::endl;
 	}
 	{
 		std::vector<Channel*> list = s.getChannelList();
@@ -104,7 +104,7 @@ std::ostream& operator<<(std::ostream& o, Channel& c) {
 		}
 		if (list.empty())
 			o << "/\tEmpty.." << std::endl;
-		o << "/* ** */" << std::endl;
+		o << WHI << "/* ********** */" << RES << std::endl;
 	}
 	if (!c.getNeedInvite())
 		return (o);
@@ -123,7 +123,11 @@ std::ostream& operator<<(std::ostream& o, Channel& c) {
 					<< " | Nickname = " <<  std::setw(10) << ptr->getNickname()
 					<< " |"  << std::endl;
 			}
-		o << "/* ** */" << std::endl;
+		o << WHI << "/* ********* */" << RES << std::endl;
 	}
 	return (o);
 }
+
+/* ************************************************************************** */
+/* End of file */
+/* ************************************************************************** */
