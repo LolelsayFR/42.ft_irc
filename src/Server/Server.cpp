@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/08 17:28:43 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/08 17:43:35 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -380,7 +380,10 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 			throwRFCException(ERR_CHANOPRIVSNEEDED, targetNick, client.getNickname());
 		else if (targetPos == -1)
 			throwRFCException(ERR_NOSUCHNICK, targetNick, client.getNickname());
-		this->_channelList[channelPos]->Kick(targetNick, reason.c_str() + 2, false, client);
+		if (!reason.empty() && reason.length() >= 2)
+			this->_channelList[channelPos]->Kick(targetNick, reason.c_str() + 2, false, client);
+		else
+			this->_channelList[channelPos]->Kick(targetNick, "", false, client);
 	}
 	else if (command == "MODE") {
 		std::string cmd;

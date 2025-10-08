@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
+/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/08 15:59:57 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/08 17:40:12 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -205,8 +205,8 @@ void Channel::DeInvite(Client& client, Server& server) {
 
 //Channel command to add operator
 void Channel::Op(Client& client, Client& sender) {
-	int clientPos = this->findClientOp(client);
-	if (clientPos == -1) {
+	int clientPos = this->findClientOp(sender);
+	if (clientPos != -1) {
 		this->_opList.push_back(&client);
 		std::string myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " +o " + client.getNickname() + "\r\n";
 		this->Broadcast(client, myMsg, BRCST_OP);
@@ -215,7 +215,7 @@ void Channel::Op(Client& client, Client& sender) {
 
 //Channel command to remove operator
 void Channel::DeOp(Client& client, Client& sender) {
-	int clientPos = this->findClientOp(client);
+	int clientPos = this->findClientOp(sender);
 	if (clientPos != -1) {
 		this->_opList.erase(_opList.begin() + clientPos);
 		std::string myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " -o " + client.getNickname() + "\r\n";
@@ -243,7 +243,7 @@ void Channel::Mode(Client& sender, std::string option) {
 	std::istringstream iss(option);
 	std::string opt, target, channel, myMsg;
 		iss >> channel >> opt >> target;
-	if (senderPos == -1)
+	if (senderPos == -1 )
 			throwRFCException(ERR_CHANOPRIVSNEEDED, this->getName(), sender.getNickname());
 	if (opt == "+l") {
 		int maxValue = std::atoi(target.c_str());
