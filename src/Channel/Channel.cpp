@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/08 13:40:32 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/08 13:42:06 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -172,9 +172,9 @@ void Channel::Kick(std::string nick, std::string reason, bool leave, Client& sen
 
 		std::string myMsg;
 		if (!reason.empty()) {
-		    myMsg = ":" + sender.getNickname() + " KICK " + this->getName() + " " + nick + " :" + reason + "\r\n";
+		    myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " KICK " + this->getName() + " " + nick + " :" + reason + "\r\n";
 		} else {
-		    myMsg = ":" + sender.getNickname() + " KICK " + this->getName() + " " + nick + "\r\n";
+		    myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " KICK " + this->getName() + " " + nick + "\r\n";
 		}
 		if (leave == false)
 			this->Broadcast(sender, myMsg, BRCST_KICK);
@@ -208,6 +208,7 @@ void Channel::Op(Client& client, Client& sender) {
 	int clientPos = this->findClientOp(client);
 	if (clientPos == -1) {
 		this->_opList.push_back(&client);
+		std::string myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " +o " + client.getNickname() + "\r\n";
 		std::string myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " +o " + client.getNickname() + "\r\n";
 		this->Broadcast(client, myMsg, BRCST_OP);
 	}
