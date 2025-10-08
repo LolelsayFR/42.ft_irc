@@ -84,6 +84,9 @@ const std::vector<Channel*>&	Server::getChannelList(void) const {
 //Create new channel
 Channel* Server::makeChannel(std::string name, std::string pass) {
 	int channelPos = this->findChannel(name);
+	if (!(name[0] == '#' || name[0] == '&' || name[0] == '+' || name[0] == '!')) {
+		return NULL;
+	}
 	if (channelPos == -1) {
 		this->_channelList.push_back(new Channel(name));
 		if (!pass.empty()) {
@@ -281,6 +284,7 @@ void	addNewSocket(std::vector<struct pollfd> &fds , int socketFD)
 }
 
 void Server::parseMessage(Client &client, const std::string &msg) {
+	std::cout << "\e[48;2;20;100;20;1m [" << client.getNickname() << "]" << RES << " " << msg << std::endl;
 	std::istringstream iss(msg);
 	std::string command;
 	iss >> command;
@@ -353,7 +357,7 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 		getline(iss, reason);
 		int channelPos = this->findChannel(channel);
 		if (channelPos == -1)
-			throwRFCException(ERR_NOSUCHNICK, channel, client.getNickname());
+			throwRFCException(ERR_NOSUCHCHANNEL, channel, client.getNickname());
 		int targetPos = this->_channelList[channelPos]->findClientJoin(targetNick);
 		if (this->_channelList[channelPos]->findClientOp(client) == -1)
 			throwRFCException(ERR_CHANOPRIVSNEEDED, targetNick, client.getNickname());
@@ -405,14 +409,18 @@ void Server::linkClientToChannel(Client& client, std::string& arg) {
 		iss >> name >> pass;
 		arg.erase(pos, arg.length() - pos);
 		pos = arg.rfind(",");
-
-		makeChannel(name, pass)->Join(client, *this, pass);
+		Channel* channel = makeChannel(name, pass);
+		if (channel == NULL)
+			throwRFCException(ERR_NOSUCHCHANNEL, name, client.getNickname());
+		channel->Join(client, *this, pass);
 	}
 	work = arg.substr(pos + 1, arg.length() - pos);
 	std::istringstream iss(work);
 	iss >> name >> pass;
-	std::cout << "Joining channel: " << name << " with pass: " << pass << std::endl;
-	makeChannel(name, pass)->Join(client, *this, pass);
+	Channel* channel = makeChannel(name, pass);
+	if (channel == NULL)
+		throwRFCException(ERR_NOSUCHCHANNEL, name, client.getNickname());
+	channel->Join(client, *this, pass);
 }
 
 void Server::setClientNick(Client& client, std::string& nick) {
@@ -443,9 +451,7 @@ void Server::privMsgSend(Client& client, const std::string& arg) {
 	else {
 		int Pos = this->findClientByNick(dest);
 		if (Pos == -1)
-		{
 			throwRFCException(ERR_NOSUCHNICK, dest, client.getNickname());
-		}
 		else
 			this->_clientList[Pos]->receptMessage(client, msg);
 	}
@@ -458,7 +464,7 @@ void Server::sendModeChannel(Client& client, const std::string& arg) {
 	if (arg[0] == '#' || arg[0] == '&' || arg[0] == '+' || arg[0] == '!') {
 		int Pos = this->findChannel(target);
 		if (Pos == -1)
-			throwRFCException(ERR_NOSUCHNICK, arg.substr(1, arg.find(" ") - 1), client.getNickname());
+			throwRFCException(ERR_NOSUCHCHANNEL, arg.substr(1, arg.find(" ") - 1), client.getNickname());
 		else
 			this->_channelList[Pos]->Mode(client, arg);
 	}
