@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 17:46:54 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 19:30:48 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/08 10:56:40 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,17 +57,17 @@ public:
 	const std::vector<Client*>&	getInviteList(void) const;
 
 	void setNeedPassword(bool val);
-	void Broadcast(Client& sender, std::string msg, broadcast type, Server& server);
+	void Broadcast(Client& sender, std::string msg, broadcast type);
 
 	void setPassword(std::string pass);
-	void Op(Client& client, Server& server, Client& sender);
-	void DeOp(Client& client, Server& server, Client& sender);
+	void Op(Client& client, Client& sender);
+	void DeOp(Client& client, Client& sender);
 	void Join(Client& client, Server& server, std::string& pass);
-	void Kick(std::string nick, Server& server, std::string reason, bool leave, Client& sender);
+	void Kick(std::string nick, std::string reason, bool leave, Client& sender);
 	void Invite(Client& client, Client& sender);
 	void DeInvite(Client& client, Server& server);
 	void Topic(std::string topic, Server& server, Client& sender);
-	void Mode(Client& sender , std::string option, Server& server);
+	void Mode(Client& sender , std::string option);
 
 	int findClientOp(Client& client);
 	int findClientOp(std::string nick);
