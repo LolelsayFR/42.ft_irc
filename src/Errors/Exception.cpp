@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:35:21 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/08 11:11:31 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/08 15:07:48 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,7 +104,12 @@ NeedMoreParamsException::NeedMoreParamsException(const std::string& arg, std::st
 
 NeedMoreParamsException::~NeedMoreParamsException() throw() {}
 
+NosuchChannelException::NosuchChannelException(const std::string& arg, std::string clientNick) : message(arg)
+{
+	this->fullMessage = " 403 " + clientNick + " " + this->message + E_NOSUCHCHANNEL;
+}
 
+NosuchChannelException::~NosuchChannelException() throw() {}
 
 
 const char* AlreadyRegisteredException::what() const throw() {
@@ -143,6 +148,10 @@ const char* NeedMoreParamsException::what(void) const throw() {
 	return (this->fullMessage.c_str());
 }
 
+const char* NosuchChannelException::what(void) const throw() {
+	return (this->fullMessage.c_str());
+}
+
 void throwRFCException(enum Exceptions exception,std::string arg, std::string clientNick) {
 	switch (exception)
 	{
@@ -164,6 +173,8 @@ void throwRFCException(enum Exceptions exception,std::string arg, std::string cl
 			throw UnknownModeException(arg, clientNick);
 		case ERR_NEEDMOREPARAMS:
 			throw NeedMoreParamsException(arg, clientNick);
+		case ERR_NOSUCHCHANNEL:
+			throw NosuchChannelException(arg, clientNick);
 		default :
 			throw RFCException();
 	}
