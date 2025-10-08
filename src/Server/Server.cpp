@@ -432,15 +432,14 @@ void Server::linkClientToChannel(Client& client, std::string& arg) {
 void Server::setClientNick(Client& client, std::string& nick) {
 
 		if (nick.empty())
-			throwRFCException(ERR_ALREADYREGISTRED, nick, client.getNickname());
+			throwRFCException(ERR_NEEDMOREPARAMS, "NICK", client.getNickname());
 		if (this->findClientByNick(nick) == -1) {
 			std::string myMsg = ":" + client.getNickname() + " NICK " + " :" + nick + "\r\n";
 			send(client.getUid(), myMsg.c_str(), myMsg.length(), MSG_NOSIGNAL);
 			client.setNickname(nick);
 		}
 		else
-			return ;
-			//EXCEPTION NICKNAME ALREADY USE
+			throwRFCException(ERR_ALREADYREGISTRED, nick, client.getNickname());
 		std::cout << "Nickname set to " << nick << " for fd " << client.getUid() << std::endl;
 }
 
