@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:10:41 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/05 20:12:08 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/07 22:39:32 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,9 +21,15 @@
 
 enum Exceptions
 {
-	ERR_ALREADYREGISTRED = 461,
+	ERR_ALREADYREGISTRED = 462,
 	ERR_NOSUCHNICK = 401,
-	ERR_NOTONCHANNEL = 442
+	ERR_NOTONCHANNEL = 442,
+	ERR_CHANNELISFULL = 471,
+	ERR_INVITEONLYCHAN = 473,
+	ERR_BADCHANNELKEY = 475,
+	ERR_CHANOPRIVSNEEDED = 482,
+	ERR_UNKNOWNMODE = 472,
+	ERR_NEEDMOREPARAMS = 461,
 };
 
 class ParsingException : public std::exception
@@ -84,6 +90,79 @@ class NotOnChannelException : public RFCException
 		virtual ~NotOnChannelException() throw();
 		virtual const char* what() const throw();
 };
+
+class ChannelIsFullException : public RFCException
+{
+	private:
+		std::string message;
+		std::string fullMessage;
+
+	public:
+		ChannelIsFullException(const std::string& arg);
+		virtual ~ChannelIsFullException() throw();
+		virtual const char* what() const throw();
+};
+
+class InviteOnlyChanException : public RFCException
+{
+	private:
+		std::string message;
+		std::string fullMessage;
+
+	public:
+		InviteOnlyChanException(const std::string& arg);
+		virtual ~InviteOnlyChanException() throw();
+		virtual const char* what() const throw();
+};
+
+class BadChannelKeyException : public RFCException
+{
+	private:
+		std::string message;
+		std::string fullMessage;
+
+	public:
+		BadChannelKeyException(const std::string& arg);
+		virtual ~BadChannelKeyException() throw();
+		virtual const char* what() const throw();
+};
+
+class ChanOpPrivsNeededException : public RFCException
+{
+	private:
+		std::string message;
+		std::string fullMessage;
+
+	public:
+		ChanOpPrivsNeededException(const std::string& arg);
+		virtual ~ChanOpPrivsNeededException() throw();
+		virtual const char* what() const throw();
+};
+
+class UnknownModeException : public RFCException
+{
+	private:
+		std::string message;
+		std::string fullMessage;
+
+	public:
+		UnknownModeException(const std::string& arg);
+		virtual ~UnknownModeException() throw();
+		virtual const char* what() const throw();
+};
+
+class NeedMoreParamsException : public RFCException
+{
+	private:
+		std::string message;
+		std::string fullMessage;
+
+	public:
+		NeedMoreParamsException(const std::string& arg);
+		virtual ~NeedMoreParamsException() throw();
+		virtual const char* what() const throw();
+};
+
 class ClientPasswordException : public std::exception
 {
 	public:

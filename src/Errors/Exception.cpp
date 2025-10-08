@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:35:21 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/05 20:04:47 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/07 22:07:13 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,8 @@ AlreadyRegisteredException::AlreadyRegisteredException(const std::string& arg) :
 
 AlreadyRegisteredException::~AlreadyRegisteredException() throw() {}
 
+
+
 NosuchNickException::NosuchNickException(const std::string& arg) : message(arg)
 {
 	this->fullMessage = this->message + E_NOSUCHNICK;
@@ -48,12 +50,62 @@ NosuchNickException::NosuchNickException(const std::string& arg) : message(arg)
 
 NosuchNickException::~NosuchNickException() throw() {}
 
+
+
 NotOnChannelException::NotOnChannelException(const std::string& arg) : message(arg)
 {
 	this->fullMessage = this->message + E_NOTONCHANNEL;
 }
 
 NotOnChannelException::~NotOnChannelException() throw() {}
+
+
+ChannelIsFullException::ChannelIsFullException(const std::string& arg) : message(arg)
+{
+	this->fullMessage = this->message + E_CHANNELISFULL;
+}
+
+ChannelIsFullException::~ChannelIsFullException() throw() {}
+
+
+InviteOnlyChanException::InviteOnlyChanException(const std::string& arg) : message(arg)
+{
+	this->fullMessage = this->message + E_INVITEONLYCHAN;
+}
+
+InviteOnlyChanException::~InviteOnlyChanException() throw() {}
+
+
+BadChannelKeyException::BadChannelKeyException(const std::string& arg) : message(arg)
+{
+	this->fullMessage = this->message + E_BADCHANNELKEY;
+}
+
+BadChannelKeyException::~BadChannelKeyException() throw() {}
+
+ChanOpPrivsNeededException::ChanOpPrivsNeededException(const std::string& arg) : message(arg)
+{
+	this->fullMessage = this->message + E_CHANOPRIVSNEEDED;
+}
+
+ChanOpPrivsNeededException::~ChanOpPrivsNeededException() throw() {}
+
+UnknownModeException::UnknownModeException(const std::string& arg) : message(arg)
+{
+	this->fullMessage = this->message + E_UNKNOWNMODE;
+}
+
+UnknownModeException::~UnknownModeException() throw() {}
+
+NeedMoreParamsException::NeedMoreParamsException(const std::string& arg) : message(arg)
+{
+	this->fullMessage = this->message + E_NEEDMOREPARAMS;
+}
+
+NeedMoreParamsException::~NeedMoreParamsException() throw() {}
+
+
+
 
 const char* AlreadyRegisteredException::what() const throw() {
 	return (this->fullMessage.c_str());
@@ -67,7 +119,29 @@ const char* NotOnChannelException::what(void) const throw() {
 	return (this->fullMessage.c_str());
 }
 
+const char* ChannelIsFullException::what(void) const throw() {
+	return (this->fullMessage.c_str());
+}
 
+const char* InviteOnlyChanException::what(void) const throw() {
+	return (this->fullMessage.c_str());
+}
+
+const char* BadChannelKeyException::what(void) const throw() {
+	return (this->fullMessage.c_str());
+}
+
+const char* ChanOpPrivsNeededException::what(void) const throw() {
+	return (this->fullMessage.c_str());
+}
+
+const char* UnknownModeException::what(void) const throw() {
+	return (this->fullMessage.c_str());
+}
+
+const char* NeedMoreParamsException::what(void) const throw() {
+	return (this->fullMessage.c_str());
+}
 
 void throwRFCException(enum Exceptions exception, std::string arg) {
 	switch (exception)
@@ -78,6 +152,18 @@ void throwRFCException(enum Exceptions exception, std::string arg) {
 			throw NosuchNickException(arg);
 		case ERR_NOTONCHANNEL:
 			throw NotOnChannelException(arg);
+		case ERR_CHANNELISFULL:
+			throw ChannelIsFullException(arg);
+		case ERR_INVITEONLYCHAN:
+			throw InviteOnlyChanException(arg);
+		case ERR_BADCHANNELKEY:
+			throw BadChannelKeyException(arg);
+		case ERR_CHANOPRIVSNEEDED:
+			throw ChanOpPrivsNeededException(arg);
+		case ERR_UNKNOWNMODE:
+			throw UnknownModeException(arg);
+		case ERR_NEEDMOREPARAMS:
+			throw NeedMoreParamsException(arg);
 		default :
 			throw RFCException();
 	}

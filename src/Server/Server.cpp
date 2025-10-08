@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
+/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 19:43:14 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 22:48:27 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -374,17 +374,17 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 		std::string pongResponse = "PONG :" + server + "\r\n";
 		send(client.getUid(), pongResponse.c_str(), pongResponse.size(), MSG_NOSIGNAL);
 	}
-	else if (this->findClientSetup(client.getUid()) != -1) // Limite les action des setupClients
-		return; //throw() Peut etre une exception custom ??
+	else if (this->findClientSetup(client.getUid()) != -1)
+		return;
 	else if (command == "INVITE") {
 		std::string targetNick, channelName;
 		iss >> targetNick >> channelName;
 		int targetPos = this->findClientByNick(targetNick);
 		if (targetPos == -1)
-			return; //throw() no client find to invite
+			throwRFCException(ERR_NOSUCHNICK, targetNick);
 		int channelPos = this->findChannel(channelName);
 		if (channelPos == -1)
-			return; //throw() no channel find to invite in
+			throwRFCException(ERR_NOSUCHNICK, channelName);
 		this->_channelList[channelPos]->Invite(*this->_clientList[targetPos], client);
 
 	}
@@ -406,9 +406,9 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 		getline(iss, reason);
 		int targetPos = this->_channelList[this->findChannel(channel)]->findClientJoin(targetNick);
 		if (this->_channelList[this->findChannel(channel)]->findClientOp(client) == -1)
-			return ; //throw() dont have permision to do this
+			throwRFCException(ERR_CHANOPRIVSNEEDED, channel);
 		if (targetPos == -1)
-			return ; //throw() no client find to kick
+			throwRFCException(ERR_NOSUCHNICK, targetNick);
 		this->_channelList[this->findChannel(channel)]->Kick(targetNick, *this, reason.c_str() + 2, false, client);
 	}
 	else if (command == "MODE") {
@@ -424,9 +424,9 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 
 		int channelPos = this->findChannel(channel);
 		if (channelPos == -1)
-			return; //throw() no channel find
+			throwRFCException(ERR_NOSUCHNICK, channel);
 		if (this->_channelList[channelPos]->findClientJoin(client) == -1)
-			return; //throw() client not in channel
+			throwRFCException(ERR_NOTONCHANNEL, channel);
 		if (!topic.empty())
 			this->_channelList[channelPos]->Topic(topic.c_str() + 2, *this, client);
 	}
@@ -446,7 +446,7 @@ void Server::linkClientToChannel(Client& client, std::string& arg) {
 		iss >> name >> pass;
 		arg.erase(pos, arg.length() - pos);
 		pos = arg.rfind(",");
-
+		
 		makeChannel(name, pass)->Join(client, *this, pass);
 	}
 	work = arg.substr(pos + 1, arg.length() - pos);
@@ -477,7 +477,7 @@ void Server::privMsgSend(Client& client, const std::string& arg) {
 	if (dest[0] == '#' || dest[0] == '&' || dest[0] == '+' || dest[0] == '!') {
 		int Pos = this->findChannel(dest);
 		if (Pos == -1)
-			throwRFCException(ERR_NOSUCHNICK, dest); //Throw error cant find any channel :<serveur> 401 <nick> <nickname> :No such nick/channel
+			throwRFCException(ERR_NOSUCHNICK, dest);
 		else
 			this->_channelList[Pos]->Broadcast(client, msg, BRCST_PRVMSG, *this);
 	}
@@ -485,8 +485,7 @@ void Server::privMsgSend(Client& client, const std::string& arg) {
 		int Pos = this->findClientByNick(dest);
 		if (Pos == -1)
 		{
-			//throwRFCException(ERR_NOSUCHNICK, dest); //Throw error Cant find any user :<serveur> 401 <nick> <nickname> :No such nick/channel
-			return ;
+			throwRFCException(ERR_NOSUCHNICK, dest);
 		}
 		else
 			this->_clientList[Pos]->receptMessage(client, msg);
@@ -500,7 +499,7 @@ void Server::sendModeChannel(Client& client, const std::string& arg) {
 	if (arg[0] == '#' || arg[0] == '&' || arg[0] == '+' || arg[0] == '!') {
 		int Pos = this->findChannel(target);
 		if (Pos == -1)
-			throwRFCException(ERR_NOSUCHNICK, arg.substr(1, arg.find(" ") - 1)); //Throw error cant find any channel :<serveur> 401 <nick> <nickname> :No such nick/channel
+			throwRFCException(ERR_NOSUCHNICK, arg.substr(1, arg.find(" ") - 1));
 		else
 			this->_channelList[Pos]->Mode(client, arg, *this);
 	}
@@ -515,14 +514,10 @@ void Server::clientLeaveChannel(Client& client, const std::string& arg) {
 		dest = std::string(arg.substr(5));
 	int Pos = this->findChannel(dest);
 	if (Pos == -1)
-	{
-		return ;
-		//throwRFCException(ERR_NOTONCHANNEL, dest); //Throw error cant find any channel :<serveur> 401 <nick> <nickname> :No such nick/channel
-	}
+		throwRFCException(ERR_NOSUCHNICK, dest);
 	else {
 		if (this->_channelList[Pos]->findClientJoin(client) == -1)
-			//throwRFCException(ERR_NOTONCHANNEL, dest);
-			return ;
+			throwRFCException(ERR_NOTONCHANNEL, dest);
 		if (separatorPos > 0 && separatorPos < (int)arg.length()) {
 			std::string	msg(arg.substr(separatorPos + 1));
 			this->_channelList[Pos]->Broadcast(client, msg, BRCST_LEAVE_MSG, *this);
@@ -609,6 +604,10 @@ void Server::clientHandler(int i, int n, char *buffer)
 			catch (ClientPasswordException & e) {
 				destroyOneClient(_fds, i);
 				std::cerr << e.what() << std::endl;
+				break ;
+			}
+			catch (std::exception & e) {
+				std::cerr << "Unexpected error: " << e.what() << std::endl;
 				break ;
 			}
 		}

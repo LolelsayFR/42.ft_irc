@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
+/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 19:31:30 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/07 22:45:47 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,8 +155,7 @@ void Channel::setNeedPassword(bool val) {
 
 void Channel::Broadcast(Client& sender, std::string msg, broadcast type, Server& server) {
 	if (this->findClientJoin(sender) == -1) {
-		return ;
-		//throwRFCException(ERR_NOTONCHANNEL, this->getName());
+		throwRFCException(ERR_NOTONCHANNEL, this->getName());
 	}
 	std::vector<Client*>::iterator	it = this->_joinedList.begin();
 	std::vector<Client*>::iterator	end = this->_joinedList.end();
@@ -181,44 +180,46 @@ void Channel::Broadcast(Client& sender, std::string msg, broadcast type, Server&
 //Channel command to join
 void Channel::Join(Client& client, Server& server, std::string& pass) {
 	std::cout << "PASS=" << pass << "| VS SERV PASS=" << this->_password << "|" << std::endl;
+
 	int clientPos = this->findClientJoin(client);
-	if (clientPos == -1) {
-		if (this->_maxClient != 0 && (int)this->_joinedList.size() >= this->_maxClient)
-			return ;//throwRFCException(ERR_CHANNELISFULL, this->getName());
-		if (this->_needInvite == true && this->findClientInvite(client) == -1)
-			return ;//throwRFCException(ERR_INVITEONLYCHAN, this->getName());
-		if (this->_needPassword == true && this->_password != pass)
-			return; //throwRFCException(ERR_BADCHANNELKEY, this->getName());
-		this->_joinedList.push_back(&client);
+	if (clientPos != -1)
+		return; // Déjà dans le channel
 
-		//Join Broadcast
-		this->Broadcast(client, "", BRCST_JOIN, server);
+	if (this->_maxClient != 0 && (int)this->_joinedList.size() >= this->_maxClient)
+		throwRFCException(ERR_CHANNELISFULL, this->getName());
+	if (this->_needInvite && this->findClientInvite(client) == -1)
+		throwRFCException(ERR_INVITEONLYCHAN, this->getName());
+	if (this->_needPassword && this->_password != pass)
+		throwRFCException(ERR_BADCHANNELKEY, this->getName());
+	this->_joinedList.push_back(&client);
 
-		//Auto op
-		if (this->_joinedList[0] == &client)
-			this->_opList.push_back(&client);
-		//Topic
-		std::string myMsg = ":" + server.getHost() + " 331 " + client.getNickname() + " " + this->getName() + " :No topic is set\r\n";
-		if (!this->_topic.empty())
-    		myMsg = ":" + server.getHost() + " 332 " + client.getNickname() + " " + this->getName() + " :" + this->_topic + "\r\n";
+	this->Broadcast(client, "", BRCST_JOIN, server);
 
-		//List of client
-		myMsg += ":" + server.getHost() + " 353 " + client.getNickname() + " = " + this->getName() + " :";
-	    std::vector<Client*>::iterator it = this->_joinedList.begin();
-	    std::vector<Client*>::iterator end = this->_joinedList.end();
-	    for (; it != end; ++it) {
-			if (this->findClientOp(*static_cast<Client*>(*it)) != -1)
-				myMsg += "@";
-	        myMsg += static_cast<Client*>(*it)->getNickname();
-			if (it + 1 != end)
-				myMsg += " ";
-		}
-	    myMsg += "\r\n";
-		//End of list
-		myMsg += ":" + server.getHost() + " 366 " + client.getNickname() + " " + this->getName() + " :End of /NAMES list.\r\n";
-		send(client.getUid(), myMsg.c_str(), myMsg.length(), MSG_NOSIGNAL);
+	if (this->_joinedList[0] == &client)
+		this->_opList.push_back(&client);
+
+	std::string myMsg;
+	if (this->_topic.empty())
+		myMsg = ":" + server.getHost() + " 331 " + client.getNickname() + " " + this->getName() + " :No topic is set\r\n";
+	else
+		myMsg = ":" + server.getHost() + " 332 " + client.getNickname() + " " + this->getName() + " :" + this->_topic + "\r\n";
+
+	// Liste des clients
+	myMsg += ":" + server.getHost() + " 353 " + client.getNickname() + " = " + this->getName() + " :";
+	for (size_t i = 0; i < this->_joinedList.size(); ++i) {
+		Client *c = this->_joinedList[i];
+		if (this->findClientOp(*c) != -1)
+			myMsg += "@";
+		myMsg += c->getNickname();
+		if (i + 1 < this->_joinedList.size())
+			myMsg += " ";
 	}
+	myMsg += "\r\n:" + server.getHost() + " 366 " + client.getNickname() + " " + this->getName() + " :End of /NAMES list.\r\n";
+
+	send(client.getUid(), myMsg.c_str(), myMsg.length(), MSG_NOSIGNAL);
 }
+
+
 
 //Channel command to kick
 void Channel::Kick(std::string nick, Server& server, std::string reason, bool leave, Client& sender) {
@@ -279,7 +280,7 @@ void Channel::DeOp(Client& client, Server& server, Client& sender) {
 //Channel command to set topic
 void Channel::Topic(std::string topic, Server& server, Client& sender) {
 	if (this->_needOpTopic == true && this->findClientOp(sender) == -1)
-		return ; //throwRFCException(ERR_CHANOPRIVSNEEDED, this->getName());
+		throwRFCException(ERR_CHANOPRIVSNEEDED, this->getName());
 	if (topic.length() < 255)
 	{
 		std::string myMsg = ":" + server.getHost() + " 332 " + sender.getNickname() + " " + this->_name + " :" + topic.c_str() + "\r\n";
@@ -287,7 +288,7 @@ void Channel::Topic(std::string topic, Server& server, Client& sender) {
 		this->Broadcast(sender, myMsg, BRCST_TOPIC, server);
 	}
 	else
-		return ;//throwRFCException(ERR_TOPICTOOLONG, this->getName());
+		throw std::runtime_error("Topic too long");
 }
 
 //Channel commands
@@ -304,8 +305,7 @@ void Channel::Mode(Client& sender, std::string option, Server& server) {
 			this->Broadcast(sender, myMsg, BRCST_MODE, server);
 		}
 		else {
-			//throwRFCException(ERR_UNKNOWNMODE, opt);
-			return ;	
+			throwRFCException(ERR_UNKNOWNMODE, opt);
 		}
 	}
 	else if (opt == "-l") {
@@ -336,9 +336,9 @@ void Channel::Mode(Client& sender, std::string option, Server& server) {
 	else if (opt == "+k") {
 		this->_needPassword = true;
 		if (target.empty())
-			return ; //throwRFCException(ERR_NEEDMOREPARAMS, opt);
+			throwRFCException(ERR_NEEDMOREPARAMS, opt);
 		if (target.length() > 255)
-			return ; //throwRFCException(ERR_KEYTOOLONG, this->getName());
+			throw std::runtime_error("Password too long");
 		this->setPassword(target);
 		myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " +k\r\n";
 		this->Broadcast(sender, myMsg, BRCST_MODE, server);
@@ -352,15 +352,15 @@ void Channel::Mode(Client& sender, std::string option, Server& server) {
 	else if (!target.empty() && (opt == "+o" || opt == "-o")) {
 		int targetPos = this->findClientJoin(target);
 		if (targetPos == -1)
-			return; //throw() no client find to aply mode
+			throwRFCException(ERR_NOSUCHNICK, target);
 		Client *target = this->_joinedList[targetPos];
 		if (senderPos == -1)
-			return ;//throwRFCException(ERR_NOTONCHANNEL, this->getName()); ?? // PAS OP
+			throwRFCException(ERR_NOTONCHANNEL, this->getName());
 		if (opt == "+o")
-			this->Op(*target, server, sender); 
+			this->Op(*target, server, sender);
 		else if (opt == "-o")
 			this->DeOp(*target, server, sender);
-	} 
+	}
 
 }
 
