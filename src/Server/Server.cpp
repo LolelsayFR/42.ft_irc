@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/08 11:13:54 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/08 13:33:52 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -283,11 +283,11 @@ void	Server::destroyOneClient(std::vector<struct pollfd> &fds , int i)
 	for(int i = 0; it != end; i++) {
 		channel = static_cast<Channel*>(*it);
 		if (channel->findClientJoin(*target) != -1)
-			channel->Kick(target->getNickname(), *this, "", true, *target);
+			channel->Kick(target->getNickname(), "", true, *target);
 		if (channel->findClientInvite(*target) != -1)
 			channel->DeInvite(*target, *this);
 		if (channel->findClientOp(*target) != -1)
-			channel->DeOp(*target, *this, *target);
+			channel->DeOp(*target, *target);
 		it++;
 	}
 	//destroy client in server base class
@@ -312,11 +312,11 @@ void	Server::destroyOneWaiting(std::vector<struct pollfd> &fds , int i)
 	for(int i = 0; it != end; i++) {
 		channel = static_cast<Channel*>(*it);
 		if (channel->findClientJoin(*target) != -1)
-			channel->Kick(target->getNickname(), *this, "", true, *target);
+			channel->Kick(target->getNickname(), "", true, *target);
 		if (channel->findClientInvite(*target) != -1)
 			channel->DeInvite(*target, *this);
 		if (channel->findClientOp(*target) != -1)
-			channel->DeOp(*target, *this, *target);
+			channel->DeOp(*target, *target);
 		it++;
 	}
 	//destroy client in server base class
@@ -479,7 +479,7 @@ void Server::privMsgSend(Client& client, const std::string& arg) {
 		if (Pos == -1)
 			throwRFCException(ERR_NOSUCHNICK, dest, client.getNickname());
 		else
-			this->_channelList[Pos]->Broadcast(client, msg, BRCST_PRVMSG, *this);
+			this->_channelList[Pos]->Broadcast(client, msg, BRCST_PRVMSG);
 	}
 	else {
 		int Pos = this->findClientByNick(dest);
@@ -501,7 +501,7 @@ void Server::sendModeChannel(Client& client, const std::string& arg) {
 		if (Pos == -1)
 			throwRFCException(ERR_NOSUCHNICK, arg.substr(1, arg.find(" ") - 1), client.getNickname());
 		else
-			this->_channelList[Pos]->Mode(client, arg, *this);
+			this->_channelList[Pos]->Mode(client, arg);
 	}
 }
 
@@ -520,11 +520,11 @@ void Server::clientLeaveChannel(Client& client, const std::string& arg) {
 			throwRFCException(ERR_NOTONCHANNEL, dest, client.getNickname());
 		if (separatorPos > 0 && separatorPos < (int)arg.length()) {
 			std::string	msg(arg.substr(separatorPos + 1));
-			this->_channelList[Pos]->Broadcast(client, msg, BRCST_LEAVE_MSG, *this);
+			this->_channelList[Pos]->Broadcast(client, msg, BRCST_LEAVE_MSG);
 		}
 		else
-			this->_channelList[Pos]->Broadcast(client, "", BRCST_LEAVE, *this);
-		this->_channelList[Pos]->Kick(client.getNickname(), *this, "", true, client);
+			this->_channelList[Pos]->Broadcast(client, "", BRCST_LEAVE);
+		this->_channelList[Pos]->Kick(client.getNickname(), "", true, client);
 
 	}
 }
