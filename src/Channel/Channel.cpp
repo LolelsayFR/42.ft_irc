@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
+/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 22:45:47 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/08 10:12:04 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -189,8 +189,11 @@ void Channel::Join(Client& client, Server& server, std::string& pass) {
 		throwRFCException(ERR_CHANNELISFULL, this->getName());
 	if (this->_needInvite && this->findClientInvite(client) == -1)
 		throwRFCException(ERR_INVITEONLYCHAN, this->getName());
-	if (this->_needPassword && this->_password != pass)
-		throwRFCException(ERR_BADCHANNELKEY, this->getName());
+	if (this->_needPassword && this->_password != pass) {
+		std::string myMsg = ":" + server.getHost() + " 475 " + client.getNickname() + " " + this->getName() + " :Cannot join channel (+k)\r\n";
+		send(client.getUid(), myMsg.c_str(), myMsg.length(), MSG_NOSIGNAL);
+		//throw() throwRFCException(ERR_BADCHANNELKEY, this->getName());
+	}
 	this->_joinedList.push_back(&client);
 
 	this->Broadcast(client, "", BRCST_JOIN, server);
