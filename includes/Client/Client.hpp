@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 14:43:51 by arthur            #+#    #+#             */
-/*   Updated: 2025/10/08 14:43:56 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/08 17:28:20 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ private :
 	std::string		_hostname;
 	std::string		_buffer;
 	bool			_fdIsClear;
+	bool			_isPassed;
 
 public :
 	Client(int fd);
@@ -41,6 +42,7 @@ public :
 	std::string getNickname(void) const;
 	std::string getRealname(void) const;
 	std::string getHostname(void) const;
+	bool getIsPassed(void) const;
 	bool getFdIsClear(void) const;
 	void fdIsClear(void);
 
@@ -50,6 +52,7 @@ public :
 	void setUsername(std::string username);
 	void setRealname(std::string realname);
 	void setHostname(std::string hostname);
+	void setIsPassed(bool val);
 	void appendBuffer(const char* data, int len);
 
 	void receptMessage(Channel& channel, Client& sender, std::string& msg);

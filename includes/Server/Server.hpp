@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:52:45 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 19:29:24 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/08 17:22:45 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,7 @@ public:
 	int findClient(int fd);
 	int findClient(std::string name);
 	int findClientByNick(std::string nick);
+	int findClientSetupByNick(std::string nick);
 	int findClientSetup(int fd);
 
 	int findChannel(Channel& channel);

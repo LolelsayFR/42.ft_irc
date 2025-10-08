@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 15:34:55 by arthur            #+#    #+#             */
-/*   Updated: 2025/10/08 14:40:30 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/08 17:29:19 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 #include "Errors/Exception.hpp"
 #include "Channel/Channel.hpp"
 
-Client::Client(int fd) : _uid(fd), _isRegistered(false), _welcomeSent(false), _realname(""), _hostname(""), _fdIsClear(false) {
+Client::Client(int fd) : _uid(fd), _isRegistered(false), _welcomeSent(false), _nickname(""), _realname(""), _hostname(""), _fdIsClear(false), _isPassed(false) {
 	std::cout << "New client connected with fd: " << fd << std::endl;
 }
 
@@ -81,7 +81,7 @@ bool Client::isRegistered() const
 }
 
 void Client::checkRegistration() {
-	if (!_nickname.empty() && !_username.empty() && !_hostname.empty() && !_realname.empty())
+	if (!_nickname.empty() && !_username.empty() && !_hostname.empty() && !_realname.empty() && _isPassed)
 		_isRegistered = true;
 }
 
@@ -93,11 +93,19 @@ Client* findClientByFd(std::vector<Client*> &clients, int fd) {
 	return NULL;
 }
 
+bool Client::getIsPassed(void) const {
+	return (this->_isPassed);
+}
+
 bool Client::getWelcomeSent(void) const {
 	return (this->_welcomeSent);
 }
 void Client::setWelcomeSent(bool val) {
 	this->_welcomeSent = val;
+}
+
+void Client::setIsPassed(bool val) {
+	this->_isPassed = val;
 }
 
 bool Client::getFdIsClear(void) const {

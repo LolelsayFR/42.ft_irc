@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/08 16:51:06 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/08 17:28:43 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,7 +127,6 @@ void Server::welcomeUser(Client *client)
 			if (static_cast<Client*>(*it)->getNickname() != client->getNickname())
 				send(static_cast<Client*>(*it)->getUid(), broadcastMsg.c_str(), broadcastMsg.length(), MSG_NOSIGNAL);
 		}
-
 	}
 }
 
@@ -174,6 +173,19 @@ int Server::findClientSetup(int fd) {
 	std::vector<Client*>::iterator	end = this->_setupList.end();
 	for(int i = 0; it != end; i++) {
 		if (static_cast<Client*>(*it)->getUid() == fd) {
+			return (i);
+		}
+		it++;
+	}
+	return (-1);
+}
+
+//Find client in setup list by fd
+int Server::findClientSetupByNick(std::string nick) {
+	std::vector<Client*>::iterator	it = this->_setupList.begin();
+	std::vector<Client*>::iterator	end = this->_setupList.end();
+	for(int i = 0; it != end; i++) {
+		if (static_cast<Client*>(*it)->getNickname() == nick) {
 			return (i);
 		}
 		it++;
@@ -320,6 +332,7 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 			throw ClientPasswordException();
 		if (pass != _password)
 			throw ClientPasswordException();
+		client.setIsPassed(true);
 		std::cout << "Password Correct" << std::endl;
 	}
 	else if (command == "PING")
@@ -430,17 +443,18 @@ void Server::linkClientToChannel(Client& client, std::string& arg) {
 }
 
 void Server::setClientNick(Client& client, std::string& nick) {
-
-		if (nick.empty())
-			throwRFCException(ERR_NEEDMOREPARAMS, "NICK", client.getNickname());
-		if (this->findClientByNick(nick) == -1) {
-			std::string myMsg = ":" + client.getNickname() + " NICK " + " :" + nick + "\r\n";
-			send(client.getUid(), myMsg.c_str(), myMsg.length(), MSG_NOSIGNAL);
-			client.setNickname(nick);
-		}
-		else
-			throwRFCException(ERR_ALREADYREGISTRED, nick, client.getNickname());
-		std::cout << "Nickname set to " << nick << " for fd " << client.getUid() << std::endl;
+	if (client.getNickname() == nick)
+		client.setNickname(nick);
+	else if (nick.empty())
+		throwRFCException(ERR_NEEDMOREPARAMS, "NICK", client.getNickname());
+	else if (this->findClientByNick(nick) == -1 && this->findClientSetupByNick(nick) == -1) {
+		std::string myMsg = ":" + client.getNickname() + " NICK " + " :" + nick + "\r\n";
+		send(client.getUid(), myMsg.c_str(), myMsg.length(), MSG_NOSIGNAL);
+		client.setNickname(nick);
+	}
+	else
+		throwRFCException(ERR_ALREADYREGISTRED, nick, client.getNickname());
+	std::cout << "Nickname set to " << nick << " for fd " << client.getUid() << std::endl;
 }
 
 void Server::privMsgSend(Client& client, const std::string& arg) {
@@ -520,14 +534,6 @@ void Server::clientSetupHandler(int i, int n, char *buffer)
 					endMessages = 1;
 				parseMessage(*client, msg.erase(msg.length() - endMessages));
 			}
-			catch (AlreadyRegisteredException &e) {
-				std::string errorMsg = ":" + this->_hostName + " " + e.what() + "\r\n";
-				send(client->getUid(), errorMsg.c_str(), errorMsg.length(), MSG_NOSIGNAL);
-				destroyOneWaiting(_fds, i);
-				client_deleted = true;
-				std::cerr << e.what() << std::endl;
-				break ;
-			}
 			catch (RFCException &e) {
 				std::string errorMsg = ":" + this->_hostName + " " + e.what() + "\r\n";
 				send(client->getUid(), errorMsg.c_str(), errorMsg.length(), MSG_NOSIGNAL);
@@ -568,13 +574,6 @@ void Server::clientHandler(int i, int n, char *buffer)
 				if (!msg.empty() && msg[msg.length() - 1] == '\r')
 					endMessages = 1;
 				parseMessage(*client, msg.erase(msg.length() - endMessages));
-			}
-			catch (AlreadyRegisteredException &e) {
-				std::string errorMsg = ":" + this->_hostName + " " + e.what() + "\r\n";
-				send(client->getUid(), errorMsg.c_str(), errorMsg.length(), MSG_NOSIGNAL);
-				destroyOneClient(_fds, i);
-				std::cerr << e.what() << std::endl;
-				break ;
 			}
 			catch (RFCException &e) {
 				std::string errorMsg = ":" + this->_hostName + " " + e.what() + "\r\n";
