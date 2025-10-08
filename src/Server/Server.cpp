@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/08 13:42:32 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/08 14:03:29 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -294,6 +294,8 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 		client.setUsername(username);
 		if (hostname.empty())
 			hostname = "unknown";
+		else if (hostname == "localhost" || hostname == "127.0.0.1")
+			hostname = this->_hostName;
 		client.setHostname(hostname);
 		if (realname.length() >= 2)
 			client.setRealname(realname.c_str() + 2);
