@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:35:21 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 22:07:13 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/08 11:11:31 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,72 +34,72 @@ const char* ArgsNumberErrorException::what(void) const throw() {
 }
 
 //RFC Exceptions
-AlreadyRegisteredException::AlreadyRegisteredException(const std::string& arg) : message(arg)
+AlreadyRegisteredException::AlreadyRegisteredException(const std::string& arg, std::string clientNick) : message(arg)
 {
-	this->fullMessage = this->message + E_ALREADY_REGISTERED;
+	this->fullMessage = " 462 " + clientNick + " " + this->message + E_ALREADY_REGISTERED;
 }
 
 AlreadyRegisteredException::~AlreadyRegisteredException() throw() {}
 
 
 
-NosuchNickException::NosuchNickException(const std::string& arg) : message(arg)
+NosuchNickException::NosuchNickException(const std::string& arg, std::string clientNick) : message(arg)
 {
-	this->fullMessage = this->message + E_NOSUCHNICK;
+	this->fullMessage = " 401 " + clientNick + " " + this->message + E_NOSUCHNICK;
 }
 
 NosuchNickException::~NosuchNickException() throw() {}
 
 
 
-NotOnChannelException::NotOnChannelException(const std::string& arg) : message(arg)
+NotOnChannelException::NotOnChannelException(const std::string& arg, std::string clientNick) : message(arg)
 {
-	this->fullMessage = this->message + E_NOTONCHANNEL;
+	this->fullMessage = " 442 " + clientNick + " " + this->message + E_NOTONCHANNEL;
 }
 
 NotOnChannelException::~NotOnChannelException() throw() {}
 
 
-ChannelIsFullException::ChannelIsFullException(const std::string& arg) : message(arg)
+ChannelIsFullException::ChannelIsFullException(const std::string& arg, std::string clientNick) : message(arg)
 {
-	this->fullMessage = this->message + E_CHANNELISFULL;
+	this->fullMessage = " 471 " + clientNick + " " + this->message + E_CHANNELISFULL;
 }
 
 ChannelIsFullException::~ChannelIsFullException() throw() {}
 
 
-InviteOnlyChanException::InviteOnlyChanException(const std::string& arg) : message(arg)
+InviteOnlyChanException::InviteOnlyChanException(const std::string& arg, std::string clientNick) : message(arg)
 {
-	this->fullMessage = this->message + E_INVITEONLYCHAN;
+	this->fullMessage = " 473 " + clientNick + " " + this->message + E_INVITEONLYCHAN;
 }
 
 InviteOnlyChanException::~InviteOnlyChanException() throw() {}
 
 
-BadChannelKeyException::BadChannelKeyException(const std::string& arg) : message(arg)
+BadChannelKeyException::BadChannelKeyException(const std::string& arg, std::string clientNick) : message(arg)
 {
-	this->fullMessage = this->message + E_BADCHANNELKEY;
+	this->fullMessage = " 475 " + clientNick + " " + this->message + E_BADCHANNELKEY;
 }
 
 BadChannelKeyException::~BadChannelKeyException() throw() {}
 
-ChanOpPrivsNeededException::ChanOpPrivsNeededException(const std::string& arg) : message(arg)
+ChanOpPrivsNeededException::ChanOpPrivsNeededException(const std::string& arg, std::string clientNick) : message(arg)
 {
-	this->fullMessage = this->message + E_CHANOPRIVSNEEDED;
+	this->fullMessage = " 482 " + clientNick + " " + this->message + E_CHANOPRIVSNEEDED;
 }
 
 ChanOpPrivsNeededException::~ChanOpPrivsNeededException() throw() {}
 
-UnknownModeException::UnknownModeException(const std::string& arg) : message(arg)
+UnknownModeException::UnknownModeException(const std::string& arg, std::string clientNick) : message(arg)
 {
-	this->fullMessage = this->message + E_UNKNOWNMODE;
+	this->fullMessage = " 472 " + clientNick + " " + this->message + E_UNKNOWNMODE;
 }
 
 UnknownModeException::~UnknownModeException() throw() {}
 
-NeedMoreParamsException::NeedMoreParamsException(const std::string& arg) : message(arg)
+NeedMoreParamsException::NeedMoreParamsException(const std::string& arg, std::string clientNick) : message(arg)
 {
-	this->fullMessage = this->message + E_NEEDMOREPARAMS;
+	this->fullMessage = " 461 " + clientNick + " " + this->message + E_NEEDMOREPARAMS;
 }
 
 NeedMoreParamsException::~NeedMoreParamsException() throw() {}
@@ -143,27 +143,27 @@ const char* NeedMoreParamsException::what(void) const throw() {
 	return (this->fullMessage.c_str());
 }
 
-void throwRFCException(enum Exceptions exception, std::string arg) {
+void throwRFCException(enum Exceptions exception,std::string arg, std::string clientNick) {
 	switch (exception)
 	{
 		case ERR_ALREADYREGISTRED:
-			throw AlreadyRegisteredException(arg);
+			throw AlreadyRegisteredException(arg, clientNick);
 		case ERR_NOSUCHNICK:
-			throw NosuchNickException(arg);
+			throw NosuchNickException(arg, clientNick);
 		case ERR_NOTONCHANNEL:
-			throw NotOnChannelException(arg);
+			throw NotOnChannelException(arg, clientNick);
 		case ERR_CHANNELISFULL:
-			throw ChannelIsFullException(arg);
+			throw ChannelIsFullException(arg, clientNick);
 		case ERR_INVITEONLYCHAN:
-			throw InviteOnlyChanException(arg);
+			throw InviteOnlyChanException(arg, clientNick);
 		case ERR_BADCHANNELKEY:
-			throw BadChannelKeyException(arg);
+			throw BadChannelKeyException(arg, clientNick);
 		case ERR_CHANOPRIVSNEEDED:
-			throw ChanOpPrivsNeededException(arg);
+			throw ChanOpPrivsNeededException(arg, clientNick);
 		case ERR_UNKNOWNMODE:
-			throw UnknownModeException(arg);
+			throw UnknownModeException(arg, clientNick);
 		case ERR_NEEDMOREPARAMS:
-			throw NeedMoreParamsException(arg);
+			throw NeedMoreParamsException(arg, clientNick);
 		default :
 			throw RFCException();
 	}

@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:10:41 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/07 22:39:32 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/08 11:10:56 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ class ArgsNumberErrorException : public ParsingException {
 class RFCException : public std::exception
 {
 public:
-    virtual ~RFCException() throw() {} // destructeur explicitement throw()
+    virtual ~RFCException() throw() {}
 };
 
 class AlreadyRegisteredException : public RFCException
@@ -61,8 +61,8 @@ private:
 	std::string fullMessage;
 
 public:
-    AlreadyRegisteredException(const std::string& arg);
-    virtual ~AlreadyRegisteredException() throw(); // destructeur explicitement throw()
+    AlreadyRegisteredException(const std::string& arg, std::string clientNick);
+    virtual ~AlreadyRegisteredException() throw();
     virtual const char* what() const throw();
 };
 
@@ -73,8 +73,8 @@ class NosuchNickException : public RFCException
 		std::string fullMessage;
 
 	public:
-	    NosuchNickException(const std::string& arg);
-	    virtual ~NosuchNickException() throw();// destructeur explicitement throw()
+	    NosuchNickException(const std::string& arg, std::string clientNick);
+	    virtual ~NosuchNickException() throw();
 	    virtual const char* what() const throw();
 };
 
@@ -86,7 +86,7 @@ class NotOnChannelException : public RFCException
 		std::string fullMessage;
 
 	public:
-		NotOnChannelException(const std::string& arg);
+		NotOnChannelException(const std::string& arg, std::string clientNick);
 		virtual ~NotOnChannelException() throw();
 		virtual const char* what() const throw();
 };
@@ -98,7 +98,7 @@ class ChannelIsFullException : public RFCException
 		std::string fullMessage;
 
 	public:
-		ChannelIsFullException(const std::string& arg);
+		ChannelIsFullException(const std::string& arg, std::string clientNick);
 		virtual ~ChannelIsFullException() throw();
 		virtual const char* what() const throw();
 };
@@ -110,7 +110,7 @@ class InviteOnlyChanException : public RFCException
 		std::string fullMessage;
 
 	public:
-		InviteOnlyChanException(const std::string& arg);
+		InviteOnlyChanException(const std::string& arg, std::string clientNick);
 		virtual ~InviteOnlyChanException() throw();
 		virtual const char* what() const throw();
 };
@@ -122,7 +122,7 @@ class BadChannelKeyException : public RFCException
 		std::string fullMessage;
 
 	public:
-		BadChannelKeyException(const std::string& arg);
+		BadChannelKeyException(const std::string& arg, std::string clientNick);
 		virtual ~BadChannelKeyException() throw();
 		virtual const char* what() const throw();
 };
@@ -134,7 +134,7 @@ class ChanOpPrivsNeededException : public RFCException
 		std::string fullMessage;
 
 	public:
-		ChanOpPrivsNeededException(const std::string& arg);
+		ChanOpPrivsNeededException(const std::string& arg, std::string clientNick);
 		virtual ~ChanOpPrivsNeededException() throw();
 		virtual const char* what() const throw();
 };
@@ -146,7 +146,7 @@ class UnknownModeException : public RFCException
 		std::string fullMessage;
 
 	public:
-		UnknownModeException(const std::string& arg);
+		UnknownModeException(const std::string& arg, std::string clientNick);
 		virtual ~UnknownModeException() throw();
 		virtual const char* what() const throw();
 };
@@ -158,7 +158,7 @@ class NeedMoreParamsException : public RFCException
 		std::string fullMessage;
 
 	public:
-		NeedMoreParamsException(const std::string& arg);
+		NeedMoreParamsException(const std::string& arg, std::string clientNick);
 		virtual ~NeedMoreParamsException() throw();
 		virtual const char* what() const throw();
 };
@@ -187,6 +187,6 @@ class ListeningErrorException : public std::exception
 		const char* what(void) const throw();
 };
 
-void throwRFCException(enum Exceptions exception, std::string arg);
+void throwRFCException(enum Exceptions exception, std::string arg, std::string clientNick);
 
 #endif // EXCEPTION_HPP
