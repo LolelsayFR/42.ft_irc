@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/08 10:22:27 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/08 11:02:27 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,7 +153,7 @@ void Channel::setNeedPassword(bool val) {
 /* ************************************************************************** */
 
 
-void Channel::Broadcast(Client& sender, std::string msg, broadcast type, Server& server) {
+void Channel::Broadcast(Client& sender, std::string msg, broadcast type) {
 	if (this->findClientJoin(sender) == -1) {
 		throwRFCException(ERR_NOTONCHANNEL, this->getName());
 	}
@@ -174,12 +174,10 @@ void Channel::Broadcast(Client& sender, std::string msg, broadcast type, Server&
 			send(static_cast<Client*>(*it)->getUid(), msg.c_str(), msg.length(), MSG_NOSIGNAL);
 		it++;
 	}
-	(void)server;
 }
 
 //Channel command to join
 void Channel::Join(Client& client, Server& server, std::string& pass) {
-	std::cout << "PASS=" << pass << "| VS SERV PASS=" << this->_password << "|" << std::endl;
 
 	int clientPos = this->findClientJoin(client);
 	if (clientPos != -1)
@@ -196,7 +194,7 @@ void Channel::Join(Client& client, Server& server, std::string& pass) {
 	}
 	this->_joinedList.push_back(&client);
 
-	this->Broadcast(client, "", BRCST_JOIN, server);
+	this->Broadcast(client, "", BRCST_JOIN);
 
 	if (this->_joinedList[0] == &client)
 		this->_opList.push_back(&client);
@@ -225,7 +223,7 @@ void Channel::Join(Client& client, Server& server, std::string& pass) {
 
 
 //Channel command to kick
-void Channel::Kick(std::string nick, Server& server, std::string reason, bool leave, Client& sender) {
+void Channel::Kick(std::string nick, std::string reason, bool leave, Client& sender) {
 	int clientPos = this->findClientJoin(nick);
 	if (clientPos >= 0) {
 
@@ -236,7 +234,7 @@ void Channel::Kick(std::string nick, Server& server, std::string reason, bool le
 		    myMsg = ":" + sender.getNickname() + " KICK " + this->getName() + " " + nick + "\r\n";
 		}
 		if (leave == false)
-			this->Broadcast(sender, myMsg, BRCST_KICK, server);
+			this->Broadcast(sender, myMsg, BRCST_KICK);
 		this->_joinedList.erase(_joinedList.begin() + clientPos);
 	}
 	int opPos = this->findClientOp(nick);
@@ -263,20 +261,22 @@ void Channel::DeInvite(Client& client, Server& server) {
 }
 
 //Channel command to add operator
-void Channel::Op(Client& client, Server&server, Client& sender) {
+void Channel::Op(Client& client, Client& sender) {
 	int clientPos = this->findClientOp(client);
 	if (clientPos == -1) {
 		this->_opList.push_back(&client);
-		std::string myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " +o " + client.getNickname() + "\r\n";		this->Broadcast(client, myMsg, BRCST_OP, server);
+		std::string myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " +o " + client.getNickname() + "\r\n";		
+		this->Broadcast(client, myMsg, BRCST_OP);
 	}
 }
 
 //Channel command to remove operator
-void Channel::DeOp(Client& client, Server& server, Client& sender) {
+void Channel::DeOp(Client& client, Client& sender) {
 	int clientPos = this->findClientOp(client);
 	if (clientPos != -1) {
 		this->_opList.erase(_opList.begin() + clientPos);
-		std::string myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " -o " + client.getNickname() + "\r\n";		this->Broadcast(client, myMsg, BRCST_DEOP, server);
+		std::string myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " -o " + client.getNickname() + "\r\n";
+		this->Broadcast(client, myMsg, BRCST_DEOP);
 	}
 }
 
@@ -288,14 +288,14 @@ void Channel::Topic(std::string topic, Server& server, Client& sender) {
 	{
 		std::string myMsg = ":" + server.getHost() + " 332 " + sender.getNickname() + " " + this->_name + " :" + topic.c_str() + "\r\n";
 		this->_topic = topic;
-		this->Broadcast(sender, myMsg, BRCST_TOPIC, server);
+		this->Broadcast(sender, myMsg, BRCST_TOPIC);
 	}
 	else
 		throw std::runtime_error("Topic too long");
 }
 
 //Channel commands
-void Channel::Mode(Client& sender, std::string option, Server& server) {
+void Channel::Mode(Client& sender, std::string option) {
 	int senderPos = this->findClientOp(sender);
 	std::istringstream iss(option);
 	std::string opt, target, channel, myMsg;
@@ -305,7 +305,7 @@ void Channel::Mode(Client& sender, std::string option, Server& server) {
 		if (maxValue > 0) {
 			this->_maxClient = maxValue;
 			myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " +l " + target + "\r\n";
-			this->Broadcast(sender, myMsg, BRCST_MODE, server);
+			this->Broadcast(sender, myMsg, BRCST_MODE);
 		}
 		else {
 			throwRFCException(ERR_UNKNOWNMODE, opt);
@@ -314,27 +314,27 @@ void Channel::Mode(Client& sender, std::string option, Server& server) {
 	else if (opt == "-l") {
 		this->_maxClient = 0;
 		myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " -l\r\n";
-		this->Broadcast(sender, myMsg, BRCST_MODE, server);
+		this->Broadcast(sender, myMsg, BRCST_MODE);
 	}
 	else if (opt == "+t") {
 		this->_needOpTopic = true;
 		myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " +t\r\n";
-		this->Broadcast(sender, myMsg, BRCST_MODE, server);
+		this->Broadcast(sender, myMsg, BRCST_MODE);
 	}
 	else if (opt == "-t") {
 		this->_needOpTopic = false;
 		myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " -t\r\n";
-		this->Broadcast(sender, myMsg, BRCST_MODE, server);
+		this->Broadcast(sender, myMsg, BRCST_MODE);
 	}
 	else if (opt == "+i") {
 		this->_needInvite = true;
 		myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " +i\r\n";
-		this->Broadcast(sender, myMsg, BRCST_MODE, server);
+		this->Broadcast(sender, myMsg, BRCST_MODE);
 	}
 	else if (opt == "-i") {
 		this->_needInvite = false;
 		myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " -i\r\n";
-		this->Broadcast(sender, myMsg, BRCST_MODE, server);
+		this->Broadcast(sender, myMsg, BRCST_MODE);
 	}
 	else if (opt == "+k") {
 		this->_needPassword = true;
@@ -344,13 +344,13 @@ void Channel::Mode(Client& sender, std::string option, Server& server) {
 			throw std::runtime_error("Password too long");
 		this->setPassword(target);
 		myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " +k " + target + "\r\n";
-		this->Broadcast(sender, myMsg, BRCST_MODE, server);
+		this->Broadcast(sender, myMsg, BRCST_MODE);
 	}
 	else if (opt == "-k") {
 		this->_needPassword = false;
 		this->setPassword("");
 		myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " -k\r\n";
-		this->Broadcast(sender, myMsg, BRCST_MODE, server);
+		this->Broadcast(sender, myMsg, BRCST_MODE);
 	}
 	else if (!target.empty() && (opt == "+o" || opt == "-o")) {
 		int targetPos = this->findClientJoin(target);
@@ -360,9 +360,9 @@ void Channel::Mode(Client& sender, std::string option, Server& server) {
 		if (senderPos == -1)
 			throwRFCException(ERR_NOTONCHANNEL, this->getName());
 		if (opt == "+o")
-			this->Op(*target, server, sender);
+			this->Op(*target, sender);
 		else if (opt == "-o")
-			this->DeOp(*target, server, sender);
+			this->DeOp(*target, sender);
 	}
 
 }
