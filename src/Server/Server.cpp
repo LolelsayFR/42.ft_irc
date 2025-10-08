@@ -6,7 +6,7 @@
 /*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/08 14:03:29 by emaillet         ###   ########.fr       */
+/*   Updated: 2025/10/08 14:43:23 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -235,8 +235,9 @@ void	Server::destroyOneClient(std::vector<struct pollfd> &fds , int i)
 				break;
 		}
 	}
+	if (!target->getFdIsClear())
+		close(fds[i].fd);
 	delete target;
-	close(fds[i].fd);
 	fds.erase(fds.begin() + i);
 }
 
@@ -264,8 +265,9 @@ void	Server::destroyOneWaiting(std::vector<struct pollfd> &fds , int i)
 				break;
 		}
 	}
+	if (!target->getFdIsClear())
+		close(fds[i].fd);
 	delete target;
-	close(fds[i].fd);
 	fds.erase(fds.begin() + i);
 }
 
@@ -378,8 +380,12 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 		if (!topic.empty())
 			this->_channelList[channelPos]->Topic(topic.c_str() + 2, *this, client);
 	}
-	else if (command == "QUIT")
-		close(client.getUid());
+	else if (command == "QUIT") {
+		if (client.getUid() > 0){
+			close(client.getUid());
+			client.fdIsClear();
+		}
+	}
 	else {
 		std::cout << "Unknown command: " << command << std::endl << *this;
 	}

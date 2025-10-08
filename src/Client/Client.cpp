@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
+/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 15:34:55 by arthur            #+#    #+#             */
-/*   Updated: 2025/10/07 21:11:25 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/08 14:40:30 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 #include "Errors/Exception.hpp"
 #include "Channel/Channel.hpp"
 
-Client::Client(int fd) : _uid(fd), _isRegistered(false), _welcomeSent(false), _realname(""), _hostname(""){
+Client::Client(int fd) : _uid(fd), _isRegistered(false), _welcomeSent(false), _realname(""), _hostname(""), _fdIsClear(false) {
 	std::cout << "New client connected with fd: " << fd << std::endl;
 }
 
@@ -98,6 +98,14 @@ bool Client::getWelcomeSent(void) const {
 }
 void Client::setWelcomeSent(bool val) {
 	this->_welcomeSent = val;
+}
+
+bool Client::getFdIsClear(void) const {
+	return (this->_fdIsClear);
+}
+
+void Client::fdIsClear(void) {
+	this->_fdIsClear = true;
 }
 
 //PRIVMSG handler channel
