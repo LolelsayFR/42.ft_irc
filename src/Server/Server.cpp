@@ -6,7 +6,7 @@
 /*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/08 15:33:37 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/08 15:48:19 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -433,8 +433,7 @@ void Server::setClientNick(Client& client, std::string& nick) {
 			client.setNickname(nick);
 		}
 		else
-			return ;
-			//EXCEPTION NICKNAME ALREADY USE
+			throwRFCException(ERR_ALREADYREGISTRED, nick, client.getNickname());
 		std::cout << "Nickname set to " << nick << " for fd " << client.getUid() << std::endl;
 }
 
