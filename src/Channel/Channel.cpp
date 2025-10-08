@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
+/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/08 13:42:06 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/08 15:59:57 by arthur           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -208,7 +208,7 @@ void Channel::Op(Client& client, Client& sender) {
 	int clientPos = this->findClientOp(client);
 	if (clientPos == -1) {
 		this->_opList.push_back(&client);
-		std::string myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " +o " + client.getNickname() + "\r\n";		
+		std::string myMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + "@" + sender.getHostname() + " MODE " + this->getName() + " +o " + client.getNickname() + "\r\n";
 		this->Broadcast(client, myMsg, BRCST_OP);
 	}
 }
@@ -243,6 +243,8 @@ void Channel::Mode(Client& sender, std::string option) {
 	std::istringstream iss(option);
 	std::string opt, target, channel, myMsg;
 		iss >> channel >> opt >> target;
+	if (senderPos == -1)
+			throwRFCException(ERR_CHANOPRIVSNEEDED, this->getName(), sender.getNickname());
 	if (opt == "+l") {
 		int maxValue = std::atoi(target.c_str());
 		if (maxValue > 0) {
@@ -300,8 +302,6 @@ void Channel::Mode(Client& sender, std::string option) {
 		if (targetPos == -1)
 			throwRFCException(ERR_NOSUCHNICK, target, sender.getNickname());
 		Client *target = this->_joinedList[targetPos];
-		if (senderPos == -1)
-			throwRFCException(ERR_NOTONCHANNEL, this->getName(), sender.getNickname());
 		if (opt == "+o")
 			this->Op(*target, sender);
 		else if (opt == "-o")
