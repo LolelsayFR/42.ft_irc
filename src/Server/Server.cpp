@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
+/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/08 15:09:47 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/08 15:31:26 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -284,6 +284,7 @@ void	addNewSocket(std::vector<struct pollfd> &fds , int socketFD)
 }
 
 void Server::parseMessage(Client &client, const std::string &msg) {
+	std::cout << "\e[48;2;20;100;20;1m [" << client.getNickname() << "]" << RES << " " << msg << std::endl;
 	std::istringstream iss(msg);
 	std::string command;
 	iss >> command;
@@ -406,14 +407,15 @@ void Server::linkClientToChannel(Client& client, std::string& arg) {
 		Channel* channel = makeChannel(name, pass);
 		if (channel == NULL)
 			throwRFCException(ERR_NOSUCHCHANNEL, name, client.getNickname());
+		channel->Join(client, *this, pass);
 	}
 	work = arg.substr(pos + 1, arg.length() - pos);
 	std::istringstream iss(work);
 	iss >> name >> pass;
-	std::cout << "Joining channel: " << name << " with pass: " << pass << std::endl;
 	Channel* channel = makeChannel(name, pass);
 	if (channel == NULL)
 		throwRFCException(ERR_NOSUCHCHANNEL, name, client.getNickname());
+	channel->Join(client, *this, pass);
 }
 
 void Server::setClientNick(Client& client, std::string& nick) {
