@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arthur <arthur@student.42.fr>              +#+  +:+       +#+        */
+/*   By: emaillet <emaillet@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 10:54:40 by emaillet          #+#    #+#             */
-/*   Updated: 2025/10/08 16:04:12 by arthur           ###   ########.fr       */
+/*   Updated: 2025/10/08 16:51:06 by emaillet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,8 +83,12 @@ const std::vector<Channel*>&	Server::getChannelList(void) const {
 
 //Create new channel
 Channel* Server::makeChannel(std::string name, std::string pass) {
+	std::transform(name.begin(), name.end(), name.begin(), ::tolower);
 	int channelPos = this->findChannel(name);
 	if (!(name[0] == '#' || name[0] == '&' || name[0] == '+' || name[0] == '!')) {
+		return NULL;
+	}
+	if (name.find(' ') != std::string::npos || name.find(',') != std::string::npos || name.length() > 200) {
 		return NULL;
 	}
 	if (channelPos == -1) {
@@ -363,10 +367,7 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 			throwRFCException(ERR_CHANOPRIVSNEEDED, targetNick, client.getNickname());
 		else if (targetPos == -1)
 			throwRFCException(ERR_NOSUCHNICK, targetNick, client.getNickname());
-		if (!reason.empty() && reason.length() >= 2)
-			this->_channelList[channelPos]->Kick(targetNick, reason.c_str() + 2, false, client);
-		else
-			this->_channelList[channelPos]->Kick(targetNick, "", false, client);
+		this->_channelList[channelPos]->Kick(targetNick, reason.c_str() + 2, false, client);
 	}
 	else if (command == "MODE") {
 		std::string cmd;
@@ -398,8 +399,10 @@ void Server::parseMessage(Client &client, const std::string &msg) {
 			client.fdIsClear();
 		}
 	}
+	else if (command == "DEBUG") 
+		std::cout << *this << std::endl	;
 	else {
-		std::cout << "Unknown command: " << command << std::endl << *this;
+		std::cout << "Unknown command: " << command << std::endl;
 	}
 }
 
@@ -436,7 +439,8 @@ void Server::setClientNick(Client& client, std::string& nick) {
 			client.setNickname(nick);
 		}
 		else
-			throwRFCException(ERR_ALREADYREGISTRED, nick, client.getNickname());
+			return ;
+			//EXCEPTION NICKNAME ALREADY USE
 		std::cout << "Nickname set to " << nick << " for fd " << client.getUid() << std::endl;
 }
 
@@ -481,7 +485,7 @@ void Server::clientLeaveChannel(Client& client, const std::string& arg) {
 		dest = std::string(arg.substr(5));
 	int Pos = this->findChannel(dest);
 	if (Pos == -1)
-		throwRFCException(ERR_NOSUCHCHANNEL, dest, client.getNickname());
+		return	;
 	else {
 		if (this->_channelList[Pos]->findClientJoin(client) == -1)
 			throwRFCException(ERR_NOTONCHANNEL, dest, client.getNickname());
